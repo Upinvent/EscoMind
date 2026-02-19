@@ -459,11 +459,11 @@ body {
   <div class="scroll-content">
 
     <div class="hero hero-terra" data-emoji="🎭">
-      <h2>Welcome back! 🎭</h2>
-      <p>You're on a 5-day streak — keep going!</p>
+      <h2 id="heroGreeting">Welcome to EscoMind! 🎭</h2>
+      <p id="heroSubtitle">Upload your first script to get started.</p>
       <div class="hero-stats">
-        <div class="hstat"><div class="n">5🔥</div><div class="l">Day Streak</div></div>
-        <div class="hstat"><div class="n">847</div><div class="l">XP Total</div></div>
+        <div class="hstat"><div class="n" id="heroStreak">0🔥</div><div class="l">Day Streak</div></div>
+        <div class="hstat"><div class="n" id="heroXP">0</div><div class="l">XP Total</div></div>
         <div class="hstat"><div class="n" id="homeLinesLearned">0</div><div class="l">Lines Learned</div></div>
       </div>
     </div>
@@ -487,14 +487,11 @@ body {
     </div>
 
     <div class="xp-card">
-      <div class="xp-hdr"><div class="xp-ttl">Level 8 — Rising Star ⭐</div><div class="xp-lvl">847 XP</div></div>
-      <div class="xp-bar"><div class="xp-fill"></div></div>
-      <div style="font-size:11px;color:var(--brown-light);">153 XP to Level 9</div>
-      <div class="badges">
-        <div class="badge">🔥<div class="badge-lbl">5 Streak</div></div>
-        <div class="badge">⭐<div class="badge-lbl">First Win</div></div>
-        <div class="badge">🎭<div class="badge-lbl">Actor</div></div>
-        <div class="badge">🧠<div class="badge-lbl">Memory</div></div>
+      <div class="xp-hdr"><div class="xp-ttl" id="xpLevelLabel">Level 1 — Just Starting 🌱</div><div class="xp-lvl" id="xpTotal">0 XP</div></div>
+      <div class="xp-bar"><div class="xp-fill" id="xpBar" style="width:0%"></div></div>
+      <div style="font-size:11px;color:var(--brown-light);" id="xpNext">100 XP to Level 2</div>
+      <div class="badges" id="homeBadges">
+        <div style="font-size:12px;color:var(--brown-light);padding:8px 0;">Earn badges by practising and playing games! 🏅</div>
       </div>
     </div>
 
@@ -691,14 +688,11 @@ Good my lord."></textarea>
     </div>
 
     <div class="xp-card">
-      <div class="xp-hdr"><div class="xp-ttl">Your XP Progress</div><div class="xp-lvl">Level 8</div></div>
-      <div class="xp-bar"><div class="xp-fill"></div></div>
-      <div style="font-size:11px;color:var(--brown-light);">847 / 1000 XP</div>
-      <div class="badges">
-        <div class="badge">🔥<div class="badge-lbl">5 Streak</div></div>
-        <div class="badge">⭐<div class="badge-lbl">First Win</div></div>
-        <div class="badge">🎭<div class="badge-lbl">Actor</div></div>
-        <div class="badge">🧠<div class="badge-lbl">Memory</div></div>
+      <div class="xp-hdr"><div class="xp-ttl" id="gameXpLabel">Level 1 — Just Starting 🌱</div><div class="xp-lvl" id="gameXpTotal">0 XP</div></div>
+      <div class="xp-bar"><div class="xp-fill" id="gameXpBar" style="width:0%"></div></div>
+      <div style="font-size:11px;color:var(--brown-light);" id="gameXpNext">100 XP to Level 2</div>
+      <div class="badges" id="gameBadges">
+        <div style="font-size:12px;color:var(--brown-light);padding:8px 0;">Play games to earn badges! 🏅</div>
       </div>
     </div>
   </div>
@@ -858,7 +852,7 @@ Good my lord."></textarea>
 // ════════════════════════════════════════
 //  STATE
 // ════════════════════════════════════════
-let productions = []; // {name, role, type, scriptData, cueLines, myChar}
+let productions = [];
 let activeProduction = null;
 let scriptFontSize = 16;
 let globalFs = 16;
@@ -879,6 +873,104 @@ let gameQIndex = 0;
 let gameQuestions = [];
 let rawScriptText = '';
 let myLinesOnlyMode = false;
+
+// Real tracking
+let totalXP = 0;
+let dayStreak = 0;
+let earnedBadges = [];
+let linesCorrectToday = 0;
+let lastPlayDate = null;
+
+const levels = [
+  {min:0,    label:'Just Starting 🌱',  next:100},
+  {min:100,  label:'Line Reader 📖',     next:300},
+  {min:300,  label:'Getting Warmer 🔆',  next:600},
+  {min:600,  label:'Rising Actor 🎭',    next:1000},
+  {min:1000, label:'Stage Ready ⭐',     next:1500},
+  {min:1500, label:'Scene Stealer 🌟',   next:2200},
+  {min:2200, label:'Lead Role 🏆',       next:3000},
+  {min:3000, label:'West End Star 🎬',   next:99999},
+];
+
+function getCurrentLevel() {
+  for(let i=levels.length-1;i>=0;i--) { if(totalXP>=levels[i].min) return {...levels[i],index:i}; }
+  return {...levels[0],index:0};
+}
+
+function addXP(pts) {
+  const before = getCurrentLevel();
+  totalXP += pts;
+  linesCorrectToday++;
+  const after = getCurrentLevel();
+  showToast(`+${pts} XP ⭐`);
+  if(after.index > before.index) {
+    setTimeout(()=>showToast(`🎉 Level up! You're now: ${after.label}`), 800);
+  }
+  checkBadges();
+  updateXPDisplays();
+}
+
+function updateXPDisplays() {
+  const lvl = getCurrentLevel();
+  const pct = lvl.next < 99999 ? Math.min(100,((totalXP-lvl.min)/(lvl.next-lvl.min))*100) : 100;
+  document.getElementById('heroXP').textContent = totalXP;
+  document.getElementById('heroStreak').textContent = dayStreak+'🔥';
+  document.getElementById('xpLevelLabel').textContent = `Level ${lvl.index+1} — ${lvl.label}`;
+  document.getElementById('xpTotal').textContent = totalXP+' XP';
+  document.getElementById('xpBar').style.width = pct+'%';
+  document.getElementById('xpNext').textContent = lvl.next < 99999 ? `${lvl.next-totalXP} XP to next level` : 'Max level reached! 🏆';
+  document.getElementById('gameXpLabel').textContent = `Level ${lvl.index+1} — ${lvl.label}`;
+  document.getElementById('gameXpTotal').textContent = totalXP+' XP';
+  document.getElementById('gameXpBar').style.width = pct+'%';
+  document.getElementById('gameXpNext').textContent = lvl.next < 99999 ? `${lvl.next-totalXP} XP to next level` : 'Max level reached! 🏆';
+  updateBadgeDisplay();
+}
+
+function checkBadges() {
+  const checks = [
+    {id:'first_line', icon:'🎭', label:'First Line',  cond:()=>linesCorrectToday>=1},
+    {id:'ten_lines',  icon:'📚', label:'10 Lines',    cond:()=>totalXP>=100},
+    {id:'streak3',    icon:'🔥', label:'3 Day Streak',cond:()=>dayStreak>=3},
+    {id:'gamer',      icon:'🎮', label:'Gamer',       cond:()=>gameScore>=100},
+    {id:'star',       icon:'⭐', label:'Rising Star', cond:()=>totalXP>=300},
+    {id:'champ',      icon:'🏆', label:'Champion',    cond:()=>totalXP>=1000},
+  ];
+  checks.forEach(b => {
+    if(!earnedBadges.includes(b.id) && b.cond()) {
+      earnedBadges.push(b.id);
+      setTimeout(()=>showToast(`🏅 Badge earned: ${b.icon} ${b.label}!`), 1200);
+    }
+  });
+}
+
+function updateBadgeDisplay() {
+  const allBadges = [
+    {id:'first_line',icon:'🎭',label:'First Line'},
+    {id:'ten_lines', icon:'📚',label:'10 Lines'},
+    {id:'streak3',   icon:'🔥',label:'3 Streak'},
+    {id:'gamer',     icon:'🎮',label:'Gamer'},
+    {id:'star',      icon:'⭐',label:'Rising Star'},
+    {id:'champ',     icon:'🏆',label:'Champion'},
+  ];
+  const earned = allBadges.filter(b=>earnedBadges.includes(b.id));
+  const html = earned.length > 0
+    ? earned.map(b=>`<div class="badge">${b.icon}<div class="badge-lbl">${b.label}</div></div>`).join('')
+    : '<div style="font-size:12px;color:var(--brown-light);padding:8px 0;">Earn badges by practising! 🏅</div>';
+  document.getElementById('homeBadges').innerHTML = html;
+  document.getElementById('gameBadges').innerHTML = html;
+}
+
+function updateDayStreak() {
+  const today = new Date().toDateString();
+  if(lastPlayDate === today) return;
+  const yesterday = new Date(Date.now()-86400000).toDateString();
+  if(lastPlayDate === yesterday) dayStreak++;
+  else if(lastPlayDate !== today) dayStreak = 1;
+  lastPlayDate = today;
+  document.getElementById('heroGreeting').textContent = dayStreak > 1 ? `Day ${dayStreak} — keep it up! 🎭` : 'Welcome to EscoMind! 🎭';
+  document.getElementById('heroSubtitle').textContent = dayStreak > 1 ? `You're on a ${dayStreak}-day streak — amazing!` : productions.length > 0 ? 'Choose a mode and practise your lines.' : 'Upload your first script to get started.';
+  updateXPDisplays();
+}
 
 // Sample script for when no user script loaded
 const sampleScript = `FAIRY
@@ -1612,6 +1704,7 @@ function checkGameAnswer(chosen, correct, btn, allOpts) {
     if(gameStreak > 2) triggerStreak();
     btn.style.cssText = 'background:var(--sage);color:white;border-color:var(--sage);';
     addXP(20);
+    checkBadges();
   } else {
     blank.textContent = chosen;
     blank.classList.add('filled-bad');
@@ -1776,6 +1869,7 @@ document.addEventListener('click', e=>{
 //  LOAD SAMPLE SCRIPT ON FIRST VISIT
 // ════════════════════════════════════════
 window.addEventListener('load', () => {
+  updateDayStreak();
   // Pre-load sample so games work straight away
   rawScriptText = sampleScript;
   const chars = detectCharacters(sampleScript);
