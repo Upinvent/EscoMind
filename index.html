@@ -509,8 +509,9 @@ body {
     <!-- IMPORT TABS -->
     <div class="section-title">Add Your Script</div>
     <div class="import-tabs">
-      <button class="itab active" onclick="switchImportTab('upload',this)">📂 Upload File</button>
-      <button class="itab" onclick="switchImportTab('paste',this)">📋 Paste Text</button>
+      <button class="itab active" onclick="switchImportTab('upload',this)">📂 Upload</button>
+      <button class="itab" onclick="switchImportTab('paste',this)">📋 Paste</button>
+      <button class="itab" onclick="switchImportTab('manual',this)">✏️ Manual</button>
     </div>
 
     <!-- UPLOAD PANEL -->
@@ -553,6 +554,48 @@ To be, or not to be — that is the question.
 HORATIO
 Good my lord."></textarea>
         <button class="btn btn-terra" style="margin-top:12px;" onclick="processScript('paste')">🔍 Analyse Script</button>
+      </div>
+    </div>
+
+    <!-- MANUAL ENTRY PANEL -->
+    <div class="import-panel" id="manualPanel">
+
+      <div class="card" id="manualStep1">
+        <div style="font-size:16px;font-weight:900;margin-bottom:6px;">✏️ Enter Lines Manually</div>
+        <div style="font-size:13px;color:var(--brown-light);margin-bottom:16px;line-height:1.6;">
+          Perfect for watermarked or locked PDFs like Universal scripts. Add one cue and one line at a time — do as many or as few as you like right now, and come back to add more later anytime!
+        </div>
+        <div style="font-size:13px;font-weight:800;margin-bottom:8px;">What's your character name?</div>
+        <input class="char-input" id="manualCharName" type="text" placeholder="e.g. MILES">
+        <button class="btn btn-terra" style="margin-top:10px;" onclick="startManualEntry()">Let's go →</button>
+      </div>
+
+      <div id="manualStep2" style="display:none;">
+
+        <div class="card" style="background:linear-gradient(135deg,var(--terra),var(--rose));color:white;margin-bottom:14px;">
+          <div style="font-size:14px;font-weight:900;margin-bottom:4px;">Adding lines for: <span id="manualCharDisplay"></span></div>
+          <div style="font-size:12px;opacity:0.9;line-height:1.6;"><span id="manualLineCount">0</span> lines added — add as many as you like, one at a time. No pressure!</div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px;">
+          <div style="font-size:13px;font-weight:900;color:var(--brown-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">📣 The cue — line just before yours:</div>
+          <textarea class="paste-area" id="manualCueInput" style="min-height:80px;" placeholder="What does the other character say just before your line?&#10;&#10;e.g. What do you think we should do about it?"></textarea>
+
+          <div style="font-size:13px;font-weight:900;color:var(--terra);text-transform:uppercase;letter-spacing:1px;margin:14px 0 8px;">🎭 Your line:</div>
+          <textarea class="paste-area" id="manualLineInput" style="min-height:80px;border-color:var(--terra);" placeholder="Type your line exactly as it is in the script.&#10;&#10;e.g. I think we need to talk to Marcus first."></textarea>
+
+          <div style="display:flex;gap:10px;margin-top:12px;">
+            <button class="btn btn-terra" style="flex:2;" onclick="addManualLine()">➕ Add This Line</button>
+            <button class="btn btn-ghost" style="flex:1;" onclick="finishManualEntry()">✅ Done</button>
+          </div>
+        </div>
+
+        <div id="manualLinesList" style="display:none;">
+          <div class="section-title" style="font-size:14px;margin-bottom:12px;">Lines Added 📋</div>
+          <div id="manualLinesListInner"></div>
+          <button class="btn btn-sage" onclick="finishManualEntry()" style="margin-top:8px;">✅ Save & Start Practising</button>
+        </div>
+
       </div>
     </div>
 
@@ -1056,6 +1099,7 @@ function switchImportTab(tab, btn) {
   btn.classList.add('active');
   document.getElementById('uploadPanel').classList.toggle('active', tab==='upload');
   document.getElementById('pastePanel').classList.toggle('active', tab==='paste');
+  document.getElementById('manualPanel').classList.toggle('active', tab==='manual');
 }
 
 // ════════════════════════════════════════
@@ -1868,6 +1912,125 @@ document.addEventListener('click', e=>{
 // ════════════════════════════════════════
 //  LOAD SAMPLE SCRIPT ON FIRST VISIT
 // ════════════════════════════════════════
+// ════════════════════════════════════════
+//  MANUAL LINE ENTRY
+// ════════════════════════════════════════
+let manualPairs = [];
+let manualChar = '';
+
+function startManualEntry() {
+  const name = document.getElementById('manualCharName').value.trim().toUpperCase();
+  if(!name) { showToast('Please enter your character name first 🎭'); return; }
+  manualChar = name;
+  manualPairs = [];
+
+  // Check if this character already has a manual production — if so, load it to add more
+  const existing = productions.find(p => p.myChar === manualChar && p.isManual);
+  if(existing) {
+    manualPairs = [...existing.cuePairs];
+    showToast(`Adding more lines for ${manualChar} 📝`);
+  }
+
+  document.getElementById('manualCharDisplay').textContent = manualChar;
+  document.getElementById('manualLineCount').textContent = manualPairs.length;
+  document.getElementById('manualStep1').style.display = 'none';
+  document.getElementById('manualStep2').style.display = 'block';
+  document.getElementById('manualCueInput').value = '';
+  document.getElementById('manualLineInput').value = '';
+  refreshManualList();
+}
+
+function addManualLine() {
+  const cue = document.getElementById('manualCueInput').value.trim();
+  const line = document.getElementById('manualLineInput').value.trim();
+
+  if(!cue && !line) { showToast('Please enter at least your line 📝'); return; }
+  if(!line) { showToast('Your line is missing — the cue is what the other person says before you speak 🎭'); return; }
+
+  manualPairs.push({
+    cue: cue || '(start of scene)',
+    myLine: line,
+    needsWork: false
+  });
+
+  document.getElementById('manualCueInput').value = '';
+  document.getElementById('manualLineInput').value = '';
+  document.getElementById('manualCueInput').focus();
+  document.getElementById('manualLineCount').textContent = manualPairs.length;
+
+  showToast(`Line ${manualPairs.length} added! ✅ Keep going or tap Done.`);
+  refreshManualList();
+
+  // Auto-save to production as you go
+  saveManualProduction();
+}
+
+function refreshManualList() {
+  const list = document.getElementById('manualLinesList');
+  const inner = document.getElementById('manualLinesListInner');
+  if(manualPairs.length === 0) { list.style.display = 'none'; return; }
+  list.style.display = 'block';
+  inner.innerHTML = manualPairs.map((p,i) => `
+    <div style="background:var(--cream);border-radius:var(--rs);padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow);position:relative;">
+      <div style="font-size:10px;font-weight:900;color:var(--brown-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Line ${i+1}</div>
+      <div style="font-size:11px;color:var(--brown-light);margin-bottom:6px;font-style:italic;">"${p.cue}"</div>
+      <div style="font-size:14px;font-weight:700;border-left:4px solid var(--terra);padding-left:10px;line-height:1.6;">${p.myLine}</div>
+      <button onclick="deleteManualLine(${i})" style="position:absolute;top:10px;right:10px;background:none;border:none;font-size:16px;cursor:pointer;color:var(--brown-light);">🗑</button>
+    </div>
+  `).join('');
+}
+
+function deleteManualLine(idx) {
+  manualPairs.splice(idx, 1);
+  document.getElementById('manualLineCount').textContent = manualPairs.length;
+  refreshManualList();
+  saveManualProduction();
+  showToast('Line removed');
+}
+
+function saveManualProduction() {
+  if(manualPairs.length === 0) return;
+
+  // Build minimal scriptData from pairs for compatibility
+  const scriptData = manualPairs.flatMap(p => [
+    { char: 'OTHER', text: p.cue, mine: false },
+    { char: manualChar, text: p.myLine, mine: true }
+  ]);
+
+  const existingIdx = productions.findIndex(p => p.myChar === manualChar && p.isManual);
+  const prod = {
+    name: `${manualChar} — Manual`,
+    role: manualChar,
+    type: '🎭',
+    scriptData,
+    cuePairs: manualPairs,
+    myChar: manualChar,
+    isManual: true,
+    id: existingIdx >= 0 ? productions[existingIdx].id : Date.now(),
+    progress: existingIdx >= 0 ? productions[existingIdx].progress : 0
+  };
+
+  if(existingIdx >= 0) productions[existingIdx] = prod;
+  else productions.push(prod);
+
+  activeProduction = prod;
+  refreshHome();
+  refreshProductionsList();
+  refreshPracticeScreen();
+}
+
+function finishManualEntry() {
+  if(manualPairs.length === 0) { showToast('Add at least one line first! ✏️'); return; }
+  saveManualProduction();
+  // Reset for next time
+  document.getElementById('manualStep1').style.display = 'block';
+  document.getElementById('manualStep2').style.display = 'none';
+  document.getElementById('manualCharName').value = '';
+  manualPairs = [];
+  showToast(`🎉 ${activeProduction.cuePairs.length} lines saved for ${manualChar}!`);
+  setTimeout(() => navTo('practiceScreen', 2), 800);
+}
+
 window.addEventListener('load', () => {
   updateDayStreak();
   // Pre-load sample so games work straight away
