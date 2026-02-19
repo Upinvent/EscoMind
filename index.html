@@ -1655,6 +1655,7 @@ function nextCue(result) {
     if(idx>=0) activeProduction.cuePairs[idx].needsWork = true;
   }
   if(result === 'correct') { addXP(10); }
+  autoSave();
   cueIndex++;
   if(cueIndex >= cuePairs.length) {
     showToast('🎉 Scene complete! Amazing work!');
@@ -2022,6 +2023,7 @@ function saveManualProduction() {
 function finishManualEntry() {
   if(manualPairs.length === 0) { showToast('Add at least one line first! ✏️'); return; }
   saveManualProduction();
+  autoSave();
   // Reset for next time
   document.getElementById('manualStep1').style.display = 'block';
   document.getElementById('manualStep2').style.display = 'none';
@@ -2031,12 +2033,98 @@ function finishManualEntry() {
   setTimeout(() => navTo('practiceScreen', 2), 800);
 }
 
-window.addEventListener('load', () => {
+// ════════════════════════════════════════
+//  SYNC — SAVE & LOAD ACROSS ALL DEVICES
+// ════════════════════════════════════════
+
+async function saveToCloud() {
+  try {
+    const data = {
+      productions,
+      totalXP,
+      dayStreak,
+      earnedBadges,
+      linesCorrectToday,
+      lastPlayDate,
+      savedAt: new Date().toISOString()
+    };
+    await window.storage.set('escomind-data', JSON.stringify(data), true);
+    showSyncStatus('✅ Synced', 'var(--sage)');
+  } catch(e) {
+    showSyncStatus('⚠️ Sync unavailable', 'var(--amber)');
+  }
+}
+
+async function loadFromCloud() {
+  try {
+    showSyncStatus('🔄 Syncing...', 'var(--brown-light)');
+    const result = await window.storage.get('escomind-data', true);
+    if(!result) { showSyncStatus('☁️ Ready to start!', 'var(--brown-light)'); return; }
+    const data = JSON.parse(result.value);
+    if(data.productions && data.productions.length > 0) productions = data.productions;
+    if(data.totalXP !== undefined) totalXP = data.totalXP;
+    if(data.dayStreak !== undefined) dayStreak = data.dayStreak;
+    if(data.earnedBadges) earnedBadges = data.earnedBadges;
+    if(data.linesCorrectToday !== undefined) linesCorrectToday = data.linesCorrectToday;
+    if(data.lastPlayDate) lastPlayDate = data.lastPlayDate;
+    if(productions.length > 0) activeProduction = productions[0];
+    refreshHome();
+    refreshProductionsList();
+    refreshPracticeScreen();
+    updateXPDisplays();
+    const savedAt = data.savedAt ? new Date(data.savedAt) : null;
+    const timeAgo = savedAt ? getTimeAgo(savedAt) : '';
+    showSyncStatus('✅ Loaded — saved ' + timeAgo, 'var(--sage)');
+  } catch(e) {
+    showSyncStatus('☁️ Starting fresh', 'var(--brown-light)');
+  }
+}
+
+function getTimeAgo(date) {
+  const mins = Math.floor((Date.now() - date.getTime()) / 60000);
+  if(mins < 1) return 'just now';
+  if(mins < 60) return mins + 'm ago';
+  const hrs = Math.floor(mins/60);
+  if(hrs < 24) return hrs + 'h ago';
+  return Math.floor(hrs/24) + 'd ago';
+}
+
+function showSyncStatus(msg, color) {
+  let el = document.getElementById('syncStatus');
+  if(!el) return;
+  el.textContent = msg;
+  el.style.color = color;
+  el.style.opacity = '1';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.style.opacity = '0.5'; }, 3000);
+}
+
+let _saveTimeout = null;
+function autoSave() {
+  clearTimeout(_saveTimeout);
+  _saveTimeout = setTimeout(saveToCloud, 1500);
+}
+
+window.addEventListener('load', async () => {
+  // Add sync indicator to home header
+  const header = document.querySelector('#homeScreen .app-header');
+  if(header) {
+    const syncEl = document.createElement('div');
+    syncEl.id = 'syncStatus';
+    syncEl.style.cssText = 'font-size:10px;font-weight:700;color:var(--brown-light);transition:opacity 0.5s;opacity:0.5;max-width:100px;text-align:right;';
+    syncEl.textContent = '🔄 Loading...';
+    header.appendChild(syncEl);
+  }
+
+  // Load saved data from cloud first
+  await loadFromCloud();
+
+  // Update streak using loaded lastPlayDate
   updateDayStreak();
-  // Pre-load sample so games work straight away
+  autoSave();
+
+  // Build sample fallback for games
   rawScriptText = sampleScript;
-  const chars = detectCharacters(sampleScript);
-  // silently build sample production
   const lines = sampleScript.split('\n');
   const parsed = [];
   let curr = null, txt = [];
@@ -2050,10 +2138,7 @@ window.addEventListener('load', () => {
   flush2();
   const cps=[];
   for(let i=0;i<parsed.length;i++){if(parsed[i].mine){cps.push({cue:i>0?parsed[i-1].text:'Begin',myLine:parsed[i].text});}}
-  // Don't push to productions — keeps home screen showing "upload" until user adds real script
-  // But store as fallback
   window._sampleProd = {name:'Sample',role:'PUCK',type:'🎭',scriptData:parsed,cuePairs:cps,myChar:'PUCK',id:0,progress:0};
 });
-</script>
 </body>
 </html>
