@@ -572,28 +572,51 @@ Good my lord."></textarea>
 
       <div id="manualStep2" style="display:none;">
 
+        <!-- Status banner -->
         <div class="card" style="background:linear-gradient(135deg,var(--terra),var(--rose));color:white;margin-bottom:14px;">
           <div style="font-size:14px;font-weight:900;margin-bottom:4px;">Adding lines for: <span id="manualCharDisplay"></span></div>
-          <div style="font-size:12px;opacity:0.9;line-height:1.6;"><span id="manualLineCount">0</span> lines added — add as many as you like, one at a time. No pressure!</div>
+          <div style="font-size:12px;opacity:0.9;line-height:1.6;">
+            <span id="manualLineCount">0</span> lines · 
+            Scene: <span id="manualCurrentSceneName">Scene 1</span>
+          </div>
         </div>
 
+        <!-- Current scene indicator -->
+        <div id="manualSceneBanner" style="background:var(--sage);color:white;border-radius:var(--rs);padding:10px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:11px;font-weight:900;opacity:0.85;text-transform:uppercase;letter-spacing:1px;">Currently entering:</div>
+            <div style="font-size:15px;font-weight:900;" id="manualSceneBannerName">Scene 1</div>
+          </div>
+          <button onclick="newScene()" style="background:rgba(255,255,255,0.25);border:none;color:white;border-radius:99px;padding:8px 16px;font-family:var(--font);font-weight:900;font-size:12px;cursor:pointer;">
+            + New Scene
+          </button>
+        </div>
+
+        <!-- Line entry card -->
         <div class="card" style="margin-bottom:14px;">
-          <div style="font-size:13px;font-weight:900;color:var(--brown-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">📣 The cue — line just before yours:</div>
-          <textarea class="paste-area" id="manualCueInput" style="min-height:80px;" placeholder="What does the other character say just before your line?&#10;&#10;e.g. What do you think we should do about it?"></textarea>
+          <div style="font-size:13px;font-weight:900;color:var(--brown-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">📣 Cue — line just before yours:</div>
+          <textarea class="paste-area" id="manualCueInput" style="min-height:70px;" placeholder="What does the other character say just before you speak?&#10;&#10;e.g. What do you think we should do?"></textarea>
 
           <div style="font-size:13px;font-weight:900;color:var(--terra);text-transform:uppercase;letter-spacing:1px;margin:14px 0 8px;">🎭 Your line:</div>
-          <textarea class="paste-area" id="manualLineInput" style="min-height:80px;border-color:var(--terra);" placeholder="Type your line exactly as it is in the script.&#10;&#10;e.g. I think we need to talk to Marcus first."></textarea>
+          <textarea class="paste-area" id="manualLineInput" style="min-height:70px;border-color:var(--terra);" placeholder="Type your line exactly as it appears in the script.&#10;&#10;e.g. I think we need to talk to Marcus first."></textarea>
 
           <div style="display:flex;gap:10px;margin-top:12px;">
-            <button class="btn btn-terra" style="flex:2;" onclick="addManualLine()">➕ Add This Line</button>
+            <button class="btn btn-terra" style="flex:2;" onclick="addManualLine()">➕ Add Line</button>
             <button class="btn btn-ghost" style="flex:1;" onclick="finishManualEntry()">✅ Done</button>
           </div>
         </div>
 
+        <!-- Lines added so far, grouped by scene -->
         <div id="manualLinesList" style="display:none;">
-          <div class="section-title" style="font-size:14px;margin-bottom:12px;">Lines Added 📋</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div class="section-title" style="font-size:14px;margin-bottom:0;">Lines Added 📋</div>
+            <button class="btn btn-sage btn-sm" onclick="finishManualEntry()">✅ Save & Practise</button>
+          </div>
+
+          <!-- Scene filter tabs -->
+          <div id="manualSceneTabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;"></div>
+
           <div id="manualLinesListInner"></div>
-          <button class="btn btn-sage" onclick="finishManualEntry()" style="margin-top:8px;">✅ Save & Start Practising</button>
         </div>
 
       </div>
@@ -1461,12 +1484,28 @@ function refreshPracticeScreen() {
     return;
   }
   const prod = activeProduction || productions[0];
+  const scenes = prod.scenes && prod.scenes.length > 1 ? prod.scenes : null;
+
+  const sceneSelector = scenes ? `
+    <div class="card" style="margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:900;margin-bottom:10px;">Practice by scene:</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="tool-btn active" id="sceneAll" onclick="setSceneFilter('all',this)">All Scenes (${prod.cuePairs.length})</button>
+        ${scenes.map(s => {
+          const count = prod.cuePairs.filter(p=>(p.scene||'Scene 1')===s).length;
+          return `<button class="tool-btn" id="scene_${s.replace(/\s/g,'_')}" onclick="setSceneFilter('${s}',this)">${s} (${count})</button>`;
+        }).join('')}
+      </div>
+    </div>
+  ` : '';
+
   c.innerHTML = `
     <div class="card" style="margin-bottom:16px;">
       <div style="font-size:12px;color:var(--brown-light);font-weight:700;margin-bottom:4px;">Currently practising:</div>
       <div style="font-size:16px;font-weight:900;">${prod.myChar}</div>
-      <div style="font-size:12px;color:var(--brown-light);">${prod.cuePairs.length} cue/line pairs ready</div>
+      <div style="font-size:12px;color:var(--brown-light);" id="practiceLineCount">${prod.cuePairs.length} lines ready</div>
     </div>
+    ${sceneSelector}
     <div class="pm-card" onclick="startCueCards()">
       <div class="pm-icon">🃏</div>
       <div class="pm-info"><div class="pm-name">Cue Cards</div><div class="pm-desc">See the cue, recall your line. Word-perfect checking.</div></div>
@@ -1477,12 +1516,12 @@ function refreshPracticeScreen() {
       <div class="pm-info"><div class="pm-name">Needs Work</div><div class="pm-desc">Practise only the lines you've flagged as wrong.</div></div>
       <div class="pm-arrow">›</div>
     </div>
-    <div class="pm-card" onclick="showToast('Fade Mode — coming soon! 🌅')">
+    <div class="pm-card" onclick="showToast('Fade Mode — coming soon!')">
       <div class="pm-icon">🌅</div>
       <div class="pm-info"><div class="pm-name">Fade Mode</div><div class="pm-desc">Lines fade as you grow more confident.</div></div>
       <div class="pm-arrow">›</div>
     </div>
-    <div class="pm-card" onclick="showToast('Full Scene Run — coming soon! 🎬')">
+    <div class="pm-card" onclick="showToast('Full Scene Run — coming soon!')">
       <div class="pm-icon">🎬</div>
       <div class="pm-info"><div class="pm-name">Full Scene Run</div><div class="pm-desc">Run the whole scene from start to finish.</div></div>
       <div class="pm-arrow">›</div>
@@ -1497,15 +1536,39 @@ function refreshPracticeScreen() {
   `;
 }
 
+let activeSceneFilter = 'all';
+
+function setSceneFilter(scene, btn) {
+  activeSceneFilter = scene;
+  document.querySelectorAll('#practiceContent .tool-btn').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const prod = activeProduction || productions[0];
+  if(!prod) return;
+  const count = scene === 'all' ? prod.cuePairs.length : prod.cuePairs.filter(p=>(p.scene||'Scene 1')===scene).length;
+  const el = document.getElementById('practiceLineCount');
+  if(el) el.textContent = count + ' lines' + (scene !== 'all' ? ' in ' + scene : ' total');
+}
+
 // ════════════════════════════════════════
 //  CUE CARDS
 // ════════════════════════════════════════
 function startCueCards() {
   const prod = activeProduction || productions[0];
   if(!prod || prod.cuePairs.length === 0) { showToast('No lines found to practise!'); return; }
-  cuePairs = prod.cuePairs;
+
+  // Apply scene filter
+  if(activeSceneFilter !== 'all') {
+    cuePairs = prod.cuePairs.filter(p => (p.scene||'Scene 1') === activeSceneFilter);
+    if(cuePairs.length === 0) { showToast('No lines in that scene yet!'); return; }
+    document.getElementById('cueScreenTitle').textContent = `Cue Cards — ${activeSceneFilter}`;
+    document.getElementById('cueScreenSub').textContent = `${prod.myChar} · ${cuePairs.length} lines`;
+  } else {
+    cuePairs = prod.cuePairs;
+    document.getElementById('cueScreenTitle').textContent = `Cue Cards — ${prod.myChar}`;
+    document.getElementById('cueScreenSub').textContent = `${cuePairs.length} lines`;
+  }
+
   cueIndex = 0;
-  document.getElementById('cueScreenTitle').textContent = `Cue Cards — ${prod.myChar}`;
   loadCue();
   navTo('cueScreen', 2);
 }
@@ -1514,9 +1577,11 @@ function startNeedsWork() {
   const prod = activeProduction || productions[0];
   if(!prod) return;
   const flagged = prod.cuePairs.filter(p=>p.needsWork);
-  if(flagged.length === 0) { showToast('No lines flagged yet! Great work! 🎉'); return; }
+  if(flagged.length === 0) { showToast('No lines flagged yet! Great work!'); return; }
   cuePairs = flagged;
   cueIndex = 0;
+  document.getElementById('cueScreenTitle').textContent = 'Needs Work';
+  document.getElementById('cueScreenSub').textContent = flagged.length + ' lines to review';
   loadCue();
   navTo('cueScreen', 2);
 }
@@ -1918,72 +1983,161 @@ document.addEventListener('click', e=>{
 // ════════════════════════════════════════
 let manualPairs = [];
 let manualChar = '';
+let manualCurrentScene = 'Scene 1';
+let manualScenes = ['Scene 1'];
+let manualViewingScene = 'all';
 
 function startManualEntry() {
   const name = document.getElementById('manualCharName').value.trim().toUpperCase();
-  if(!name) { showToast('Please enter your character name first 🎭'); return; }
+  if(!name) { showToast('Please enter your character name first'); return; }
   manualChar = name;
   manualPairs = [];
+  manualCurrentScene = 'Scene 1';
+  manualScenes = ['Scene 1'];
+  manualViewingScene = 'all';
 
-  // Check if this character already has a manual production — if so, load it to add more
   const existing = productions.find(p => p.myChar === manualChar && p.isManual);
   if(existing) {
-    manualPairs = [...existing.cuePairs];
-    showToast(`Adding more lines for ${manualChar} 📝`);
+    manualPairs = existing.cuePairs.map(p => ({...p}));
+    manualScenes = [...new Set(manualPairs.map(p => p.scene || 'Scene 1'))];
+    manualCurrentScene = manualScenes[manualScenes.length - 1];
+    showToast('Continuing ' + manualChar + ' -- ' + manualPairs.length + ' lines already saved');
   }
 
   document.getElementById('manualCharDisplay').textContent = manualChar;
-  document.getElementById('manualLineCount').textContent = manualPairs.length;
   document.getElementById('manualStep1').style.display = 'none';
   document.getElementById('manualStep2').style.display = 'block';
   document.getElementById('manualCueInput').value = '';
   document.getElementById('manualLineInput').value = '';
+  updateSceneBanner();
   refreshManualList();
 }
 
+function newScene() {
+  const num = manualScenes.length + 1;
+  const defaultName = 'Scene ' + num;
+  const banner = document.getElementById('manualSceneBanner');
+  banner.style.background = 'var(--brown)';
+  banner.innerHTML =
+    '<div style="flex:1;">' +
+      '<div style="font-size:11px;font-weight:900;opacity:0.85;text-transform:uppercase;letter-spacing:1px;color:white;margin-bottom:6px;">Name this scene:</div>' +
+      '<input id="newSceneInput" value="' + defaultName + '" ' +
+        'style="width:100%;padding:8px 12px;border-radius:var(--rs);border:none;font-family:var(--font);font-size:14px;font-weight:700;color:var(--brown);background:white;">' +
+    '</div>' +
+    '<button onclick="confirmNewScene()" style="margin-left:10px;background:rgba(255,255,255,0.25);border:none;color:white;border-radius:99px;padding:8px 16px;font-family:var(--font);font-weight:900;font-size:12px;cursor:pointer;">' +
+      'Start' +
+    '</button>';
+  setTimeout(function() { var el = document.getElementById('newSceneInput'); if(el) el.select(); }, 100);
+}
+
+function confirmNewScene() {
+  var input = document.getElementById('newSceneInput');
+  var name = input ? input.value.trim() : '';
+  if(!name) { showToast('Please give the scene a name'); return; }
+  if(manualScenes.includes(name)) { showToast('A scene with that name already exists'); return; }
+  manualScenes.push(name);
+  manualCurrentScene = name;
+  manualViewingScene = 'all';
+  updateSceneBanner();
+  refreshManualList();
+  showToast('Now entering: ' + name);
+  document.getElementById('manualCueInput').focus();
+}
+
+function updateSceneBanner() {
+  var banner = document.getElementById('manualSceneBanner');
+  banner.style.background = 'var(--sage)';
+  banner.innerHTML =
+    '<div>' +
+      '<div style="font-size:11px;font-weight:900;opacity:0.85;text-transform:uppercase;letter-spacing:1px;">Currently entering:</div>' +
+      '<div style="font-size:15px;font-weight:900;" id="manualSceneBannerName">' + manualCurrentScene + '</div>' +
+    '</div>' +
+    '<button onclick="newScene()" style="background:rgba(255,255,255,0.25);border:none;color:white;border-radius:99px;padding:8px 16px;font-family:var(--font);font-weight:900;font-size:12px;cursor:pointer;">' +
+      '+ New Scene' +
+    '</button>';
+  var el = document.getElementById('manualCurrentSceneName');
+  if(el) el.textContent = manualCurrentScene;
+}
+
+function switchScene(scene) {
+  manualCurrentScene = scene;
+  updateSceneBanner();
+  showToast('Switched to: ' + scene);
+}
+
 function addManualLine() {
-  const cue = document.getElementById('manualCueInput').value.trim();
-  const line = document.getElementById('manualLineInput').value.trim();
-
-  if(!cue && !line) { showToast('Please enter at least your line 📝'); return; }
-  if(!line) { showToast('Your line is missing — the cue is what the other person says before you speak 🎭'); return; }
-
-  manualPairs.push({
-    cue: cue || '(start of scene)',
-    myLine: line,
-    needsWork: false
-  });
-
+  var cue = document.getElementById('manualCueInput').value.trim();
+  var line = document.getElementById('manualLineInput').value.trim();
+  if(!line) { showToast('Your line is missing! The cue is what the other person says before you'); return; }
+  manualPairs.push({ cue: cue || '(start of scene)', myLine: line, scene: manualCurrentScene, needsWork: false });
   document.getElementById('manualCueInput').value = '';
   document.getElementById('manualLineInput').value = '';
   document.getElementById('manualCueInput').focus();
   document.getElementById('manualLineCount').textContent = manualPairs.length;
-
-  showToast(`Line ${manualPairs.length} added! ✅ Keep going or tap Done.`);
+  var sceneLines = manualPairs.filter(function(p) { return p.scene === manualCurrentScene; }).length;
+  showToast('Line ' + manualPairs.length + ' added to ' + manualCurrentScene + ' (' + sceneLines + ' in this scene)');
   refreshManualList();
-
-  // Auto-save to production as you go
   saveManualProduction();
 }
 
 function refreshManualList() {
-  const list = document.getElementById('manualLinesList');
-  const inner = document.getElementById('manualLinesListInner');
+  var list = document.getElementById('manualLinesList');
+  var inner = document.getElementById('manualLinesListInner');
+  var tabsEl = document.getElementById('manualSceneTabs');
+  document.getElementById('manualLineCount').textContent = manualPairs.length;
   if(manualPairs.length === 0) { list.style.display = 'none'; return; }
   list.style.display = 'block';
-  inner.innerHTML = manualPairs.map((p,i) => `
-    <div style="background:var(--cream);border-radius:var(--rs);padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow);position:relative;">
-      <div style="font-size:10px;font-weight:900;color:var(--brown-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Line ${i+1}</div>
-      <div style="font-size:11px;color:var(--brown-light);margin-bottom:6px;font-style:italic;">"${p.cue}"</div>
-      <div style="font-size:14px;font-weight:700;border-left:4px solid var(--terra);padding-left:10px;line-height:1.6;">${p.myLine}</div>
-      <button onclick="deleteManualLine(${i})" style="position:absolute;top:10px;right:10px;background:none;border:none;font-size:16px;cursor:pointer;color:var(--brown-light);">🗑</button>
-    </div>
-  `).join('');
+
+  var allScenes = [];
+  manualPairs.forEach(function(p) {
+    var sc = p.scene || 'Scene 1';
+    if(!allScenes.includes(sc)) allScenes.push(sc);
+  });
+
+  var tabHTML = '<button class="tool-btn ' + (manualViewingScene==='all'?'active':'') + '" onclick="filterManualScene(\'all\')">All (' + manualPairs.length + ')</button>';
+  allScenes.forEach(function(s) {
+    var count = manualPairs.filter(function(p){ return (p.scene||'Scene 1')===s; }).length;
+    tabHTML += '<button class="tool-btn ' + (manualViewingScene===s?'active':'') + '" onclick="filterManualScene(\'' + s + '\')">' + s + ' (' + count + ')</button>';
+  });
+  tabsEl.innerHTML = tabHTML;
+
+  var toShow = manualViewingScene === 'all' ? manualPairs : manualPairs.filter(function(p){ return (p.scene||'Scene 1') === manualViewingScene; });
+
+  var grouped = {};
+  toShow.forEach(function(p) {
+    var sc = p.scene || 'Scene 1';
+    if(!grouped[sc]) grouped[sc] = [];
+    grouped[sc].push({cue:p.cue, myLine:p.myLine, scene:p.scene, globalIdx: manualPairs.indexOf(p)});
+  });
+
+  var html = '';
+  Object.keys(grouped).forEach(function(scene) {
+    var pairs = grouped[scene];
+    html += '<div style="margin-bottom:20px;">';
+    html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">';
+    html += '<div style="background:var(--sage);color:white;border-radius:99px;padding:4px 14px;font-size:11px;font-weight:900;">Scene: ' + scene + '</div>';
+    html += '<button onclick="switchScene(\'' + scene + '\')" style="background:none;border:2px solid var(--sage);color:var(--sage);border-radius:99px;padding:4px 12px;font-size:10px;font-weight:900;cursor:pointer;font-family:var(--font);">Add lines here</button>';
+    html += '</div>';
+    pairs.forEach(function(p) {
+      html += '<div style="background:var(--cream);border-radius:var(--rs);padding:14px 16px;margin-bottom:8px;box-shadow:var(--shadow);position:relative;">';
+      html += '<div style="font-size:10px;font-weight:900;color:var(--brown-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Cue:</div>';
+      html += '<div style="font-size:12px;color:var(--brown-light);margin-bottom:8px;font-style:italic;">"' + p.cue + '"</div>';
+      html += '<div style="font-size:14px;font-weight:700;border-left:4px solid var(--terra);padding-left:10px;line-height:1.6;">' + p.myLine + '</div>';
+      html += '<button onclick="deleteManualLine(' + p.globalIdx + ')" style="position:absolute;top:10px;right:10px;background:none;border:none;font-size:16px;cursor:pointer;color:var(--brown-light);">X</button>';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+  inner.innerHTML = html;
+}
+
+function filterManualScene(scene) {
+  manualViewingScene = scene;
+  refreshManualList();
 }
 
 function deleteManualLine(idx) {
   manualPairs.splice(idx, 1);
-  document.getElementById('manualLineCount').textContent = manualPairs.length;
   refreshManualList();
   saveManualProduction();
   showToast('Line removed');
@@ -1991,29 +2145,28 @@ function deleteManualLine(idx) {
 
 function saveManualProduction() {
   if(manualPairs.length === 0) return;
-
-  // Build minimal scriptData from pairs for compatibility
-  const scriptData = manualPairs.flatMap(p => [
-    { char: 'OTHER', text: p.cue, mine: false },
-    { char: manualChar, text: p.myLine, mine: true }
-  ]);
-
-  const existingIdx = productions.findIndex(p => p.myChar === manualChar && p.isManual);
-  const prod = {
-    name: `${manualChar} — Manual`,
+  var scriptData = [];
+  manualPairs.forEach(function(p) {
+    scriptData.push({ char: 'OTHER', text: p.cue, mine: false, scene: p.scene });
+    scriptData.push({ char: manualChar, text: p.myLine, mine: true, scene: p.scene });
+  });
+  var existingIdx = productions.findIndex(function(p) { return p.myChar === manualChar && p.isManual; });
+  var sceneList = [];
+  manualPairs.forEach(function(p) { var s = p.scene||'Scene 1'; if(!sceneList.includes(s)) sceneList.push(s); });
+  var prod = {
+    name: manualChar + ' (Manual)',
     role: manualChar,
-    type: '🎭',
-    scriptData,
+    type: 'T',
+    scriptData: scriptData,
     cuePairs: manualPairs,
+    scenes: sceneList,
     myChar: manualChar,
     isManual: true,
     id: existingIdx >= 0 ? productions[existingIdx].id : Date.now(),
     progress: existingIdx >= 0 ? productions[existingIdx].progress : 0
   };
-
   if(existingIdx >= 0) productions[existingIdx] = prod;
   else productions.push(prod);
-
   activeProduction = prod;
   refreshHome();
   refreshProductionsList();
@@ -2021,16 +2174,19 @@ function saveManualProduction() {
 }
 
 function finishManualEntry() {
-  if(manualPairs.length === 0) { showToast('Add at least one line first! ✏️'); return; }
+  if(manualPairs.length === 0) { showToast('Add at least one line first!'); return; }
   saveManualProduction();
   autoSave();
-  // Reset for next time
   document.getElementById('manualStep1').style.display = 'block';
   document.getElementById('manualStep2').style.display = 'none';
   document.getElementById('manualCharName').value = '';
   manualPairs = [];
-  showToast(`🎉 ${activeProduction.cuePairs.length} lines saved for ${manualChar}!`);
-  setTimeout(() => navTo('practiceScreen', 2), 800);
+  manualCurrentScene = 'Scene 1';
+  manualScenes = ['Scene 1'];
+  showToast('All lines saved for ' + manualChar + '!');
+  setTimeout(function() { navTo('practiceScreen', 2); }, 800);
+}
+
 }
 
 // ════════════════════════════════════════
