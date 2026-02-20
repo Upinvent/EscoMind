@@ -404,6 +404,48 @@ body {
 .swatches{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
 .swatch{width:34px;height:34px;border-radius:99px;cursor:pointer;border:3px solid transparent;transition:border-color 0.2s;}
 .swatch.active{border-color:var(--brown);}
+.theme-card{background:var(--sand);border:3px solid var(--sand-dark);border-radius:var(--rs);padding:12px;cursor:pointer;transition:all 0.2s;}
+.theme-card.active{border-color:var(--terra);background:rgba(193,97,79,0.08);}
+.theme-card:hover{border-color:var(--terra-light);}
+
+/* ── HANDS-FREE / SCENE PARTNER / SPEED DRILL SCREENS ── */
+.hf-screen{background:var(--sand);min-height:100vh;display:none;flex-direction:column;}
+.hf-screen.active{display:flex;}
+.hf-header{background:var(--cream);padding:50px 20px 14px;border-bottom:2px solid var(--sand-dark);display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;}
+.hf-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;gap:20px;text-align:center;}
+.hf-cue-card{background:var(--cream);border-radius:var(--r);padding:24px;box-shadow:var(--shadow-lg);width:100%;max-width:500px;}
+.hf-cue-label{font-size:11px;font-weight:900;color:var(--brown-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+.hf-cue-text{font-size:18px;font-weight:700;line-height:1.6;color:var(--brown);}
+.hf-status{font-size:14px;font-weight:900;color:var(--brown-light);min-height:28px;}
+.hf-big-btn{width:88px;height:88px;border-radius:50%;border:none;font-size:32px;cursor:pointer;box-shadow:var(--shadow-lg);transition:transform 0.1s;}
+.hf-big-btn:active{transform:scale(0.94);}
+.hf-big-btn.listening{background:var(--terra);animation:pulse 1s infinite;}
+.hf-big-btn.idle{background:var(--sage);}
+.hf-big-btn.speaking{background:var(--amber);}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(193,97,79,0.4)}50%{box-shadow:0 0 0 20px rgba(193,97,79,0)}}
+.hf-result{border-radius:var(--rs);padding:12px 16px;font-size:14px;font-weight:800;width:100%;max-width:500px;}
+.hf-result.good{background:rgba(39,174,96,0.15);color:#1a7a40;}
+.hf-result.close{background:rgba(232,168,56,0.15);color:#a07010;}
+.hf-result.wrong{background:rgba(193,97,79,0.12);color:var(--terra-dark);}
+.hf-controls{display:flex;gap:12px;width:100%;max-width:500px;}
+.sp-other-line{background:var(--sand-dark);border-radius:var(--rs);padding:14px 18px;font-size:15px;font-weight:700;line-height:1.6;color:var(--brown-light);font-style:italic;width:100%;max-width:500px;text-align:left;}
+.sp-char-name{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:var(--brown-light);margin-bottom:4px;}
+
+/* ── SPEED DRILL ── */
+.sd-timer{font-size:72px;font-weight:900;color:var(--terra);font-family:monospace;line-height:1;}
+.sd-best{font-size:12px;font-weight:800;color:var(--brown-light);}
+.sd-line-card{background:var(--cream);border-radius:var(--r);padding:20px 22px;box-shadow:var(--shadow-lg);width:100%;max-width:500px;}
+.sd-scene-tag{font-size:10px;font-weight:900;color:var(--sage-dark);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+
+/* ── PROGRESS DASHBOARD ── */
+.prog-dash{background:var(--sand);min-height:100vh;display:none;flex-direction:column;}
+.prog-dash.active{display:flex;}
+.scene-progress-bar{height:10px;background:var(--sand-dark);border-radius:99px;overflow:hidden;margin-top:6px;}
+.scene-progress-fill{height:100%;border-radius:99px;background:var(--sage);transition:width 0.6s;}
+.conf-pill{display:inline-block;border-radius:99px;padding:3px 10px;font-size:10px;font-weight:900;cursor:pointer;border:none;font-family:var(--font);}
+.conf-shaky{background:rgba(193,97,79,0.15);color:var(--terra-dark);}
+.conf-getting{background:rgba(232,168,56,0.15);color:#a07010;}
+.conf-solid{background:rgba(122,158,126,0.15);color:var(--sage-dark);}
 
 /* ── MODAL ── */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(74,55,40,0.55);z-index:300;align-items:flex-end;justify-content:center;}
@@ -824,15 +866,41 @@ Good my lord."></textarea>
     </div>
 
     <div class="set-sec">
-      <h3>🎨 Background Tint</h3>
-      <div style="font-size:12px;color:var(--brown-light);margin-bottom:8px;">Choose a colour that feels comfortable for your eyes:</div>
-      <div class="swatches">
-        <div class="swatch active" style="background:#F5ECD7;" onclick="setTint('#F5ECD7','#FAF4E8',this)" title="Warm Sand"></div>
-        <div class="swatch" style="background:#E8F0E4;" onclick="setTint('#E8F0E4','#F0F7EE',this)" title="Sage Mist"></div>
-        <div class="swatch" style="background:#F0E8F5;" onclick="setTint('#F0E8F5','#F7F0FC',this)" title="Lavender"></div>
-        <div class="swatch" style="background:#E8EEF5;" onclick="setTint('#E8EEF5','#F0F5FC',this)" title="Sky Blue"></div>
-        <div class="swatch" style="background:#F5F0E0;" onclick="setTint('#F5F0E0','#FCF7EC',this)" title="Cream"></div>
-        <div class="swatch" style="background:#F5E8E4;" onclick="setTint('#F5E8E4','#FCF0EC',this)" title="Blush"></div>
+      <h3>🎨 Creative Themes</h3>
+      <div style="font-size:12px;color:var(--brown-light);margin-bottom:12px;">Pick a full theme — changes background, buttons and accent colours:</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;" id="themeGrid">
+        <div class="theme-card active" onclick="applyTheme('sand',this)">
+          <div style="display:flex;gap:6px;margin-bottom:6px;"><div style="width:18px;height:18px;border-radius:50%;background:#F5ECD7;border:2px solid #ccc;"></div><div style="width:18px;height:18px;border-radius:50%;background:#C1614F;"></div><div style="width:18px;height:18px;border-radius:50%;background:#7A9E7E;"></div></div>
+          <div style="font-size:12px;font-weight:900;">Warm Sand</div><div style="font-size:10px;color:var(--brown-light);">Original — easy on the eyes</div>
+        </div>
+        <div class="theme-card" onclick="applyTheme('night',this)">
+          <div style="display:flex;gap:6px;margin-bottom:6px;"><div style="width:18px;height:18px;border-radius:50%;background:#1A1A2E;border:2px solid #444;"></div><div style="width:18px;height:18px;border-radius:50%;background:#E94560;"></div><div style="width:18px;height:18px;border-radius:50%;background:#0F3460;"></div></div>
+          <div style="font-size:12px;font-weight:900;">Night Mode 🌙</div><div style="font-size:10px;color:var(--brown-light);">Dark — late night rehearsals</div>
+        </div>
+        <div class="theme-card" onclick="applyTheme('ocean',this)">
+          <div style="display:flex;gap:6px;margin-bottom:6px;"><div style="width:18px;height:18px;border-radius:50%;background:#E8F4FD;border:2px solid #ccc;"></div><div style="width:18px;height:18px;border-radius:50%;background:#2980B9;"></div><div style="width:18px;height:18px;border-radius:50%;background:#1ABC9C;"></div></div>
+          <div style="font-size:12px;font-weight:900;">Ocean 🌊</div><div style="font-size:10px;color:var(--brown-light);">Cool blue and teal</div>
+        </div>
+        <div class="theme-card" onclick="applyTheme('sunset',this)">
+          <div style="display:flex;gap:6px;margin-bottom:6px;"><div style="width:18px;height:18px;border-radius:50%;background:#FFF0E6;border:2px solid #ccc;"></div><div style="width:18px;height:18px;border-radius:50%;background:#E67E22;"></div><div style="width:18px;height:18px;border-radius:50%;background:#C0392B;"></div></div>
+          <div style="font-size:12px;font-weight:900;">Sunset 🌅</div><div style="font-size:10px;color:var(--brown-light);">Warm orange and red</div>
+        </div>
+        <div class="theme-card" onclick="applyTheme('lavender',this)">
+          <div style="display:flex;gap:6px;margin-bottom:6px;"><div style="width:18px;height:18px;border-radius:50%;background:#F5F0FF;border:2px solid #ccc;"></div><div style="width:18px;height:18px;border-radius:50%;background:#8E44AD;"></div><div style="width:18px;height:18px;border-radius:50%;background:#3498DB;"></div></div>
+          <div style="font-size:12px;font-weight:900;">Lavender 💜</div><div style="font-size:10px;color:var(--brown-light);">Purple and blue calm</div>
+        </div>
+        <div class="theme-card" onclick="applyTheme('forest',this)">
+          <div style="display:flex;gap:6px;margin-bottom:6px;"><div style="width:18px;height:18px;border-radius:50%;background:#EAF5EA;border:2px solid #ccc;"></div><div style="width:18px;height:18px;border-radius:50%;background:#27AE60;"></div><div style="width:18px;height:18px;border-radius:50%;background:#F39C12;"></div></div>
+          <div style="font-size:12px;font-weight:900;">Forest 🌿</div><div style="font-size:10px;color:var(--brown-light);">Green and gold nature</div>
+        </div>
+        <div class="theme-card" onclick="applyTheme('rose',this)">
+          <div style="display:flex;gap:6px;margin-bottom:6px;"><div style="width:18px;height:18px;border-radius:50%;background:#FFF0F5;border:2px solid #ccc;"></div><div style="width:18px;height:18px;border-radius:50%;background:#E91E8C;"></div><div style="width:18px;height:18px;border-radius:50%;background:#9B59B6;"></div></div>
+          <div style="font-size:12px;font-weight:900;">Rose Gold 🌸</div><div style="font-size:10px;color:var(--brown-light);">Pink and purple glam</div>
+        </div>
+        <div class="theme-card" onclick="applyTheme('slate',this)">
+          <div style="display:flex;gap:6px;margin-bottom:6px;"><div style="width:18px;height:18px;border-radius:50%;background:#ECF0F1;border:2px solid #ccc;"></div><div style="width:18px;height:18px;border-radius:50%;background:#2C3E50;"></div><div style="width:18px;height:18px;border-radius:50%;background:#E74C3C;"></div></div>
+          <div style="font-size:12px;font-weight:900;">Slate ⚡</div><div style="font-size:10px;color:var(--brown-light);">Clean monochrome</div>
+        </div>
       </div>
     </div>
 
@@ -886,6 +954,100 @@ Good my lord."></textarea>
     </div>
 
   </div>
+</div>
+
+<!-- ════════════════ HANDS-FREE MODE ════════════════ -->
+<div class="hf-screen" id="handsFreeScreen">
+  <div class="hf-header">
+    <button class="back-btn" onclick="stopHandsFree()">‹</button>
+    <div>
+      <div style="font-size:17px;font-weight:900;">🔊 Hands-Free Mode</div>
+      <div style="font-size:11px;color:var(--brown-light);" id="hfProgress">Line 1 of 0</div>
+    </div>
+    <button onclick="toggleHFPause()" id="hfPauseBtn" style="margin-left:auto;background:var(--sand);border:2px solid var(--sand-dark);border-radius:99px;padding:6px 14px;font-family:var(--font);font-weight:900;font-size:12px;cursor:pointer;">⏸ Pause</button>
+  </div>
+  <div class="hf-body">
+    <div class="hf-cue-card">
+      <div class="hf-cue-label">🎤 Cue — listen and respond:</div>
+      <div class="hf-cue-text" id="hfCueText">Ready to begin...</div>
+    </div>
+    <div class="hf-status" id="hfStatus">Tap the mic to start</div>
+    <button class="hf-big-btn idle" id="hfMicBtn" onclick="hfMicTap()">🎙</button>
+    <div class="hf-result" id="hfResult" style="display:none;"></div>
+    <div style="display:flex;gap:10px;width:100%;max-width:500px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="hfNext('wrong')">✗ Wrong</button>
+      <button class="btn btn-sage" style="flex:2;" onclick="hfNext('correct')">✓ Got it — Next</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ SCENE PARTNER ════════════════ -->
+<div class="hf-screen" id="scenePartnerScreen">
+  <div class="hf-header">
+    <button class="back-btn" onclick="stopScenePartner()">‹</button>
+    <div>
+      <div style="font-size:17px;font-weight:900;">🎭 Scene Partner</div>
+      <div style="font-size:11px;color:var(--brown-light);" id="spProgress">Line 1 of 0</div>
+    </div>
+    <button onclick="toggleSPPause()" id="spPauseBtn" style="margin-left:auto;background:var(--sand);border:2px solid var(--sand-dark);border-radius:99px;padding:6px 14px;font-family:var(--font);font-weight:900;font-size:12px;cursor:pointer;">⏸ Pause</button>
+  </div>
+  <div class="hf-body">
+    <div id="spOtherCard" class="sp-other-line" style="display:none;">
+      <div class="sp-char-name" id="spOtherChar">OTHER CHARACTER</div>
+      <div id="spOtherText">...</div>
+    </div>
+    <div class="hf-cue-card" id="spMyCard" style="display:none;">
+      <div class="hf-cue-label" id="spMyChar">YOUR LINE</div>
+      <div class="hf-cue-text" id="spMyText">...</div>
+    </div>
+    <div class="hf-status" id="spStatus">App will read all other lines aloud. You speak yours.</div>
+    <button class="hf-big-btn idle" id="spMicBtn" onclick="spMicTap()" style="display:none;">🎙</button>
+    <div class="hf-result" id="spResult" style="display:none;"></div>
+    <button class="btn btn-terra" id="spStartBtn" onclick="spStart()" style="width:100%;max-width:500px;">▶ Start Scene</button>
+  </div>
+</div>
+
+<!-- ════════════════ SPEED DRILL ════════════════ -->
+<div class="hf-screen" id="speedDrillScreen">
+  <div class="hf-header">
+    <button class="back-btn" onclick="stopSpeedDrill()">‹</button>
+    <div>
+      <div style="font-size:17px;font-weight:900;">⚡ Speed Drill</div>
+      <div style="font-size:11px;color:var(--brown-light);" id="sdProgress">Line 1 of 0</div>
+    </div>
+  </div>
+  <div class="hf-body">
+    <div class="sd-timer" id="sdTimer">0.0s</div>
+    <div class="sd-best" id="sdBest">Best time: --</div>
+    <div class="sd-line-card">
+      <div class="sd-scene-tag" id="sdSceneTag">Scene 1</div>
+      <div class="hf-cue-label">Cue:</div>
+      <div style="font-size:14px;color:var(--brown-light);font-style:italic;margin-bottom:10px;" id="sdCueText">...</div>
+      <div class="hf-cue-label" style="color:var(--terra);">Your line:</div>
+      <div style="font-size:16px;font-weight:700;line-height:1.6;" id="sdLineText">...</div>
+    </div>
+    <div style="display:flex;gap:10px;width:100%;max-width:500px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="sdMark('wrong')">✗ Stumbled</button>
+      <button class="btn btn-terra" style="flex:2;" onclick="sdMark('correct')">✓ Got it!</button>
+    </div>
+    <div id="sdFinished" style="display:none;width:100%;max-width:500px;text-align:center;">
+      <div style="font-size:18px;font-weight:900;margin-bottom:8px;">Run complete! 🎉</div>
+      <div style="font-size:14px;color:var(--brown-light);margin-bottom:16px;" id="sdFinishStats"></div>
+      <button class="btn btn-terra" onclick="startSpeedDrill()">Run Again ⚡</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ PROGRESS DASHBOARD ════════════════ -->
+<div class="prog-dash" id="progressDashScreen">
+  <div class="hf-header">
+    <button class="back-btn" onclick="hideProgressDashboard()">‹</button>
+    <div>
+      <div style="font-size:17px;font-weight:900;">📊 Progress Dashboard</div>
+      <div style="font-size:11px;color:var(--brown-light);" id="dashSubtitle">Your lines at a glance</div>
+    </div>
+  </div>
+  <div class="scroll-content" id="dashContent"></div>
 </div>
 
 <!-- ════════════════ BOTTOM NAV ════════════════ -->
@@ -1524,19 +1686,29 @@ function refreshPracticeScreen() {
       <div class="pm-info"><div class="pm-name">Cue Cards</div><div class="pm-desc">See the cue, recall your line. Word-perfect checking.</div></div>
       <div class="pm-arrow">›</div>
     </div>
+    <div class="pm-card" onclick="startHandsFree()">
+      <div class="pm-icon">🔊</div>
+      <div class="pm-info"><div class="pm-name">Hands-Free Mode</div><div class="pm-desc">Phone reads the cue aloud — you speak your line back.</div></div>
+      <div class="pm-arrow">›</div>
+    </div>
+    <div class="pm-card" onclick="startScenePartner()">
+      <div class="pm-icon">🎭</div>
+      <div class="pm-info"><div class="pm-name">Scene Partner</div><div class="pm-desc">App voices ALL other characters. Just you and your phone.</div></div>
+      <div class="pm-arrow">›</div>
+    </div>
+    <div class="pm-card" onclick="startSpeedDrill()">
+      <div class="pm-icon">⚡</div>
+      <div class="pm-info"><div class="pm-name">Speed Drill</div><div class="pm-desc">Race through all your lines. Beat your personal best!</div></div>
+      <div class="pm-arrow">›</div>
+    </div>
     <div class="pm-card" onclick="startNeedsWork()">
       <div class="pm-icon">🔁</div>
       <div class="pm-info"><div class="pm-name">Needs Work</div><div class="pm-desc">Practise only the lines you've flagged as wrong.</div></div>
       <div class="pm-arrow">›</div>
     </div>
-    <div class="pm-card" onclick="showToast('Fade Mode — coming soon!')">
-      <div class="pm-icon">🌅</div>
-      <div class="pm-info"><div class="pm-name">Fade Mode</div><div class="pm-desc">Lines fade as you grow more confident.</div></div>
-      <div class="pm-arrow">›</div>
-    </div>
-    <div class="pm-card" onclick="showToast('Full Scene Run — coming soon!')">
-      <div class="pm-icon">🎬</div>
-      <div class="pm-info"><div class="pm-name">Full Scene Run</div><div class="pm-desc">Run the whole scene from start to finish.</div></div>
+    <div class="pm-card" onclick="showProgressDashboard()">
+      <div class="pm-icon">📊</div>
+      <div class="pm-info"><div class="pm-name">Progress Dashboard</div><div class="pm-desc">See which scenes you've mastered and what needs work.</div></div>
       <div class="pm-arrow">›</div>
     </div>
     ${prod.cuePairs.some(p=>p.needsWork) ? `
@@ -1947,19 +2119,439 @@ function globalFontSize(d) {
   document.body.style.fontSize = globalFs+'px';
 }
 
-function setTint(bg, cream, el) {
-  document.documentElement.style.setProperty('--sand', bg);
-  document.documentElement.style.setProperty('--cream', cream);
-  document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active'));
-  el.classList.add('active');
-  showToast('Colour theme updated 🎨');
-}
+// theme functions above replace setTint
 
 function setBreakLen(mins) {
   breakLen = mins;
   document.getElementById('break5Btn').classList.toggle('active', mins===5);
   document.getElementById('break10Btn').classList.toggle('active', mins===10);
-  showToast(`Break length: ${mins} minutes`);
+  showToast('Break length: ' + mins + ' minutes');
+}
+
+// ════════════════════════════════════════
+//  THEMES
+// ════════════════════════════════════════
+const THEMES = {
+  sand:     { sand:'#F5ECD7', sandDark:'#E8D9BC', cream:'#FAF4E8', terra:'#C1614F', terraLight:'#D4826F', terraDark:'#A04F3E', sage:'#7A9E7E', sageDark:'#5A7E5E', brown:'#4A3728', brownLight:'#6B5445', amber:'#E8A838', text:'#4A3728' },
+  night:    { sand:'#1A1A2E', sandDark:'#16213E', cream:'#0F3460', terra:'#E94560', terraLight:'#FF6B8A', terraDark:'#C43050', sage:'#4A90D9', sageDark:'#2970B9', brown:'#E8E8F0', brownLight:'#A8A8C0', amber:'#F4C430', text:'#E8E8F0' },
+  ocean:    { sand:'#E8F4FD', sandDark:'#D0E8F8', cream:'#F5FBFF', terra:'#2980B9', terraLight:'#5DADE2', terraDark:'#1A6A9A', sage:'#1ABC9C', sageDark:'#16A085', brown:'#1A3A4A', brownLight:'#4A7A9A', amber:'#F39C12', text:'#1A3A4A' },
+  sunset:   { sand:'#FFF0E6', sandDark:'#FFD9C0', cream:'#FFF8F4', terra:'#E67E22', terraLight:'#F0A040', terraDark:'#C0612A', sage:'#C0392B', sageDark:'#A03020', brown:'#3A1A0A', brownLight:'#8A4A2A', amber:'#F1C40F', text:'#3A1A0A' },
+  lavender: { sand:'#F5F0FF', sandDark:'#E5D8FF', cream:'#FAF6FF', terra:'#8E44AD', terraLight:'#BB77D0', terraDark:'#6C2A8A', sage:'#3498DB', sageDark:'#2070B0', brown:'#2C1A3A', brownLight:'#7A5A9A', amber:'#F39C12', text:'#2C1A3A' },
+  forest:   { sand:'#EAF5EA', sandDark:'#CCE8CC', cream:'#F4FCF4', terra:'#27AE60', terraLight:'#52C880', terraDark:'#1A8A48', sage:'#F39C12', sageDark:'#D68A00', brown:'#1A3A1A', brownLight:'#4A7A4A', amber:'#E74C3C', text:'#1A3A1A' },
+  rose:     { sand:'#FFF0F5', sandDark:'#FFD0E8', cream:'#FFF8FC', terra:'#E91E8C', terraLight:'#FF60B0', terraDark:'#C01070', sage:'#9B59B6', sageDark:'#7A3A9A', brown:'#3A0A2A', brownLight:'#8A4A7A', amber:'#F39C12', text:'#3A0A2A' },
+  slate:    { sand:'#ECF0F1', sandDark:'#D0D8DA', cream:'#F8FAFB', terra:'#2C3E50', terraLight:'#546E7A', terraDark:'#1A2A38', sage:'#7F8C8D', sageDark:'#5D6D7E', brown:'#1A1A1A', brownLight:'#555555', amber:'#E74C3C', text:'#1A1A1A' }
+};
+
+let currentTheme = localStorage.getItem('escomind-theme') || 'sand';
+
+function applyTheme(name, el) {
+  const t = THEMES[name];
+  if(!t) return;
+  currentTheme = name;
+  localStorage.setItem('escomind-theme', name);
+  const r = document.documentElement;
+  r.style.setProperty('--sand', t.sand);
+  r.style.setProperty('--sand-dark', t.sandDark);
+  r.style.setProperty('--cream', t.cream);
+  r.style.setProperty('--terra', t.terra);
+  r.style.setProperty('--terra-light', t.terraLight);
+  r.style.setProperty('--terra-dark', t.terraDark);
+  r.style.setProperty('--sage', t.sage);
+  r.style.setProperty('--sage-dark', t.sageDark);
+  r.style.setProperty('--brown', t.brown);
+  r.style.setProperty('--brown-light', t.brownLight);
+  r.style.setProperty('--amber', t.amber);
+  document.body.style.color = t.text;
+  document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+  if(el) el.classList.add('active');
+  else {
+    var grid = document.getElementById('themeGrid');
+    if(grid) { var cards = grid.querySelectorAll('.theme-card'); var idx = Object.keys(THEMES).indexOf(name); if(cards[idx]) cards[idx].classList.add('active'); }
+  }
+  showToast('Theme changed to ' + name.charAt(0).toUpperCase() + name.slice(1) + ' !');
+}
+
+function loadSavedTheme() {
+  var saved = localStorage.getItem('escomind-theme') || 'sand';
+  applyTheme(saved, null);
+}
+
+// ════════════════════════════════════════
+//  CONFIDENCE RATINGS
+// ════════════════════════════════════════
+function setConfidence(prodIdx, pairIdx, level) {
+  if(productions[prodIdx] && productions[prodIdx].cuePairs[pairIdx]) {
+    productions[prodIdx].cuePairs[pairIdx].confidence = level;
+    autoSave();
+    showProgressDashboard();
+  }
+}
+
+// ════════════════════════════════════════
+//  PROGRESS DASHBOARD
+// ════════════════════════════════════════
+function showProgressDashboard() {
+  const prod = activeProduction || productions[0];
+  if(!prod) { showToast('No script loaded yet!'); return; }
+  const screen = document.getElementById('progressDashScreen');
+  screen.classList.add('active');
+  document.getElementById('dashSubtitle').textContent = prod.myChar + ' — ' + prod.cuePairs.length + ' lines';
+  renderDashboard(prod);
+}
+
+function hideProgressDashboard() {
+  document.getElementById('progressDashScreen').classList.remove('active');
+}
+
+function renderDashboard(prod) {
+  const pairs = prod.cuePairs;
+  const prodIdx = productions.indexOf(prod);
+  const total = pairs.length;
+  const solid = pairs.filter(p => p.confidence === 'solid').length;
+  const getting = pairs.filter(p => p.confidence === 'getting').length;
+  const shaky = pairs.filter(p => p.confidence === 'shaky').length;
+  const unrated = total - solid - getting - shaky;
+  const pct = total > 0 ? Math.round((solid / total) * 100) : 0;
+
+  const scenes = prod.scenes && prod.scenes.length > 0 ? prod.scenes : ['All Lines'];
+
+  let html = '<div class="card" style="margin-bottom:16px;">';
+  html += '<div style="font-size:28px;font-weight:900;color:var(--terra);">' + pct + '% solid</div>';
+  html += '<div style="font-size:13px;color:var(--brown-light);margin-bottom:12px;">' + solid + ' solid · ' + getting + ' getting there · ' + shaky + ' shaky · ' + unrated + ' unrated</div>';
+  html += '<div class="scene-progress-bar"><div class="scene-progress-fill" style="width:' + pct + '%"></div></div>';
+  html += '</div>';
+
+  html += '<div class="section-title" style="font-size:14px;margin-bottom:12px;">Rate each line — tap to update:</div>';
+
+  scenes.forEach(function(scene) {
+    const scenePairs = pairs.filter(function(p, i) {
+      return (p.scene || scenes[0]) === scene || scenes.length === 1;
+    }).map(function(p, i) { return { p: p, idx: pairs.indexOf(p) }; });
+
+    const scPct = scenePairs.length > 0 ? Math.round((scenePairs.filter(function(x){ return x.p.confidence==='solid'; }).length / scenePairs.length) * 100) : 0;
+
+    html += '<div style="margin-bottom:20px;">';
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">';
+    html += '<div style="background:var(--sage);color:white;border-radius:99px;padding:4px 14px;font-size:11px;font-weight:900;">' + scene + '</div>';
+    html += '<div style="font-size:12px;font-weight:800;color:var(--brown-light);">' + scPct + '% solid</div>';
+    html += '</div>';
+
+    scenePairs.forEach(function(item) {
+      const p = item.p;
+      const i = item.idx;
+      const conf = p.confidence || 'unrated';
+      html += '<div style="background:var(--cream);border-radius:var(--rs);padding:12px 14px;margin-bottom:8px;box-shadow:var(--shadow);">';
+      html += '<div style="font-size:12px;color:var(--brown-light);margin-bottom:4px;font-style:italic;">"' + (p.cue.length > 60 ? p.cue.substring(0,60)+'...' : p.cue) + '"</div>';
+      html += '<div style="font-size:14px;font-weight:700;margin-bottom:10px;line-height:1.5;">' + p.myLine + '</div>';
+      html += '<div style="display:flex;gap:6px;">';
+      html += '<button class="conf-pill conf-shaky' + (conf==='shaky'?' active" style="border:2px solid var(--terra);':'"') + ' onclick="setConfidence(' + prodIdx + ',' + i + ',\'shaky\')">🔴 Shaky</button>';
+      html += '<button class="conf-pill conf-getting' + (conf==='getting'?' active" style="border:2px solid var(--amber);':'"') + ' onclick="setConfidence(' + prodIdx + ',' + i + ',\'getting\')">🟡 Getting there</button>';
+      html += '<button class="conf-pill conf-solid' + (conf==='solid'?' active" style="border:2px solid var(--sage);':'"') + ' onclick="setConfidence(' + prodIdx + ',' + i + ',\'solid\')">🟢 Solid</button>';
+      html += '</div></div>';
+    });
+    html += '</div>';
+  });
+
+  document.getElementById('dashContent').innerHTML = html;
+}
+
+// ════════════════════════════════════════
+//  HANDS-FREE MODE
+// ════════════════════════════════════════
+let hfPairs = [], hfIndex = 0, hfPaused = false, hfSpeaking = false;
+
+function startHandsFree() {
+  const prod = activeProduction || productions[0];
+  if(!prod || prod.cuePairs.length === 0) { showToast('No lines to practise!'); return; }
+  hfPairs = activeSceneFilter === 'all' ? prod.cuePairs : prod.cuePairs.filter(function(p){ return (p.scene||'Scene 1') === activeSceneFilter; });
+  hfIndex = 0;
+  hfPaused = false;
+  document.getElementById('handsFreeScreen').classList.add('active');
+  document.getElementById('hfResult').style.display = 'none';
+  hfLoadLine();
+  setTimeout(hfReadCue, 500);
+}
+
+function stopHandsFree() {
+  window.speechSynthesis && window.speechSynthesis.cancel();
+  document.getElementById('handsFreeScreen').classList.remove('active');
+}
+
+function toggleHFPause() {
+  hfPaused = !hfPaused;
+  document.getElementById('hfPauseBtn').textContent = hfPaused ? '▶ Resume' : '⏸ Pause';
+  if(!hfPaused) hfReadCue();
+}
+
+function hfLoadLine() {
+  if(hfIndex >= hfPairs.length) { hfFinish(); return; }
+  const pair = hfPairs[hfIndex];
+  document.getElementById('hfCueText').textContent = pair.cue;
+  document.getElementById('hfProgress').textContent = 'Line ' + (hfIndex+1) + ' of ' + hfPairs.length;
+  document.getElementById('hfStatus').textContent = 'Reading cue aloud...';
+  document.getElementById('hfResult').style.display = 'none';
+  document.getElementById('hfMicBtn').className = 'hf-big-btn idle';
+  document.getElementById('hfMicBtn').textContent = '🎙';
+}
+
+function hfReadCue() {
+  if(hfPaused || hfIndex >= hfPairs.length) return;
+  if(!window.speechSynthesis) { hfMicReady(); return; }
+  window.speechSynthesis.cancel();
+  const pair = hfPairs[hfIndex];
+  const utt = new SpeechSynthesisUtterance(pair.cue);
+  utt.rate = 0.9; utt.pitch = 1.1;
+  utt.onend = function() { if(!hfPaused) hfMicReady(); };
+  document.getElementById('hfMicBtn').className = 'hf-big-btn speaking';
+  document.getElementById('hfMicBtn').textContent = '🔊';
+  hfSpeaking = true;
+  window.speechSynthesis.speak(utt);
+}
+
+function hfMicReady() {
+  hfSpeaking = false;
+  document.getElementById('hfMicBtn').className = 'hf-big-btn idle';
+  document.getElementById('hfMicBtn').textContent = '🎙';
+  document.getElementById('hfStatus').textContent = 'Your turn — tap the mic and say your line';
+}
+
+function hfMicTap() {
+  if(hfSpeaking) { window.speechSynthesis && window.speechSynthesis.cancel(); hfMicReady(); return; }
+  if(!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+    showToast('Voice not supported on this browser'); return;
+  }
+  const btn = document.getElementById('hfMicBtn');
+  btn.className = 'hf-big-btn listening';
+  btn.textContent = '🔴';
+  document.getElementById('hfStatus').textContent = 'Listening...';
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const rec = new SR();
+  rec.lang = 'en-GB'; rec.continuous = false; rec.interimResults = false;
+  rec.onresult = function(e) {
+    const spoken = e.results[0][0].transcript;
+    btn.className = 'hf-big-btn idle'; btn.textContent = '🎙';
+    hfCheckLine(spoken);
+  };
+  rec.onerror = function() {
+    btn.className = 'hf-big-btn idle'; btn.textContent = '🎙';
+    document.getElementById('hfStatus').textContent = 'Could not hear you — try again or tap Got it';
+  };
+  rec.start();
+  setTimeout(function(){ try{rec.stop();}catch(e){} }, 9000);
+}
+
+function hfCheckLine(spoken) {
+  const correct = hfPairs[hfIndex].myLine;
+  const result = compareLines(spoken, correct);
+  const resultEl = document.getElementById('hfResult');
+  resultEl.style.display = 'block';
+  if(result.pct >= 0.85) {
+    resultEl.className = 'hf-result good';
+    resultEl.textContent = '✅ Nailed it! ' + Math.round(result.pct*100) + '% match';
+    document.getElementById('hfStatus').textContent = 'Great! Moving to next line...';
+    setTimeout(function(){ hfNext('correct'); }, 1500);
+  } else if(result.pct >= 0.55) {
+    resultEl.className = 'hf-result close';
+    resultEl.textContent = '~ Close! ' + Math.round(result.pct*100) + '% — you said: "' + spoken + '"';
+    document.getElementById('hfStatus').textContent = 'Your line: ' + correct;
+  } else {
+    resultEl.className = 'hf-result wrong';
+    resultEl.textContent = '✗ Not quite. You said: "' + spoken + '"';
+    document.getElementById('hfStatus').textContent = 'Your line: ' + correct;
+  }
+}
+
+function hfNext(result) {
+  if(result === 'correct') addXP(10);
+  hfIndex++;
+  if(hfIndex >= hfPairs.length) { hfFinish(); return; }
+  hfLoadLine();
+  setTimeout(hfReadCue, 400);
+}
+
+function hfFinish() {
+  document.getElementById('hfStatus').textContent = '🎉 All lines done! Amazing work!';
+  document.getElementById('hfMicBtn').textContent = '🎉';
+  document.getElementById('hfMicBtn').className = 'hf-big-btn idle';
+  showToast('Hands-Free session complete!');
+  addXP(50);
+}
+
+// ════════════════════════════════════════
+//  SCENE PARTNER
+// ════════════════════════════════════════
+let spPairs = [], spIndex = 0, spPaused = false, spMyTurn = false;
+
+function startScenePartner() {
+  const prod = activeProduction || productions[0];
+  if(!prod || prod.cuePairs.length === 0) { showToast('No lines to practise!'); return; }
+  spPairs = activeSceneFilter === 'all' ? prod.cuePairs : prod.cuePairs.filter(function(p){ return (p.scene||'Scene 1') === activeSceneFilter; });
+  spIndex = 0; spPaused = false; spMyTurn = false;
+  document.getElementById('scenePartnerScreen').classList.add('active');
+  document.getElementById('spMyCard').style.display = 'none';
+  document.getElementById('spOtherCard').style.display = 'none';
+  document.getElementById('spMicBtn').style.display = 'none';
+  document.getElementById('spStartBtn').style.display = 'block';
+  document.getElementById('spResult').style.display = 'none';
+  document.getElementById('spStatus').textContent = 'App will read all other characters\' lines. You speak yours.';
+  document.getElementById('spProgress').textContent = '0 of ' + spPairs.length + ' lines';
+}
+
+function stopScenePartner() {
+  window.speechSynthesis && window.speechSynthesis.cancel();
+  document.getElementById('scenePartnerScreen').classList.remove('active');
+}
+
+function toggleSPPause() {
+  spPaused = !spPaused;
+  document.getElementById('spPauseBtn').textContent = spPaused ? '▶ Resume' : '⏸ Pause';
+  if(!spPaused && !spMyTurn) spReadOther();
+}
+
+function spStart() {
+  document.getElementById('spStartBtn').style.display = 'none';
+  spLoadNext();
+}
+
+function spLoadNext() {
+  if(spIndex >= spPairs.length) { spFinish(); return; }
+  const pair = spPairs[spIndex];
+  document.getElementById('spProgress').textContent = (spIndex+1) + ' of ' + spPairs.length + ' lines';
+
+  // Show cue (other character's line) and read it aloud
+  document.getElementById('spOtherCard').style.display = 'block';
+  document.getElementById('spMyCard').style.display = 'none';
+  document.getElementById('spMicBtn').style.display = 'none';
+  document.getElementById('spResult').style.display = 'none';
+  document.getElementById('spOtherChar').textContent = 'OTHER CHARACTER';
+  document.getElementById('spOtherText').textContent = pair.cue;
+  document.getElementById('spStatus').textContent = 'Reading their line...';
+  spMyTurn = false;
+
+  if(!spPaused && window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(pair.cue);
+    utt.rate = 0.88; utt.pitch = 0.95;
+    utt.onend = function() { if(!spPaused) spShowMyTurn(); };
+    window.speechSynthesis.speak(utt);
+  } else {
+    setTimeout(spShowMyTurn, 800);
+  }
+}
+
+function spShowMyTurn() {
+  if(spIndex >= spPairs.length) return;
+  const pair = spPairs[spIndex];
+  spMyTurn = true;
+  document.getElementById('spMyCard').style.display = 'block';
+  document.getElementById('spMyChar').textContent = '🎭 YOUR LINE';
+  document.getElementById('spMyText').textContent = '(tap mic to speak, or tap Next)';
+  document.getElementById('spMicBtn').style.display = 'block';
+  document.getElementById('spMicBtn').className = 'hf-big-btn idle';
+  document.getElementById('spMicBtn').textContent = '🎙';
+  document.getElementById('spStatus').textContent = 'Your turn — say your line!';
+}
+
+function spMicTap() {
+  if(!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+    showToast('Voice not supported — tap Next to continue');
+    return;
+  }
+  const btn = document.getElementById('spMicBtn');
+  btn.className = 'hf-big-btn listening'; btn.textContent = '🔴';
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const rec = new SR();
+  rec.lang = 'en-GB'; rec.continuous = false; rec.interimResults = false;
+  rec.onresult = function(e) {
+    const spoken = e.results[0][0].transcript;
+    btn.className = 'hf-big-btn idle'; btn.textContent = '🎙';
+    spCheckLine(spoken);
+  };
+  rec.onerror = function() { btn.className = 'hf-big-btn idle'; btn.textContent = '🎙'; };
+  rec.start();
+  setTimeout(function(){ try{rec.stop();}catch(e){} }, 9000);
+}
+
+function spCheckLine(spoken) {
+  const correct = spPairs[spIndex].myLine;
+  const result = compareLines(spoken, correct);
+  const resultEl = document.getElementById('spResult');
+  resultEl.style.display = 'block';
+  document.getElementById('spMyText').textContent = correct;
+  if(result.pct >= 0.85) {
+    resultEl.className = 'hf-result good';
+    resultEl.textContent = '✅ ' + Math.round(result.pct*100) + '% — moving on!';
+    addXP(10);
+    setTimeout(function(){ spIndex++; spLoadNext(); }, 1200);
+  } else {
+    resultEl.className = 'hf-result close';
+    resultEl.textContent = 'You said: "' + spoken + '" — tap Next when ready';
+  }
+}
+
+// ════════════════════════════════════════
+//  SPEED DRILL
+// ════════════════════════════════════════
+let sdPairs = [], sdIndex = 0, sdStartTime = 0, sdTimerInterval = null, sdWrong = 0;
+
+function startSpeedDrill() {
+  const prod = activeProduction || productions[0];
+  if(!prod || prod.cuePairs.length === 0) { showToast('No lines to practise!'); return; }
+  sdPairs = activeSceneFilter === 'all' ? prod.cuePairs : prod.cuePairs.filter(function(p){ return (p.scene||'Scene 1') === activeSceneFilter; });
+  sdIndex = 0; sdWrong = 0;
+  document.getElementById('speedDrillScreen').classList.add('active');
+  document.getElementById('sdFinished').style.display = 'none';
+  var bestKey = 'sd-best-' + (prod.myChar || 'char');
+  var best = localStorage.getItem(bestKey);
+  document.getElementById('sdBest').textContent = best ? 'Best: ' + best + 's for ' + sdPairs.length + ' lines' : 'Best time: not set yet';
+  sdLoadLine();
+  sdStartTime = Date.now();
+  clearInterval(sdTimerInterval);
+  sdTimerInterval = setInterval(function() {
+    var elapsed = ((Date.now() - sdStartTime) / 1000).toFixed(1);
+    document.getElementById('sdTimer').textContent = elapsed + 's';
+  }, 100);
+}
+
+function stopSpeedDrill() {
+  clearInterval(sdTimerInterval);
+  document.getElementById('speedDrillScreen').classList.remove('active');
+}
+
+function sdLoadLine() {
+  if(sdIndex >= sdPairs.length) { sdFinish(); return; }
+  const pair = sdPairs[sdIndex];
+  document.getElementById('sdProgress').textContent = (sdIndex+1) + ' of ' + sdPairs.length;
+  document.getElementById('sdSceneTag').textContent = pair.scene || 'Scene 1';
+  document.getElementById('sdCueText').textContent = pair.cue;
+  document.getElementById('sdLineText').textContent = pair.myLine;
+}
+
+function sdMark(result) {
+  if(result === 'wrong') { sdWrong++; if(sdPairs[sdIndex]) sdPairs[sdIndex].needsWork = true; }
+  sdIndex++;
+  sdLoadLine();
+}
+
+function sdFinish() {
+  clearInterval(sdTimerInterval);
+  var total = ((Date.now() - sdStartTime) / 1000).toFixed(1);
+  document.getElementById('sdTimer').textContent = total + 's';
+  document.getElementById('sdFinished').style.display = 'block';
+  var correct = sdPairs.length - sdWrong;
+  document.getElementById('sdFinishStats').textContent = correct + '/' + sdPairs.length + ' lines got · ' + total + 's total';
+  var prod = activeProduction || productions[0];
+  if(prod) {
+    var bestKey = 'sd-best-' + (prod.myChar || 'char');
+    var best = parseFloat(localStorage.getItem(bestKey)) || 9999;
+    if(parseFloat(total) < best) {
+      localStorage.setItem(bestKey, total);
+      showToast('New personal best! ' + total + 's 🏆');
+      document.getElementById('sdBest').textContent = 'NEW BEST: ' + total + 's!';
+    }
+  }
+  addXP(correct * 10);
+  autoSave();
 }
 
 // ════════════════════════════════════════
@@ -2027,20 +2619,24 @@ function startManualEntry() {
 }
 
 function newScene() {
+  // Auto-save any lines typed so far before switching
+  saveManualProduction();
+
   const num = manualScenes.length + 1;
   const defaultName = 'Scene ' + num;
   const banner = document.getElementById('manualSceneBanner');
   banner.style.background = 'var(--brown)';
   banner.innerHTML =
     '<div style="flex:1;">' +
-      '<div style="font-size:11px;font-weight:900;opacity:0.85;text-transform:uppercase;letter-spacing:1px;color:white;margin-bottom:6px;">Name this scene:</div>' +
+      '<div style="font-size:11px;font-weight:900;opacity:0.85;text-transform:uppercase;letter-spacing:1px;color:white;margin-bottom:6px;">Name this new scene:</div>' +
       '<input id="newSceneInput" value="' + defaultName + '" ' +
+        'onkeydown="if(event.key===\'Enter\')confirmNewScene()" ' +
         'style="width:100%;padding:8px 12px;border-radius:var(--rs);border:none;font-family:var(--font);font-size:14px;font-weight:700;color:var(--brown);background:white;">' +
     '</div>' +
-    '<button onclick="confirmNewScene()" style="margin-left:10px;background:rgba(255,255,255,0.25);border:none;color:white;border-radius:99px;padding:8px 16px;font-family:var(--font);font-weight:900;font-size:12px;cursor:pointer;">' +
-      'Start' +
+    '<button onclick="confirmNewScene()" style="margin-left:10px;background:rgba(255,255,255,0.25);border:none;color:white;border-radius:99px;padding:8px 16px;font-family:var(--font);font-weight:900;font-size:12px;cursor:pointer;white-space:nowrap;">' +
+      '✅ Start' +
     '</button>';
-  setTimeout(function() { var el = document.getElementById('newSceneInput'); if(el) el.select(); }, 100);
+  setTimeout(function() { var el = document.getElementById('newSceneInput'); if(el) { el.select(); el.focus(); } }, 100);
 }
 
 function confirmNewScene() {
@@ -2048,12 +2644,17 @@ function confirmNewScene() {
   var name = input ? input.value.trim() : '';
   if(!name) { showToast('Please give the scene a name'); return; }
   if(manualScenes.includes(name)) { showToast('A scene with that name already exists'); return; }
+  // Save previous scene's lines automatically
+  saveManualProduction();
   manualScenes.push(name);
   manualCurrentScene = name;
   manualViewingScene = 'all';
   updateSceneBanner();
   refreshManualList();
-  showToast('Now entering: ' + name);
+  // Clear inputs ready for new scene
+  document.getElementById('manualCueInput').value = '';
+  document.getElementById('manualLineInput').value = '';
+  showToast('Scene saved! Now entering: ' + name);
   document.getElementById('manualCueInput').focus();
 }
 
@@ -2334,11 +2935,17 @@ function finishManualEntry() {
 
 const SYNC_KEY = 'escomind-sync-id';
 const SYNC_API  = 'https://api.jsonbin.io/v3/b';
-const MASTER_KEY = '$2a$10$placeholder'; // replaced by user's own key
 
-let syncBinId = localStorage.getItem(SYNC_KEY) || null;
+// Keys stored under a stable name that never changes between app versions
+let syncBinId  = localStorage.getItem('escomind-bin-id') || localStorage.getItem(SYNC_KEY) || null;
 let syncApiKey = localStorage.getItem('escomind-api-key') || null;
-let isSyncing = false;
+let isSyncing  = false;
+
+// Always persist keys immediately when set
+function persistSyncKeys() {
+  if(syncBinId)  { localStorage.setItem('escomind-bin-id', syncBinId);  localStorage.setItem(SYNC_KEY, syncBinId); }
+  if(syncApiKey) { localStorage.setItem('escomind-api-key', syncApiKey); }
+}
 
 function getDataObject() {
   return {
@@ -2461,8 +3068,7 @@ async function createSyncBin() {
     if(res.ok) {
       const json = await res.json();
       syncBinId = json.metadata.id;
-      localStorage.setItem(SYNC_KEY, syncBinId);
-      localStorage.setItem('escomind-api-key', syncApiKey);
+      persistSyncKeys();
       showSyncStatus('Sync created!', 'var(--sage)');
       showToast('Sync set up! Copy your Bin ID: ' + syncBinId);
       refreshSyncUI();
@@ -2478,8 +3084,7 @@ async function createSyncBin() {
 function connectExistingBin(binId) {
   if(!binId || !syncApiKey) { showToast('Enter both your API key and Bin ID'); return; }
   syncBinId = binId.trim();
-  localStorage.setItem(SYNC_KEY, syncBinId);
-  localStorage.setItem('escomind-api-key', syncApiKey);
+  persistSyncKeys();
   loadFromCloud().then(function() {
     showToast('Connected! Your data is loading...');
     refreshSyncUI();
@@ -2516,11 +3121,11 @@ function refreshSyncUI() {
         '2. Copy your Master Key from the dashboard<br>' +
         '3. Paste it below and tap Set Up Sync' +
       '</div>' +
-      '<input id="apiKeyInput" class="char-input" placeholder="Paste your JSONBin Master Key here" style="margin-bottom:10px;" oninput="syncApiKey=this.value">' +
-      '<button onclick="createSyncBin()" class="btn btn-terra" style="margin-bottom:8px;">Set Up Sync (new device)</button>' +
+      '<input id="apiKeyInput" class="char-input" placeholder="Paste your JSONBin Master Key here" style="margin-bottom:10px;" value="' + (syncApiKey||'') + '" oninput="syncApiKey=this.value">' +
+      '<button onclick="createSyncBin()" class="btn btn-terra" style="margin-bottom:8px;">☁️ Set Up Sync (first time)</button>' +
       '<div style="font-size:12px;font-weight:800;margin:10px 0 6px;color:var(--brown-light);">Already set up on another device?</div>' +
       '<input id="binIdInput" class="char-input" placeholder="Paste your Bin ID here" style="margin-bottom:10px;">' +
-      '<button onclick="connectExistingBin(document.getElementById(\'binIdInput\').value)" class="btn btn-sage">Connect Existing Sync</button>';
+      '<button onclick="connectExistingBin(document.getElementById(\'binIdInput\').value)" class="btn btn-sage">🔗 Connect to Existing Sync</button>';
   }
 }
 
@@ -2602,6 +3207,9 @@ window.addEventListener('load', async function() {
     syncEl.textContent = 'Loading...';
     header.appendChild(syncEl);
   }
+
+  // Load saved theme
+  loadSavedTheme();
 
   // Load data (localStorage first, cloud on top)
   await loadFromCloud();
