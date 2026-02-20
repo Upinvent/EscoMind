@@ -875,6 +875,16 @@ Good my lord."></textarea>
       </div>
     </div>
 
+    <div class="set-sec">
+      <h3>☁️ Sync Across Devices</h3>
+      <p style="font-size:12px;color:var(--brown-light);margin-bottom:14px;line-height:1.6;">
+        Set this up once and your lines, scenes and progress will automatically appear on your phone, computer and tablet.
+      </p>
+      <div id="syncSetupArea">
+        <div style="text-align:center;padding:10px;color:var(--brown-light);font-size:13px;">Loading sync status...</div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -2318,77 +2328,28 @@ function finishManualEntry() {
 
 
 // ════════════════════════════════════════
-//  SYNC — localStorage fallback (works on GitHub Pages + Claude.ai)
+//  SYNC — Real cross-device sync via JSONBin
+//  Works on GitHub Pages, phone, computer, anywhere
 // ════════════════════════════════════════
 
-function saveData() {
-  try {
-    const data = {
-      productions,
-      totalXP,
-      dayStreak,
-      earnedBadges,
-      linesCorrectToday,
-      lastPlayDate,
-      savedAt: new Date().toISOString()
-    };
-    const json = JSON.stringify(data);
-    // Try Claude.ai storage first, fall back to localStorage
-    if(window.storage) {
-      window.storage.set('escomind-data', json, true).catch(() => {});
-    }
-    localStorage.setItem('escomind-data', json);
-    showSyncStatus('Saved', 'var(--sage)');
-  } catch(e) {
-    showSyncStatus('Save failed', 'var(--amber)');
-  }
-}
+const SYNC_KEY = 'escomind-sync-id';
+const SYNC_API  = 'https://api.jsonbin.io/v3/b';
+const MASTER_KEY = '$2a$10$placeholder'; // replaced by user's own key
 
-function loadData() {
-  try {
-    // Try localStorage first (always available)
-    const local = localStorage.getItem('escomind-data');
-    if(local) {
-      const data = JSON.parse(local);
-      applyLoadedData(data);
-      const savedAt = data.savedAt ? new Date(data.savedAt) : null;
-      showSyncStatus('Loaded ' + (savedAt ? getTimeAgo(savedAt) : ''), 'var(--sage)');
-      return true;
-    }
-  } catch(e) {}
-  return false;
-}
+let syncBinId = localStorage.getItem(SYNC_KEY) || null;
+let syncApiKey = localStorage.getItem('escomind-api-key') || null;
+let isSyncing = false;
 
-async function loadFromCloud() {
-  // First load from localStorage immediately
-  const localLoaded = loadData();
-  // Then try cloud sync on top
-  if(window.storage) {
-    try {
-      const result = await window.storage.get('escomind-data', true);
-      if(result && result.value) {
-        const cloudData = JSON.parse(result.value);
-        const localData = localStorage.getItem('escomind-data');
-        // Use whichever is newer
-        if(localData) {
-          const local = JSON.parse(localData);
-          const cloudTime = cloudData.savedAt ? new Date(cloudData.savedAt).getTime() : 0;
-          const localTime = local.savedAt ? new Date(local.savedAt).getTime() : 0;
-          if(cloudTime > localTime) {
-            applyLoadedData(cloudData);
-            localStorage.setItem('escomind-data', JSON.stringify(cloudData));
-            showSyncStatus('Cloud synced', 'var(--sage)');
-          }
-        } else {
-          applyLoadedData(cloudData);
-          showSyncStatus('Cloud synced', 'var(--sage)');
-        }
-      }
-    } catch(e) {}
-  }
-  if(!localLoaded && (!window.storage)) {
-    showSyncStatus('Ready to start!', 'var(--brown-light)');
-  }
+function getDataObject() {
+  return {
+    productions,
+    totalXP,
+    dayStreak,
+    earnedBadges,
+    linesCorrectToday,
+    lastPlayDate,
+    savedAt: new Date().toISOString()
+  };
 }
 
 function applyLoadedData(data) {
@@ -2405,7 +2366,166 @@ function applyLoadedData(data) {
   updateXPDisplays();
 }
 
+// Always save to localStorage immediately
+function saveLocal() {
+  try {
+    localStorage.setItem('escomind-local', JSON.stringify(getDataObject()));
+  } catch(e) {}
+}
+
+function loadLocal() {
+  try {
+    const d = localStorage.getItem('escomind-local');
+    if(d) { applyLoadedData(JSON.parse(d)); return true; }
+  } catch(e) {}
+  return false;
+}
+
+// Cloud sync — only runs if user has set up a sync code
+async function saveToCloud() {
+  saveLocal();
+  if(!syncBinId || !syncApiKey) { showSyncStatus('Saved locally', 'var(--sage)'); return; }
+  if(isSyncing) return;
+  isSyncing = true;
+  showSyncStatus('Syncing...', 'var(--brown-light)');
+  try {
+    const res = await fetch(SYNC_API + '/' + syncBinId, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': syncApiKey },
+      body: JSON.stringify(getDataObject())
+    });
+    if(res.ok) {
+      showSyncStatus('Synced across devices', 'var(--sage)');
+    } else {
+      showSyncStatus('Sync error — saved locally', 'var(--amber)');
+    }
+  } catch(e) {
+    showSyncStatus('Offline — saved locally', 'var(--amber)');
+  }
+  isSyncing = false;
+}
+
+async function loadFromCloud() {
+  // Always load local first so app works instantly
+  loadLocal();
+  if(!syncBinId || !syncApiKey) {
+    showSyncStatus('No sync set up', 'var(--brown-light)');
+    return;
+  }
+  showSyncStatus('Loading from cloud...', 'var(--brown-light)');
+  try {
+    const res = await fetch(SYNC_API + '/' + syncBinId + '/latest', {
+      headers: { 'X-Master-Key': syncApiKey }
+    });
+    if(res.ok) {
+      const json = await res.json();
+      const cloudData = json.record;
+      // Use cloud data if it's newer than local
+      const local = localStorage.getItem('escomind-local');
+      let useCloud = true;
+      if(local) {
+        const localData = JSON.parse(local);
+        const localTime = localData.savedAt ? new Date(localData.savedAt).getTime() : 0;
+        const cloudTime = cloudData.savedAt ? new Date(cloudData.savedAt).getTime() : 0;
+        useCloud = cloudTime > localTime;
+      }
+      if(useCloud) {
+        applyLoadedData(cloudData);
+        saveLocal();
+        showSyncStatus('Synced ' + getTimeAgo(new Date(cloudData.savedAt)), 'var(--sage)');
+      } else {
+        showSyncStatus('Up to date', 'var(--sage)');
+      }
+    } else {
+      showSyncStatus('Cloud unavailable', 'var(--amber)');
+    }
+  } catch(e) {
+    showSyncStatus('Offline — using local data', 'var(--amber)');
+  }
+}
+
+async function createSyncBin() {
+  if(!syncApiKey) { showToast('Enter your API key first'); return; }
+  showSyncStatus('Creating sync...', 'var(--brown-light)');
+  try {
+    const res = await fetch(SYNC_API, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': syncApiKey,
+        'X-Bin-Name': 'escomind-data',
+        'X-Bin-Private': 'true'
+      },
+      body: JSON.stringify(getDataObject())
+    });
+    if(res.ok) {
+      const json = await res.json();
+      syncBinId = json.metadata.id;
+      localStorage.setItem(SYNC_KEY, syncBinId);
+      localStorage.setItem('escomind-api-key', syncApiKey);
+      showSyncStatus('Sync created!', 'var(--sage)');
+      showToast('Sync set up! Copy your Bin ID: ' + syncBinId);
+      refreshSyncUI();
+    } else {
+      showToast('Could not create sync — check your API key');
+      showSyncStatus('Setup failed', 'var(--terra)');
+    }
+  } catch(e) {
+    showToast('Network error — check your connection');
+  }
+}
+
+function connectExistingBin(binId) {
+  if(!binId || !syncApiKey) { showToast('Enter both your API key and Bin ID'); return; }
+  syncBinId = binId.trim();
+  localStorage.setItem(SYNC_KEY, syncBinId);
+  localStorage.setItem('escomind-api-key', syncApiKey);
+  loadFromCloud().then(function() {
+    showToast('Connected! Your data is loading...');
+    refreshSyncUI();
+  });
+}
+
+function disconnectSync() {
+  syncBinId = null;
+  syncApiKey = null;
+  localStorage.removeItem(SYNC_KEY);
+  localStorage.removeItem('escomind-api-key');
+  showSyncStatus('Sync disconnected', 'var(--brown-light)');
+  refreshSyncUI();
+  showToast('Sync disconnected — data still saved locally');
+}
+
+function refreshSyncUI() {
+  const el = document.getElementById('syncSetupArea');
+  if(!el) return;
+  if(syncBinId && syncApiKey) {
+    el.innerHTML =
+      '<div style="background:rgba(122,158,126,0.15);border-radius:var(--rs);padding:14px 16px;margin-bottom:12px;">' +
+        '<div style="font-size:13px;font-weight:900;color:var(--sage-dark);margin-bottom:4px;">Sync active</div>' +
+        '<div style="font-size:11px;color:var(--brown-light);margin-bottom:8px;">Bin ID: <code style="background:var(--sand);padding:2px 6px;border-radius:4px;">' + syncBinId + '</code></div>' +
+        '<div style="font-size:11px;color:var(--brown-light);">Your data syncs automatically across all your devices.</div>' +
+      '</div>' +
+      '<button onclick="loadFromCloud()" class="btn btn-sage btn-sm" style="margin-bottom:8px;width:100%;">Force sync now</button>' +
+      '<button onclick="disconnectSync()" class="btn btn-ghost btn-sm" style="width:100%;font-size:11px;">Disconnect sync</button>';
+  } else {
+    el.innerHTML =
+      '<div style="font-size:13px;color:var(--brown-light);margin-bottom:12px;line-height:1.6;">' +
+        'To sync across devices you need a free JSONBin account.<br>' +
+        '<a href="https://jsonbin.io" target="_blank" style="color:var(--terra);font-weight:800;">1. Sign up free at jsonbin.io</a><br>' +
+        '2. Copy your Master Key from the dashboard<br>' +
+        '3. Paste it below and tap Set Up Sync' +
+      '</div>' +
+      '<input id="apiKeyInput" class="char-input" placeholder="Paste your JSONBin Master Key here" style="margin-bottom:10px;" oninput="syncApiKey=this.value">' +
+      '<button onclick="createSyncBin()" class="btn btn-terra" style="margin-bottom:8px;">Set Up Sync (new device)</button>' +
+      '<div style="font-size:12px;font-weight:800;margin:10px 0 6px;color:var(--brown-light);">Already set up on another device?</div>' +
+      '<input id="binIdInput" class="char-input" placeholder="Paste your Bin ID here" style="margin-bottom:10px;">' +
+      '<button onclick="connectExistingBin(document.getElementById(\'binIdInput\').value)" class="btn btn-sage">Connect Existing Sync</button>';
+  }
+}
+
 function getTimeAgo(date) {
+  if(!date) return '';
   const mins = Math.floor((Date.now() - date.getTime()) / 60000);
   if(mins < 1) return 'just now';
   if(mins < 60) return mins + 'm ago';
@@ -2424,10 +2544,13 @@ function showSyncStatus(msg, color) {
   el._t = setTimeout(function() { el.style.opacity = '0.4'; }, 3000);
 }
 
+function saveData() { saveToCloud(); }
+
 let _saveTimeout = null;
 function autoSave() {
+  saveLocal(); // save locally immediately
   clearTimeout(_saveTimeout);
-  _saveTimeout = setTimeout(saveData, 1000);
+  _saveTimeout = setTimeout(saveToCloud, 2000); // cloud after short delay
 }
 
 // ════════════════════════════════════════
@@ -2485,6 +2608,9 @@ window.addEventListener('load', async function() {
 
   // Update streak
   updateDayStreak();
+
+  // Show sync UI state
+  refreshSyncUI();
 
   // Build sample fallback for games
   rawScriptText = sampleScript;
