@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EscoMind — Learn Your Lines</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<!-- PWA / App Icon -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="EscoMind">
+<meta name="theme-color" content="#C1614F">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="manifest" href="manifest.json">
+
+<!-- Inline SVG icon as fallback favicon -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23C1614F'/><text y='72' x='50' text-anchor='middle' font-size='62' font-family='serif'>🎭</text></svg>">
 <style>
 @font-face {
   font-family: 'OpenDyslexic';
@@ -671,6 +682,19 @@ Good my lord."></textarea>
       <div class="detected-chars" id="detectedChars"></div>
       <input class="char-input" id="myCharInput" type="text" placeholder="Or type your character name..." oninput="highlightTypedChar(this.value)">
       <button class="btn btn-terra" onclick="confirmCharacter()">✅ That's me — Show My Lines</button>
+    </div>
+
+    <!-- SCENE SPLITTER (shown after character confirmed if user wants to split manually) -->
+    <div id="sceneSplitterSection" style="display:none;">
+      <div class="card" style="margin-bottom:14px;background:linear-gradient(135deg,var(--sage),var(--sage-dark));color:white;">
+        <div style="font-size:15px;font-weight:900;margin-bottom:6px;">📍 Split into Scenes</div>
+        <div style="font-size:12px;opacity:0.9;line-height:1.6;">Tap anywhere in your script below to drop a scene divider. Name each scene whatever makes sense to you. When you're done, tap <strong>Save Scenes</strong>.</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+        <button class="btn btn-sage" style="flex:1;" onclick="saveSplitScenes()">✅ Save Scenes</button>
+        <button class="btn btn-ghost" style="flex:1;" onclick="skipSceneSplit()">Skip — No Scenes</button>
+      </div>
+      <div id="splitterScript" style="background:var(--cream);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);"></div>
     </div>
 
     <!-- READER TOOLBAR + SCRIPT VIEW -->
@@ -1439,9 +1463,174 @@ function highlightTypedChar(val) {
 }
 
 function confirmCharacter() {
-  const name = document.getElementById('myCharInput').value.trim().toUpperCase();
+  const name = (document.getElementById('myCharInput').value || '').trim().toUpperCase();
   if(!name) { showToast('Please choose or type your character name 🎭'); return; }
-  buildScriptData(rawScriptText, name);
+  // Hide character setup
+  document.getElementById('charSetup').classList.remove('show');
+  document.getElementById('charSetup').style.display = 'none';
+  // Show scene splitter
+  showSceneSplitter(rawScriptText, name);
+}
+
+// ═══════════════════════════════════════
+//  SCENE SPLITTER
+// ═══════════════════════════════════════
+let splitterParsed = [];
+let splitterMyChar = '';
+let splitterDividers = []; // [{afterIdx, name}]
+
+function showSceneSplitter(text, myChar) {
+  splitterMyChar = myChar;
+  splitterDividers = [];
+
+  // Quick parse to get blocks
+  const lines = text.split('\n');
+  splitterParsed = [];
+  let currentChar = null, currentText = [];
+  function flush() {
+    if(currentChar && currentText.length > 0) {
+      const t = currentText.join(' ').replace(/\s+/g,' ').trim();
+      if(t) splitterParsed.push({ char: currentChar, text: t, mine: currentChar === myChar });
+      currentText = [];
+    }
+  }
+  lines.forEach(function(line) {
+    const trimmed = line.trim();
+    if(!trimmed) return;
+    const isChar = /^[A-Z][A-Z\s\.]{1,28}$/.test(trimmed) && !trimmed.match(/^(ACT|SCENE|INT\.|EXT\.)/) && trimmed.length >= 2;
+    const colonMatch = trimmed.match(/^([A-Z][A-Z\s]{1,20}):\s*(.*)/);
+    if(colonMatch) { flush(); currentChar = colonMatch[1].trim(); if(colonMatch[2]) currentText.push(colonMatch[2]); }
+    else if(isChar) { flush(); currentChar = trimmed; }
+    else if(currentChar && !/^\(.*\)$/.test(trimmed) && !/^\[.*\]$/.test(trimmed)) currentText.push(trimmed);
+  });
+  flush();
+
+  if(splitterParsed.length === 0) {
+    // Nothing parsed — go straight to buildScriptData
+    buildScriptData(text, myChar);
+    return;
+  }
+
+  // Render splitter view
+  document.getElementById('sceneSplitterSection').style.display = 'block';
+  renderSplitterScript();
+}
+
+function renderSplitterScript() {
+  const container = document.getElementById('splitterScript');
+  let html = '<div style="font-size:11px;color:var(--brown-light);margin-bottom:12px;font-weight:700;">Tap between any two lines to add a scene divider:</div>';
+
+  splitterParsed.forEach(function(block, i) {
+    // Show any divider that goes BEFORE this block
+    const divBefore = splitterDividers.find(function(d){ return d.afterIdx === i - 0.5; });
+    if(divBefore) {
+      html += renderDivider(i - 0.5, divBefore.name);
+    }
+
+    // The script block itself
+    html += '<div style="padding:8px 0;border-bottom:1px solid var(--sand-dark);">';
+    html += '<div style="font-size:10px;font-weight:900;color:' + (block.mine ? 'var(--terra)' : 'var(--brown-light)') + ';text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;">' + block.char + '</div>';
+    html += '<div style="font-size:13px;line-height:1.6;' + (block.mine ? 'font-weight:700;border-left:3px solid var(--terra);padding-left:8px;' : 'color:var(--brown-light);') + '">' + block.text.substring(0, 120) + (block.text.length > 120 ? '...' : '') + '</div>';
+    html += '</div>';
+
+    // Insert button AFTER this block
+    const hasDivider = splitterDividers.find(function(d){ return d.afterIdx === i + 0.5; });
+    if(!hasDivider) {
+      html += '<div style="text-align:center;margin:4px 0;">';
+      html += '<button onclick="addSceneDivider(' + (i + 0.5) + ')" style="background:none;border:1px dashed var(--sage);color:var(--sage);border-radius:99px;padding:3px 16px;font-size:10px;font-weight:900;cursor:pointer;font-family:var(--font);">+ scene break here</button>';
+      html += '</div>';
+    } else {
+      html += renderDivider(i + 0.5, hasDivider.name);
+    }
+  });
+
+  container.innerHTML = html;
+}
+
+function renderDivider(idx, name) {
+  return '<div style="background:var(--sage);color:white;border-radius:var(--rs);padding:8px 14px;margin:6px 0;display:flex;align-items:center;gap:8px;">' +
+    '<div style="font-size:12px;">📍</div>' +
+    '<input value="' + name + '" onchange="renameDivider(' + idx + ', this.value)" ' +
+      'style="flex:1;background:rgba(255,255,255,0.25);border:none;border-radius:6px;padding:4px 8px;font-family:var(--font);font-weight:900;font-size:12px;color:white;" ' +
+      'placeholder="Scene name...">' +
+    '<button onclick="removeDivider(' + idx + ')" style="background:rgba(255,255,255,0.2);border:none;color:white;border-radius:99px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:var(--font);">✕ Remove</button>' +
+  '</div>';
+}
+
+function addSceneDivider(afterIdx) {
+  const sceneNum = splitterDividers.length + 2;
+  splitterDividers.push({ afterIdx: afterIdx, name: 'Scene ' + sceneNum });
+  splitterDividers.sort(function(a,b){ return a.afterIdx - b.afterIdx; });
+  renderSplitterScript();
+  showToast('Scene break added — tap the name to rename it');
+}
+
+function renameDivider(idx, newName) {
+  const d = splitterDividers.find(function(d){ return d.afterIdx === idx; });
+  if(d) d.name = newName;
+}
+
+function removeDivider(idx) {
+  splitterDividers = splitterDividers.filter(function(d){ return d.afterIdx !== idx; });
+  renderSplitterScript();
+}
+
+function skipSceneSplit() {
+  document.getElementById('sceneSplitterSection').style.display = 'none';
+  buildScriptData(rawScriptText, splitterMyChar);
+}
+
+function saveSplitScenes() {
+  document.getElementById('sceneSplitterSection').style.display = 'none';
+  buildScriptDataWithScenes(splitterParsed, splitterMyChar, splitterDividers);
+}
+
+function buildScriptDataWithScenes(parsed, myChar, dividers) {
+  // Assign scene names to each block
+  var scenes = ['Scene 1'];
+  dividers.forEach(function(d){ scenes.push(d.name); });
+
+  function getScene(blockIdx) {
+    var sceneName = 'Scene 1';
+    for(var i=0; i<dividers.length; i++) {
+      if(blockIdx > dividers[i].afterIdx - 0.5) sceneName = dividers[i].name;
+    }
+    return sceneName;
+  }
+
+  var cuePairs = [];
+  var sceneList = [];
+  for(var i=0; i<parsed.length; i++) {
+    var scene = getScene(i);
+    if(!sceneList.includes(scene)) sceneList.push(scene);
+    if(parsed[i].mine) {
+      var cue = i > 0 ? parsed[i-1].text : 'Start of scene';
+      cuePairs.push({ cue: cue, myLine: parsed[i].text, scene: scene, needsWork: false });
+    }
+  }
+
+  var prod = {
+    name: 'My Script',
+    role: myChar,
+    type: '🎭',
+    scriptData: parsed.map(function(b,i){ return Object.assign({},b,{scene:getScene(i)}); }),
+    cuePairs: cuePairs,
+    scenes: sceneList,
+    myChar: myChar,
+    id: Date.now(),
+    progress: 0
+  };
+  productions.push(prod);
+  activeProduction = prod;
+
+  renderScriptReader(prod.scriptData, myChar);
+  document.getElementById('readerSection').style.display = 'block';
+
+  showToast('Found ' + cuePairs.length + ' lines across ' + sceneList.length + ' scenes!');
+  refreshHome();
+  refreshProductionsList();
+  refreshPracticeScreen();
+  autoSave();
 }
 
 function buildScriptData(text, myChar) {
@@ -3243,3 +3432,28 @@ window.addEventListener('load', async function() {
 </script>
 </body>
 </html>
+
+{
+  "name": "EscoMind — Learn Your Lines",
+  "short_name": "EscoMind",
+  "description": "Line learning app for actors",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F5ECD7",
+  "theme_color": "#C1614F",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
