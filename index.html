@@ -1333,7 +1333,7 @@ const dict = {
 // ════════════════════════════════════════
 //  NAVIGATION
 // ════════════════════════════════════════
-const screenIds = ['homeScreen','scriptScreen','practiceScreen','gameScreen','settingsScreen'];
+const screenIds = ['homeScreen','scriptScreen','practiceScreen','gameScreen','settingsScreen','chakraScreen'];
 
 function navTo(id, navIdx) {
   screenIds.forEach(s => {
@@ -1427,17 +1427,19 @@ function extractTextFromPDF(binary, filename) {
 
 // Drag and drop
 const dropZone = document.getElementById('dropZone');
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-dropZone.addEventListener('drop', e => {
-  e.preventDefault();
-  dropZone.classList.remove('drag-over');
-  const file = e.dataTransfer.files[0];
-  if(file) {
-    const fakeInput = { files: [file] };
-    handleFileUpload(fakeInput);
-  }
-});
+if(dropZone) {
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if(file) {
+      const fakeInput = { files: [file] };
+      handleFileUpload(fakeInput);
+    }
+  });
+}
 
 // ════════════════════════════════════════
 //  SCRIPT PROCESSING — THE BRAIN
