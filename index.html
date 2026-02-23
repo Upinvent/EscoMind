@@ -1349,6 +1349,7 @@ function navTo(id, navIdx) {
   window.scrollTo(0,0);
   if(id === 'practiceScreen') refreshPracticeScreen();
   if(id === 'homeScreen') refreshHome();
+  if(id === 'chakraScreen') refreshChakraScreen();
 }
 
 function goToGameScreen(id) {
@@ -2821,7 +2822,7 @@ function sdFinish() {
 // ════════════════════════════════════════
 //  XP + FEEDBACK
 // ════════════════════════════════════════
-function addXP(pts) { showToast(`+${pts} XP ⭐`); }
+// addXP defined above
 
 function triggerStreak() {
   const el = document.getElementById('streakFx');
@@ -3843,11 +3844,6 @@ function printChakraProfile() {
   setTimeout(() => w.print(), 500);
 }
 
-// Call refreshChakraScreen when navigating to it
-const _origNavTo = navTo;
-function navTo(screen, idx) {
-  _origNavTo(screen, idx);
-  if(screen === 'chakraScreen') refreshChakraScreen();
-}
+// chakra refresh is handled inside navTo directly
 
 
