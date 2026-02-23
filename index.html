@@ -3232,8 +3232,11 @@ const SYNC_KEY = 'escomind-sync-id';
 const SYNC_API  = 'https://api.jsonbin.io/v3/b';
 
 // Keys stored under a stable name that never changes between app versions
-let syncBinId  = localStorage.getItem('escomind-bin-id') || localStorage.getItem(SYNC_KEY) || null;
-let syncApiKey = localStorage.getItem('escomind-api-key') || null;
+let syncBinId  = '6998cb53ae596e708f3b1606';
+let syncApiKey = '$2a$10$Dnl4wBnkC0LYovzk5RCXS.ds6PB/Bjq8EZ6w.BWbOZZFUvHAmnrUi';
+// Pre-save to localStorage so the app recognises sync as active on first load
+localStorage.setItem('escomind-bin-id', syncBinId);
+localStorage.setItem('escomind-api-key', syncApiKey);
 let isSyncing  = false;
 
 // Always persist keys immediately when set
