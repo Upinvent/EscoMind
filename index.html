@@ -1076,49 +1076,64 @@ Good my lord."></textarea>
 <!-- ════════════════ BOTTOM NAV ════════════════ -->
 <!-- ════════════════ CHAKRA SCREEN ════════════════ -->
 <div class="screen" id="chakraScreen">
-  <div class="app-header">
-    <div class="logo">Esco<span>Mind</span></div>
-    <div style="font-size:13px;font-weight:800;color:var(--brown-light);">Character Chakras 🔮</div>
-  </div>
-  <div class="scroll-content">
-
-    <!-- Character selector -->
-    <div class="card" id="chakraCharCard">
-      <div style="font-size:14px;font-weight:900;margin-bottom:10px;">Which character?</div>
-      <div id="chakraCharList" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;"></div>
-      <div style="font-size:11px;color:var(--brown-light);">Select a character above to build their chakra profile, or type a new one:</div>
-      <input class="char-input" id="chakraCharInput" placeholder="Character name..." style="margin-top:8px;" oninput="chakraCharTyped(this.value)">
+  <!-- Home view -->
+  <div id="chakraHome">
+    <div class="app-header">
+      <div class="logo">Esco<span>Mind</span></div>
+      <div style="font-size:13px;font-weight:800;color:var(--brown-light);">Character Chakras 🔮</div>
     </div>
-
-    <!-- Mode selector -->
-    <div id="chakraModeArea" style="display:none;">
-      <div style="font-size:16px;font-weight:900;margin-bottom:4px;" id="chakraCharTitle"></div>
-      <div style="font-size:12px;color:var(--brown-light);margin-bottom:14px;">Choose how to build the chakra profile:</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
-        <div class="card" onclick="startChakraQuiz()" style="cursor:pointer;text-align:center;border:3px solid transparent;" id="quizModeCard">
-          <div style="font-size:32px;margin-bottom:8px;">🧠</div>
-          <div style="font-size:13px;font-weight:900;">Character Quiz</div>
-          <div style="font-size:11px;color:var(--brown-light);margin-top:4px;">Answer questions and the app maps the chakras</div>
-        </div>
-        <div class="card" onclick="startChakraManual()" style="cursor:pointer;text-align:center;border:3px solid transparent;" id="manualModeCard">
-          <div style="font-size:32px;margin-bottom:8px;">🎛</div>
-          <div style="font-size:13px;font-weight:900;">Manual Mode</div>
-          <div style="font-size:11px;color:var(--brown-light);margin-top:4px;">Set each chakra yourself from your own instinct</div>
+    <div class="scroll-content">
+      <div class="hero hero-brown" data-emoji="🔮">
+        <h2>Character Chakras</h2>
+        <p>Map your character's energy system to deepen your embodiment</p>
+      </div>
+      <!-- Saved profiles -->
+      <div id="chakraSavedProfiles" style="margin-bottom:16px;"></div>
+      <!-- New profile -->
+      <div class="card">
+        <div style="font-size:14px;font-weight:900;margin-bottom:10px;">+ New Character Profile</div>
+        <div id="chakraCharList" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;"></div>
+        <div style="font-size:11px;color:var(--brown-light);margin-bottom:8px;">Select from your scripts above, or type a new character name:</div>
+        <input class="char-input" id="chakraCharInput" placeholder="Character name..." oninput="chakraCharTyped(this.value)">
+        <div id="chakraStartBtns" style="display:none;margin-top:12px;">
+          <div style="font-size:13px;font-weight:900;color:var(--brown);margin-bottom:10px;" id="chakraCharTitle"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <button class="btn btn-terra" onclick="startChakraQuiz()">🧠 Character Quiz</button>
+            <button class="btn btn-sage" onclick="startChakraManual()">🎛 Manual Mode</button>
+          </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Quiz area -->
-    <div id="chakraQuizArea" style="display:none;"></div>
-
-    <!-- Results / Manual area -->
-    <div id="chakraResultArea" style="display:none;"></div>
-
-    <!-- Print button -->
-    <div id="chakraPrintArea" style="display:none;margin-top:8px;">
-      <button class="btn btn-terra" onclick="printChakraProfile()" style="width:100%;">🖨 Print / Save for Workbook</button>
+  <!-- Quiz view -->
+  <div id="chakraQuizView" style="display:none;">
+    <div class="app-header">
+      <button class="back-btn" onclick="chakraGoHome()">‹</button>
+      <div>
+        <div style="font-size:17px;font-weight:900;">Character Quiz</div>
+        <div style="font-size:11px;color:var(--brown-light);" id="chakraQuizProgress">Question 1 of 35</div>
+      </div>
     </div>
+    <div class="scroll-content">
+      <div id="chakraQuizArea"></div>
+    </div>
+  </div>
 
+  <!-- Results view -->
+  <div id="chakraResultView" style="display:none;">
+    <div class="app-header">
+      <button class="back-btn" onclick="chakraGoHome()">‹</button>
+      <div style="flex:1;">
+        <div style="font-size:17px;font-weight:900;" id="chakraResultTitle">Chakra Profile</div>
+        <div style="font-size:11px;color:var(--brown-light);">Tap any chakra to change its state</div>
+      </div>
+      <button onclick="printChakraProfile()" style="background:var(--terra);color:white;border:none;border-radius:99px;padding:6px 14px;font-size:11px;font-weight:900;cursor:pointer;font-family:var(--font);">🖨 Print</button>
+    </div>
+    <div class="scroll-content">
+      <div id="chakraResultArea"></div>
+      <div style="height:20px;"></div>
+    </div>
   </div>
 </div>
 
@@ -1127,9 +1142,22 @@ Good my lord."></textarea>
   <button class="nav-btn" id="nav1" onclick="navTo('scriptScreen',1)"><div class="ni">📄</div>Scripts</button>
   <button class="nav-btn" id="nav2" onclick="navTo('practiceScreen',2)"><div class="ni">📚</div>Practice</button>
   <button class="nav-btn" id="nav3" onclick="navTo('gameScreen',3)"><div class="ni">🎮</div>Games</button>
-  <button class="nav-btn" id="nav4" onclick="navTo('chakraScreen',4)"><div class="ni">🔮</div>Chakra</button>
-  <button class="nav-btn" id="nav5" onclick="navTo('settingsScreen',5)"><div class="ni">⚙️</div>Settings</button>
+  <button class="nav-btn" id="nav4" onclick="toggleMoreMenu()"><div class="ni">☰</div>More</button>
 </nav>
+
+<!-- More dropdown menu -->
+<div id="moreMenu" style="display:none;position:fixed;bottom:68px;left:0;right:0;background:var(--cream);border-top:2px solid var(--sand-dark);z-index:150;box-shadow:0 -4px 20px rgba(74,55,40,0.15);padding:12px 16px;">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+    <button onclick="closeMoreMenu();navTo('chakraScreen',4);" style="background:linear-gradient(135deg,#7B1FA2,#512DA8);color:white;border:none;border-radius:var(--r);padding:16px;font-family:var(--font);font-size:13px;font-weight:900;cursor:pointer;text-align:center;">
+      <div style="font-size:28px;margin-bottom:4px;">🔮</div>Chakras
+    </button>
+    <button onclick="closeMoreMenu();navTo('settingsScreen',5);" style="background:var(--sand);border:2px solid var(--sand-dark);border-radius:var(--r);padding:16px;font-family:var(--font);font-size:13px;font-weight:900;cursor:pointer;color:var(--brown);text-align:center;">
+      <div style="font-size:28px;margin-bottom:4px;">⚙️</div>Settings
+    </button>
+  </div>
+  <button onclick="closeMoreMenu()" style="width:100%;margin-top:10px;background:none;border:none;font-family:var(--font);font-size:12px;font-weight:900;color:var(--brown-light);padding:8px;cursor:pointer;">✕ Close</button>
+</div>
+<div id="moreMenuOverlay" style="display:none;position:fixed;inset:0;z-index:140;" onclick="closeMoreMenu()"></div>
 
 <!-- ════════════════ TIMER MODAL ════════════════ -->
 <div class="modal-overlay" id="timerModal">
@@ -3507,290 +3535,430 @@ window.addEventListener('load', async function() {
   window._sampleProd = {name:'Sample', role:'PUCK', type:'T', scriptData:parsed, cuePairs:cps, myChar:'PUCK', id:0, progress:0};
 });
 
+
+// ════════════════════════════════════════
+//  MORE MENU
+// ════════════════════════════════════════
 // ════════════════════════════════════════
 //  CHAKRA SYSTEM
 // ════════════════════════════════════════
 
 const CHAKRAS = [
   {
-    id: 'root', num: 1, name: 'Root', sanskrit: 'Muladhara', color: '#E53935', emoji: '🔴',
+    id: 'root', num: 1, name: 'Root', sanskrit: 'Muladhara', color: '#C62828', emoji: '🔴',
     location: 'Base of Spine', element: 'Earth', mantra: 'LAM',
-    mudra: 'Thumb & index fingers touch. Arms straight, hands on knees.',
+    mudra: 'Thumb and index fingers touch. Arms straight, hands on knees.',
     theme: 'Survival, Grounding, Security',
-    balanced: ['Grounded','Secure','Independent','Trusting','Alive','Poised'],
-    overactive: ['Bossy','Domineering','Big ego','Greedy','Violent','Cunning'],
-    blocked: ['Fearful','Insecure','Anxious','Unloved','Frustrated','Shy','Unsure'],
-    actingNote: 'Where does your character carry their body weight? Do they feel rooted or like they might float away? Root energy shows in the hips, legs and feet.',
-    question: 'Does your character feel safe and secure in the world, or are they driven by fear, survival instinct or insecurity?',
-    answers: [
-      { text: 'Deeply insecure, fearful or desperate to survive', value: 'blocked' },
-      { text: 'Grounded, stable and secure in themselves', value: 'balanced' },
-      { text: 'Domineering, controlling or greedy for power', value: 'overactive' }
+    balanced: ['Grounded','Secure','Independent','Trusting','Alive','Physically strong'],
+    overactive: ['Bossy','Domineering','Greedy','Rigid','Resistant to change','Controlling'],
+    blocked: ['Fearful','Anxious','Insecure','Financially stressed','Disconnected from body'],
+    actingNote: 'Where does your character carry their body weight? Do they feel rooted or like they might float away? Root energy shows in the hips, legs and feet — how they stand, sit and move through space.',
+    activation: [
+      'Stand barefoot and feel the floor — bring this to every entrance your character makes',
+      'Stomp the feet gently before entering a scene to awaken root energy',
+      'Breathe deeply into the belly and pelvis — let the exhale drop weight into the ground',
+      'Red visualisation: imagine red light glowing at the base of the spine',
+      'Mantra: chant LAM three times before stepping into character'
     ]
   },
   {
-    id: 'sacral', num: 2, name: 'Sacral', sanskrit: 'Svadhisthana', color: '#F57C00', emoji: '🟠',
-    location: 'Below Navel', element: 'Water', mantra: 'VAM',
-    mudra: 'Palms facing up in lap, right palm resting on left.',
-    theme: 'Creativity, Emotion, Sensuality',
-    balanced: ['Passionate','Friendly','Creative','Playful','Emotionally free','Naturally expressive'],
-    overactive: ['Manipulative','Power hungry','Craving','Emotionally overwhelming'],
-    blocked: ['Shy','Guilty','Afraid to connect','Lost','Emotionally shut down','Creatively blocked'],
-    actingNote: 'The sacral lives in the hips and lower belly. A character with open sacral energy moves fluidly. Blocked sacral energy creates rigidity, shame or emotional walls.',
-    question: 'How does your character relate to their emotions, creativity and connection with others?',
-    answers: [
-      { text: 'Shut down emotionally, guilty, afraid to be seen', value: 'blocked' },
-      { text: 'Open, passionate, creatively alive and connected', value: 'balanced' },
-      { text: 'Manipulative, craving, uses emotion as a weapon', value: 'overactive' }
+    id: 'sacral', num: 2, name: 'Sacral', sanskrit: 'Svadhisthana', color: '#E65100', emoji: '🟠',
+    location: 'Below Navel / Hips', element: 'Water', mantra: 'VAM',
+    mudra: 'Palms facing up in lap, right palm resting on top of left.',
+    theme: 'Creativity, Emotion, Sensuality, Pleasure',
+    balanced: ['Passionate','Creative','Emotionally expressive','Playful','Naturally fluid'],
+    overactive: ['Manipulative','Emotionally overwhelming','Craving','Boundary-less','Obsessive'],
+    blocked: ['Emotionally shut down','Guilty','Creatively blocked','Rigid in movement','Afraid of intimacy'],
+    actingNote: 'The sacral lives in the hips and lower belly. A character with open sacral energy moves fluidly and expressively. A blocked sacral creates physical rigidity, shame about the body, or emotional walls that keep others out.',
+    activation: [
+      'Roll the hips in slow circles — find where your character holds tension or freedom here',
+      'Let your character sway or shift weight side to side as they listen',
+      'Orange visualisation: warm orange light flowing through the pelvis',
+      'Improvise with water — how does your character move through a room like water or resist it?',
+      'Mantra: chant VAM to open creative flow before emotional scenes'
     ]
   },
   {
     id: 'solar', num: 3, name: 'Solar Plexus', sanskrit: 'Manipura', color: '#F9A825', emoji: '🟡',
-    location: 'Two inches below navel', element: 'Fire', mantra: 'RAM',
-    mudra: 'Hands between heart and stomach, fingers interlaced.',
-    theme: 'Willpower, Confidence, Purpose',
-    balanced: ['Confident','Calm','Purposeful','Problem solving','Respectful','Integrity'],
-    overactive: ['Judgmental','Stubborn','Critical','Bullying','Controlling'],
-    blocked: ['Low self-esteem','Apathetic','Procrastinating','Taken advantage of','Powerless'],
-    actingNote: 'The gut and core are the seat of willpower. A character with strong solar energy stands tall and acts with conviction. Blocked energy shows as collapse in the torso or an inability to make decisions.',
-    question: 'What is your character\'s relationship with their own power and will?',
-    answers: [
-      { text: 'Powerless, low self-worth, easily walked over', value: 'blocked' },
-      { text: 'Confident, purposeful and self-directed', value: 'balanced' },
-      { text: 'Controlling, judgmental, uses power over others', value: 'overactive' }
+    location: 'Upper Abdomen / Core', element: 'Fire', mantra: 'RAM',
+    mudra: 'Hands between heart and stomach, fingers interlaced, thumbtips touching.',
+    theme: 'Willpower, Confidence, Purpose, Identity',
+    balanced: ['Confident','Purposeful','Self-directed','Decisive','Energetic','Owns their power'],
+    overactive: ['Controlling','Judgmental','Aggressive','Needs to be right','Bullying','Arrogant'],
+    blocked: ['Powerless','Low self-worth','Procrastinating','Easily dominated','Apathetic','Victim mindset'],
+    actingNote: 'The gut and core are the seat of willpower. A character with strong solar energy stands tall and acts with conviction — their core is engaged. A blocked solar shows as collapsed posture, hesitation, or an inability to make decisions.',
+    activation: [
+      'Pull the navel gently toward the spine — notice how this changes your character\'s presence',
+      'Stand in a power pose for 2 minutes before scenes where your character needs authority',
+      'Yellow visualisation: a fire burning in the solar plexus, growing brighter with each breath',
+      'Ask: what does this character WANT? Connect every action to a clear want',
+      'Mantra: chant RAM to ignite determination and confidence'
     ]
   },
   {
-    id: 'heart', num: 4, name: 'Heart', sanskrit: 'Anahata', color: '#388E3C', emoji: '💚',
-    location: 'Heart centre', element: 'Air', mantra: 'YAM',
-    mudra: 'Right hand: index and thumb touching at heart. Left hand same, resting on knee.',
-    theme: 'Love, Compassion, Connection',
-    balanced: ['Loving','Empathetic','Forgiving','Open','Contagiously good energy'],
-    overactive: ['Entitled','Jealous','Blaming others','Giving too much','Smothering'],
-    blocked: ['Unloved','Self pity','Fear of rejection','Clingy','Closed off','Guarded'],
-    actingNote: 'The heart chakra lives in the chest and arms. Open heart energy means the character reaches toward others. Blocked heart energy shows as arms crossed, chest collapsed or an inability to receive love.',
-    question: 'How does your character experience love and connection?',
-    answers: [
-      { text: 'Closed off, fearful of rejection, self-pitying or lonely', value: 'blocked' },
-      { text: 'Loving, empathetic, open and genuinely connected', value: 'balanced' },
-      { text: 'Possessive, jealous, smothering or entitled in love', value: 'overactive' }
+    id: 'heart', num: 4, name: 'Heart', sanskrit: 'Anahata', color: '#2E7D32', emoji: '💚',
+    location: 'Heart Centre / Chest', element: 'Air', mantra: 'YAM',
+    mudra: 'Right hand: index and thumb touching at heart centre. Left hand same, resting on knee.',
+    theme: 'Love, Compassion, Connection, Grief',
+    balanced: ['Loving','Empathetic','Forgiving','Open','Generous','Genuinely connected'],
+    overactive: ['Possessive','Jealous','Smothering','Gives too much','Martyrdom','Codependent'],
+    blocked: ['Closed off','Fearful of rejection','Grieving','Isolated','Unable to receive love'],
+    actingNote: 'The heart chakra lives in the chest and arms. Open heart energy means the character reaches toward others — arms open, chest lifted. Blocked heart energy shows as arms folded, chest collapsed, or a character who cannot be touched or moved.',
+    activation: [
+      'Open the chest: roll the shoulders back, lift the sternum — notice how this changes your character\'s availability',
+      'Before scenes of love or loss, place a hand on your own heart and breathe',
+      'Green visualisation: warm green light expanding from the chest with each breath',
+      'Find what your character loves most — and let that love be physically present in every scene',
+      'Mantra: chant YAM to open the heart before emotionally vulnerable scenes'
     ]
   },
   {
-    id: 'throat', num: 5, name: 'Throat', sanskrit: 'Vishuddha', color: '#1976D2', emoji: '🔵',
-    location: 'Throat and neck', element: 'Ether', mantra: 'HAM',
-    mudra: 'Hands by stomach, fingers interlaced, thumbtips touching.',
-    theme: 'Expression, Communication, Truth',
-    balanced: ['Speaks truth','Creative','Expressive','Articulate','Heard and understood'],
-    overactive: ['Speaks too much','Boring others','Critical','Stubborn','Interrupts'],
-    blocked: ['Can\'t express self','Timid','Afraid to speak','Suppressed creativity','Voiceless'],
-    actingNote: 'The throat is the bridge between inner world and outer expression. Does your character speak their truth or swallow it? Throat tension, a quiet voice or speaking over others are all chakra signals.',
-    question: 'How does your character use their voice and express themselves?',
-    answers: [
-      { text: 'Struggles to speak up, suppressed, timid or voiceless', value: 'blocked' },
-      { text: 'Speaks truth clearly, creative and articulate', value: 'balanced' },
-      { text: 'Speaks too much, dominates, criticises or lectures', value: 'overactive' }
+    id: 'throat', num: 5, name: 'Throat', sanskrit: 'Vishuddha', color: '#1565C0', emoji: '🔵',
+    location: 'Throat and Neck', element: 'Ether / Space', mantra: 'HAM',
+    mudra: 'Hands by stomach, fingers interlaced, thumbtips touching, focus on throat.',
+    theme: 'Expression, Truth, Communication, Voice',
+    balanced: ['Speaks truth','Articulate','Creative','Heard and understood','Authentic voice'],
+    overactive: ['Speaks over others','Lectures','Dominates','Harsh','Interrupts','Gossips'],
+    blocked: ['Voiceless','Timid','Swallows words','Afraid to speak truth','Suppressed creativity'],
+    actingNote: 'The throat is the bridge between inner world and outer expression. Does your character speak their truth or swallow it? Throat tension, a quiet voice, or speaking over others are all throat chakra signals that inform physical performance.',
+    activation: [
+      'Hum gently — feel the vibration in the throat and chest; bring this resonance to your character\'s voice',
+      'Lengthen the back of the neck — this opens the throat energetically',
+      'Blue visualisation: clear blue light at the throat, expanding with each exhale',
+      'Speak your character\'s most important line as a whisper, then as a shout — find where the truth lives',
+      'Mantra: chant HAM to clear and activate the voice before speaking-heavy scenes'
     ]
   },
   {
-    id: 'thirdeye', num: 6, name: 'Third Eye', sanskrit: 'Ajna', color: '#512DA8', emoji: '🟣',
-    location: 'Centre of forehead', element: 'Light', mantra: 'AUM',
-    mudra: 'Hands in front of lower chest, middle fingers pointing up and touching.',
-    theme: 'Intuition, Wisdom, Vision',
-    balanced: ['Intuitive','Charismatic','Clear purpose','Wise','Perceptive'],
-    overactive: ['Spaced out','Lost in fantasy','Worrying','Delusional'],
-    blocked: ['Can\'t see bigger picture','Doubting self','Easily influenced','Confused about purpose'],
-    actingNote: 'Third eye energy is about how the character sees the world — literally and symbolically. Do they have clarity and vision, or are they lost and confused? This shows in the eyes, the focus of gaze and the quality of attention.',
-    question: 'How clearly does your character see themselves and the world around them?',
-    answers: [
-      { text: 'Confused, doubting, easily lost or misled', value: 'blocked' },
-      { text: 'Clear, intuitive, purposeful and perceptive', value: 'balanced' },
-      { text: 'Lost in fantasy, delusional or disconnected from reality', value: 'overactive' }
+    id: 'thirdeye', num: 6, name: 'Third Eye', sanskrit: 'Ajna', color: '#4527A0', emoji: '🟣',
+    location: 'Centre of Forehead', element: 'Light', mantra: 'AUM',
+    mudra: 'Hands in front of lower chest, middle fingers pointing up and touching, other fingers bent.',
+    theme: 'Intuition, Vision, Wisdom, Clarity',
+    balanced: ['Intuitive','Perceptive','Clear purpose','Imaginative','Sees the big picture'],
+    overactive: ['Lost in fantasy','Disconnected from reality','Overthinking','Delusional','Spaced out'],
+    blocked: ['Confused about purpose','Easily misled','Doubts intuition','Short-sighted','Rigid thinking'],
+    actingNote: 'Third eye energy is about how the character sees the world — literally and metaphorically. Do they have clarity and vision, or are they lost and confused? This shows in the quality of attention, where the eyes focus, and whether the character seems truly present.',
+    activation: [
+      'Soften your gaze — let the eyes receive rather than search; this is the quality of deep intuitive seeing',
+      'Before a scene, close the eyes and ask: what does my character KNOW that they cannot explain?',
+      'Indigo visualisation: a deep purple light at the centre of the forehead',
+      'Trust your first instinct in every scene — the third eye is your character\'s gut wisdom',
+      'Mantra: chant AUM (OM) to deepen presence and perceptive clarity'
     ]
   },
   {
-    id: 'crown', num: 7, name: 'Crown', sanskrit: 'Sahasrara', color: '#7B1FA2', emoji: '👑',
-    location: 'Top of head', element: 'Thought', mantra: 'ANG',
-    mudra: 'Hands in front of stomach, fingers interlaced, little fingers pointing up.',
-    theme: 'Spirituality, Connection, Transcendence',
-    balanced: ['Connected','Wise','Compassionate','Joyful','Sense of purpose','At peace'],
-    overactive: ['Addicted to spirituality','Craving attention','Needs to be the centre'],
-    blocked: ['Misunderstood','Can\'t have fun','Lonely','Disconnected from meaning or purpose'],
-    actingNote: 'Crown energy is about your character\'s relationship with something bigger than themselves — whether that\'s God, fate, love, community or meaning. Does your character feel part of something or completely alone in the universe?',
-    question: 'Does your character feel connected to a greater purpose or meaning, or are they spiritually lost?',
-    answers: [
-      { text: 'Disconnected, lonely, no sense of meaning or purpose', value: 'blocked' },
-      { text: 'Connected, wise, compassionate and at peace', value: 'balanced' },
-      { text: 'Obsessed with spirituality or needing to be special', value: 'overactive' }
+    id: 'crown', num: 7, name: 'Crown', sanskrit: 'Sahasrara', color: '#6A1B9A', emoji: '👑',
+    location: 'Top of Head', element: 'Thought / Consciousness', mantra: 'ANG',
+    mudra: 'Hands in front of stomach, fingers interlaced, little fingers pointing upward.',
+    theme: 'Spirituality, Connection, Transcendence, Meaning',
+    balanced: ['Connected to purpose','Wise','Compassionate','Joyful','Part of something bigger'],
+    overactive: ['Spiritually obsessed','Needs to be special','Disconnected from body','Grandiose'],
+    blocked: ['Disconnected','No sense of meaning','Spiritually cut off','Lonely','Cynical'],
+    actingNote: 'Crown energy is about your character\'s relationship with something bigger than themselves — whether that is God, fate, love, community or meaning. Does your character feel part of something or completely alone in the universe? This is the philosophical spine of the role.',
+    activation: [
+      'Imagine a thread of light from the crown connecting upward — let this lift your character\'s entire posture',
+      'Ask: what does my character believe in? Even if broken, even if lost — what do they reach for?',
+      'Violet visualisation: a thousand-petalled lotus blooming at the crown',
+      'Find the spiritual or philosophical core of your character\'s worldview — let it inform every choice',
+      'Mantra: chant ANG to connect with higher purpose and transcendent awareness'
     ]
   }
 ];
 
+// Scored quiz questions (5 per chakra = 35 total, scored 1-4)
+const CHAKRA_QUIZ = [
+  // ROOT (0-4)
+  { chakra: 'root', q: 'My character feels physically safe and secure in their world', reverse: false },
+  { chakra: 'root', q: 'My character is comfortable in their own body', reverse: false },
+  { chakra: 'root', q: 'My character has a stable relationship with money, home, and survival', reverse: false },
+  { chakra: 'root', q: 'My character is driven by fear, anxiety, or the need to survive', reverse: true },
+  { chakra: 'root', q: 'My character feels grounded — they have weight and presence', reverse: false },
+  // SACRAL (5-9)
+  { chakra: 'sacral', q: 'My character expresses their emotions freely and openly', reverse: false },
+  { chakra: 'sacral', q: 'My character has a rich creative or sensual inner life', reverse: false },
+  { chakra: 'sacral', q: 'My character is emotionally shut down, guilty, or ashamed', reverse: true },
+  { chakra: 'sacral', q: 'My character connects easily and warmly with other people', reverse: false },
+  { chakra: 'sacral', q: 'My character uses emotion or desire to manipulate others', reverse: true },
+  // SOLAR (10-14)
+  { chakra: 'solar', q: 'My character knows what they want and pursues it with conviction', reverse: false },
+  { chakra: 'solar', q: 'My character has strong self-worth and confidence', reverse: false },
+  { chakra: 'solar', q: 'My character feels powerless, dominated, or easily walked over', reverse: true },
+  { chakra: 'solar', q: 'My character is controlling, judgmental, or needs to be in charge', reverse: true },
+  { chakra: 'solar', q: 'My character has a clear sense of personal identity and purpose', reverse: false },
+  // HEART (15-19)
+  { chakra: 'heart', q: 'My character gives and receives love openly', reverse: false },
+  { chakra: 'heart', q: 'My character is empathetic and genuinely cares about others', reverse: false },
+  { chakra: 'heart', q: 'My character is closed off, guarded, or afraid of being hurt', reverse: true },
+  { chakra: 'heart', q: 'My character carries grief, loneliness, or a sense of being unloved', reverse: true },
+  { chakra: 'heart', q: 'My character is possessive, jealous, or smothering in relationships', reverse: true },
+  // THROAT (20-24)
+  { chakra: 'throat', q: 'My character speaks their truth clearly and honestly', reverse: false },
+  { chakra: 'throat', q: 'My character is creative and expressive', reverse: false },
+  { chakra: 'throat', q: 'My character struggles to speak up or swallows their words', reverse: true },
+  { chakra: 'throat', q: 'My character dominates conversations or speaks over others', reverse: true },
+  { chakra: 'throat', q: 'My character feels heard and understood by the people around them', reverse: false },
+  // THIRD EYE (25-29)
+  { chakra: 'thirdeye', q: 'My character has strong intuition and trusts their gut', reverse: false },
+  { chakra: 'thirdeye', q: 'My character sees the bigger picture of their situation clearly', reverse: false },
+  { chakra: 'thirdeye', q: 'My character is confused, easily misled, or lost in life', reverse: true },
+  { chakra: 'thirdeye', q: 'My character is lost in fantasy or disconnected from reality', reverse: true },
+  { chakra: 'thirdeye', q: 'My character has a clear sense of their own purpose', reverse: false },
+  // CROWN (30-34)
+  { chakra: 'crown', q: 'My character feels connected to something larger than themselves', reverse: false },
+  { chakra: 'crown', q: 'My character has a sense of meaning and purpose in their life', reverse: false },
+  { chakra: 'crown', q: 'My character feels spiritually disconnected, cynical, or alone in the universe', reverse: true },
+  { chakra: 'crown', q: 'My character is obsessed with being special, chosen, or spiritually superior', reverse: true },
+  { chakra: 'crown', q: 'My character is wise and compassionate toward others and themselves', reverse: false },
+];
+
 let chakraChar = '';
-let chakraProfile = {}; // {root:'balanced', sacral:'blocked', ...}
+let chakraProfile = {};
+let chakraQuizAnswers = [];
 let chakraQuizStep = 0;
-let chakraMode = ''; // 'quiz' or 'manual'
+let chakraMode = '';
+
+function toggleMoreMenu() {
+  const m = document.getElementById('moreMenu');
+  const o = document.getElementById('moreMenuOverlay');
+  const showing = m.style.display !== 'none';
+  m.style.display = showing ? 'none' : 'block';
+  o.style.display = showing ? 'none' : 'block';
+}
+function closeMoreMenu() {
+  document.getElementById('moreMenu').style.display = 'none';
+  document.getElementById('moreMenuOverlay').style.display = 'none';
+}
+
+function chakraGoHome() {
+  document.getElementById('chakraHome').style.display = 'block';
+  document.getElementById('chakraQuizView').style.display = 'none';
+  document.getElementById('chakraResultView').style.display = 'none';
+  window.scrollTo(0,0);
+  refreshChakraScreen();
+}
 
 function refreshChakraScreen() {
-  // Build character list from productions
   const list = document.getElementById('chakraCharList');
   if(!list) return;
-  const chars = productions.map(p => p.myChar).filter(Boolean);
+  const chars = [...new Set(productions.map(p => p.myChar).filter(Boolean))];
   list.innerHTML = chars.map(c =>
     `<button onclick="selectChakraChar('${c}')" class="tool-btn ${chakraChar===c?'active':''}">${c}</button>`
   ).join('');
-  if(chakraChar) renderChakraModeArea();
+  renderSavedChakraProfiles();
+}
+
+function renderSavedChakraProfiles() {
+  const area = document.getElementById('chakraSavedProfiles');
+  if(!area) return;
+  const withProfiles = productions.filter(p => p.chakraProfile && Object.keys(p.chakraProfile).length === 7);
+  if(withProfiles.length === 0) { area.innerHTML = ''; return; }
+  const stateEmoji = { balanced: '✅', overactive: '🔥', blocked: '⬇️' };
+  area.innerHTML = `<div class="section-title">Saved Profiles</div>` +
+    withProfiles.map((p,i) => {
+      const idx = productions.indexOf(p);
+      const states = CHAKRAS.map(ch => stateEmoji[p.chakraProfile[ch.id]] || '◯').join(' ');
+      return `<div class="card" style="cursor:pointer;margin-bottom:10px;" onclick="viewSavedProfile(${idx})">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:15px;font-weight:900;">${p.myChar}</div>
+            <div style="font-size:12px;margin-top:4px;letter-spacing:2px;">${states}</div>
+          </div>
+          <div style="font-size:12px;color:var(--brown-light);font-weight:700;">View →</div>
+        </div>
+      </div>`;
+    }).join('');
+}
+
+function viewSavedProfile(prodIdx) {
+  const prod = productions[prodIdx];
+  if(!prod) return;
+  chakraChar = prod.myChar;
+  chakraProfile = {...prod.chakraProfile};
+  renderChakraResults();
 }
 
 function chakraCharTyped(val) {
-  if(val.length > 1) {
-    chakraChar = val.toUpperCase();
-    document.getElementById('chakraModeArea').style.display = 'block';
-    document.getElementById('chakraCharTitle').textContent = chakraChar;
-  }
+  chakraChar = val.trim().toUpperCase();
+  const show = chakraChar.length > 1;
+  document.getElementById('chakraStartBtns').style.display = show ? 'block' : 'none';
+  if(show) document.getElementById('chakraCharTitle').textContent = chakraChar;
 }
 
 function selectChakraChar(name) {
   chakraChar = name;
-  chakraProfile = {};
-  // Load existing profile if saved
-  const prod = productions.find(p => p.myChar === name);
-  if(prod && prod.chakraProfile) chakraProfile = {...prod.chakraProfile};
   document.getElementById('chakraCharInput').value = name;
-  renderChakraModeArea();
+  document.getElementById('chakraCharTitle').textContent = name;
+  document.getElementById('chakraStartBtns').style.display = 'block';
+  const prod = productions.find(p => p.myChar === name);
+  if(prod && prod.chakraProfile && Object.keys(prod.chakraProfile).length === 7) {
+    chakraProfile = {...prod.chakraProfile};
+  } else {
+    chakraProfile = {};
+  }
   refreshChakraScreen();
 }
 
-function renderChakraModeArea() {
-  document.getElementById('chakraModeArea').style.display = 'block';
-  document.getElementById('chakraCharTitle').textContent = '🎭 ' + chakraChar;
-  document.getElementById('chakraQuizArea').style.display = 'none';
-  document.getElementById('chakraResultArea').style.display = 'none';
-  // If profile already exists, show results directly
-  if(Object.keys(chakraProfile).length === 7) {
-    renderChakraResults();
-  } else {
-    document.getElementById('chakraPrintArea').style.display = 'none';
-  }
-}
-
 function startChakraQuiz() {
+  if(!chakraChar) { showToast('Choose a character first!'); return; }
   chakraMode = 'quiz';
   chakraQuizStep = 0;
-  chakraProfile = {};
-  document.getElementById('chakraQuizArea').style.display = 'block';
-  document.getElementById('chakraResultArea').style.display = 'none';
-  document.getElementById('chakraPrintArea').style.display = 'none';
+  chakraQuizAnswers = new Array(CHAKRA_QUIZ.length).fill(null);
+  document.getElementById('chakraHome').style.display = 'none';
+  document.getElementById('chakraQuizView').style.display = 'block';
+  document.getElementById('chakraResultView').style.display = 'none';
   renderQuizStep();
+  window.scrollTo(0,0);
 }
 
 function renderQuizStep() {
-  const area = document.getElementById('chakraQuizArea');
-  if(chakraQuizStep >= CHAKRAS.length) {
-    renderChakraResults();
-    return;
-  }
-  const ch = CHAKRAS[chakraQuizStep];
-  const progress = Math.round((chakraQuizStep / CHAKRAS.length) * 100);
-  area.innerHTML = `
-    <div class="card" style="margin-bottom:14px;">
-      <div style="background:var(--sand);border-radius:var(--rs);height:8px;margin-bottom:14px;">
-        <div style="background:${ch.color};height:8px;border-radius:var(--rs);width:${progress}%;transition:width 0.3s;"></div>
-      </div>
-      <div style="font-size:11px;font-weight:900;color:var(--brown-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Chakra ${chakraQuizStep+1} of 7</div>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-        <div style="width:44px;height:44px;border-radius:50%;background:${ch.color};display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">●</div>
-        <div>
-          <div style="font-size:18px;font-weight:900;">${ch.name} Chakra</div>
-          <div style="font-size:12px;color:var(--brown-light);">${ch.sanskrit} · ${ch.location}</div>
-        </div>
-      </div>
-      <div style="font-size:14px;font-weight:700;line-height:1.7;margin-bottom:18px;color:var(--brown);">${ch.question}</div>
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        ${ch.answers.map(a => `
-          <button onclick="answerQuiz('${a.value}')" style="background:var(--sand);border:2px solid var(--sand-dark);border-radius:var(--r);padding:14px 16px;text-align:left;font-family:var(--font);font-size:13px;font-weight:700;color:var(--brown);cursor:pointer;line-height:1.5;">${a.text}</button>
-        `).join('')}
-      </div>
-      <div style="font-size:11px;color:var(--brown-light);margin-top:14px;font-style:italic;line-height:1.6;">${ch.actingNote}</div>
+  const total = CHAKRA_QUIZ.length;
+  const pct = Math.round((chakraQuizStep / total) * 100);
+  document.getElementById('chakraQuizProgress').textContent = `Question ${chakraQuizStep+1} of ${total}`;
+  
+  const q = CHAKRA_QUIZ[chakraQuizStep];
+  const ch = CHAKRAS.find(c => c.id === q.chakra);
+  const labels = ['Never / Not at all', 'Rarely / A little', 'Sometimes / Somewhat', 'Always / Strongly'];
+  const current = chakraQuizAnswers[chakraQuizStep];
+  
+  document.getElementById('chakraQuizArea').innerHTML = `
+    <div style="background:var(--sand);border-radius:var(--rs);height:8px;margin-bottom:20px;">
+      <div style="background:${ch.color};height:8px;border-radius:var(--rs);width:${pct}%;transition:width 0.3s;"></div>
+    </div>
+    <div class="card" style="border-left:5px solid ${ch.color};margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:900;color:${ch.color};text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">${ch.emoji} ${ch.name} Chakra</div>
+      <div style="font-size:15px;font-weight:700;line-height:1.7;color:var(--brown);">${q.q}</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+      ${labels.map((label, i) => `
+        <button onclick="selectQuizAnswer(${i+1})" style="background:${current===i+1?ch.color+'22':'var(--cream)'};border:2px solid ${current===i+1?ch.color:'var(--sand-dark)'};border-radius:var(--r);padding:14px 16px;text-align:left;font-family:var(--font);font-size:13px;font-weight:700;color:${current===i+1?ch.color:'var(--brown)'};cursor:pointer;line-height:1.5;">${label}</button>
+      `).join('')}
+    </div>
+    <div style="display:flex;gap:10px;">
+      ${chakraQuizStep > 0 ? `<button onclick="quizBack()" class="btn btn-ghost" style="flex:1;">← Back</button>` : '<div style="flex:1;"></div>'}
+      ${current !== null ? `<button onclick="quizNext()" class="btn btn-terra" style="flex:2;">Next →</button>` : `<button class="btn" style="flex:2;background:var(--sand-dark);color:var(--brown-light);cursor:default;">Choose an answer</button>`}
     </div>
   `;
 }
 
-function answerQuiz(value) {
-  const ch = CHAKRAS[chakraQuizStep];
-  chakraProfile[ch.id] = value;
+function selectQuizAnswer(val) {
+  chakraQuizAnswers[chakraQuizStep] = val;
+  renderQuizStep();
+}
+
+function quizBack() {
+  if(chakraQuizStep > 0) { chakraQuizStep--; renderQuizStep(); window.scrollTo(0,0); }
+}
+
+function quizNext() {
+  if(chakraQuizAnswers[chakraQuizStep] === null) return;
   chakraQuizStep++;
-  if(chakraQuizStep >= CHAKRAS.length) {
-    renderChakraResults();
+  if(chakraQuizStep >= CHAKRA_QUIZ.length) {
+    computeChakraScores();
   } else {
     renderQuizStep();
+    window.scrollTo(0,0);
   }
 }
 
+function computeChakraScores() {
+  // Score each chakra: 5 questions, each 1-4, max 20
+  const scores = {};
+  CHAKRAS.forEach(ch => scores[ch.id] = 0);
+  
+  CHAKRA_QUIZ.forEach((q, i) => {
+    let answer = chakraQuizAnswers[i] || 2;
+    if(q.reverse) answer = 5 - answer; // flip: high score on reversed = actually low
+    scores[q.chakra] += answer;
+  });
+  
+  // Map scores to states
+  // 5-10: blocked, 11-15: balanced, 16-20: overactive
+  chakraProfile = {};
+  CHAKRAS.forEach(ch => {
+    const s = scores[ch.id];
+    if(s <= 10) chakraProfile[ch.id] = 'blocked';
+    else if(s <= 15) chakraProfile[ch.id] = 'balanced';
+    else chakraProfile[ch.id] = 'overactive';
+  });
+  
+  saveChakraProfile();
+  renderChakraResults();
+}
+
 function startChakraManual() {
+  if(!chakraChar) { showToast('Choose a character first!'); return; }
   chakraMode = 'manual';
-  chakraQuizStep = 0;
-  document.getElementById('chakraQuizArea').style.display = 'none';
-  // Pre-fill with balanced if empty
   CHAKRAS.forEach(ch => { if(!chakraProfile[ch.id]) chakraProfile[ch.id] = 'balanced'; });
-  renderChakraResults(true);
+  saveChakraProfile();
+  renderChakraResults();
 }
 
 function setChakraState(id, state) {
   chakraProfile[id] = state;
   saveChakraProfile();
-  renderChakraResults(chakraMode === 'manual');
+  renderChakraResults();
 }
 
-function renderChakraResults(editable) {
-  document.getElementById('chakraQuizArea').style.display = 'none';
-  document.getElementById('chakraModeArea').style.display = 'block';
-  const area = document.getElementById('chakraResultArea');
-  area.style.display = 'block';
-  document.getElementById('chakraPrintArea').style.display = 'block';
+function renderChakraResults() {
+  document.getElementById('chakraHome').style.display = 'none';
+  document.getElementById('chakraQuizView').style.display = 'none';
+  document.getElementById('chakraResultView').style.display = 'block';
+  document.getElementById('chakraResultTitle').textContent = chakraChar + ' — Chakra Profile';
+  window.scrollTo(0,0);
+  
+  const stateColors = { balanced: '#2E7D32', overactive: '#C62828', blocked: '#546E7A' };
+  const stateLabel  = { balanced: 'Balanced ✅', overactive: 'Overactive 🔥', blocked: 'Blocked ⬇️' };
+  const stateDesc   = {
+    balanced: 'Healthy energy flow — this aspect of the character is integrated.',
+    overactive: 'Excessive energy — this chakra drives the character too hard or creates imbalance.',
+    blocked: 'Restricted flow — this is where the character is stuck, wounded, or shut down.'
+  };
 
-  const stateColors = { balanced: '#388E3C', overactive: '#E53935', blocked: '#757575' };
-  const stateEmoji  = { balanced: '✅', overactive: '🔥', blocked: '⬇️' };
-  const stateLabel  = { balanced: 'Balanced', overactive: 'Overactive', blocked: 'Blocked / Underactive' };
-
-  let html = `<div style="font-size:16px;font-weight:900;margin-bottom:4px;">Chakra Profile — ${chakraChar}</div>
-    <div style="font-size:12px;color:var(--brown-light);margin-bottom:16px;">Tap any chakra to change its state</div>`;
-
+  let html = '';
   CHAKRAS.forEach(ch => {
     const state = chakraProfile[ch.id] || 'balanced';
     const traits = ch[state] || [];
     html += `
-    <div class="card" style="margin-bottom:12px;border-left:5px solid ${ch.color};">
+    <div class="card" style="margin-bottom:14px;border-left:5px solid ${ch.color};">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
-        <div style="width:40px;height:40px;border-radius:50%;background:${ch.color};flex-shrink:0;"></div>
+        <div style="width:44px;height:44px;border-radius:50%;background:${ch.color};flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;">●</div>
         <div style="flex:1;">
           <div style="font-size:15px;font-weight:900;">${ch.name} Chakra</div>
-          <div style="font-size:11px;color:var(--brown-light);">${ch.sanskrit} · ${ch.mantra}</div>
+          <div style="font-size:11px;color:var(--brown-light);">${ch.sanskrit} · ${ch.location}</div>
         </div>
-        <div style="text-align:right;">
-          <div style="font-size:11px;font-weight:900;color:${stateColors[state]};">${stateEmoji[state]} ${stateLabel[state]}</div>
-        </div>
+        <div style="font-size:12px;font-weight:900;color:${stateColors[state]};text-align:right;">${stateLabel[state]}</div>
       </div>
-      <div style="display:flex;gap:6px;margin-bottom:12px;">
+      
+      <div style="font-size:12px;color:var(--brown-light);line-height:1.6;margin-bottom:12px;">${stateDesc[state]}</div>
+      
+      <!-- State selector -->
+      <div style="display:flex;gap:6px;margin-bottom:14px;">
         ${['blocked','balanced','overactive'].map(s => `
-          <button onclick="setChakraState('${ch.id}','${s}')" style="flex:1;padding:8px 4px;border-radius:99px;border:2px solid ${s===state?stateColors[s]:'var(--sand-dark)'};background:${s===state?stateColors[s]+'22':'var(--sand)'};font-family:var(--font);font-size:10px;font-weight:900;color:${s===state?stateColors[s]:'var(--brown-light)'};cursor:pointer;">${stateLabel[s].split(' ')[0]}</button>
+          <button onclick="setChakraState('${ch.id}','${s}')" style="flex:1;padding:8px 2px;border-radius:99px;border:2px solid ${s===state?stateColors[s]:'var(--sand-dark)'};background:${s===state?stateColors[s]+'22':'var(--sand)'};font-family:var(--font);font-size:9px;font-weight:900;color:${s===state?stateColors[s]:'var(--brown-light)'};cursor:pointer;text-transform:uppercase;letter-spacing:0.5px;">${s}</button>
         `).join('')}
       </div>
-      <div style="font-size:12px;font-weight:900;color:var(--brown-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Character traits:</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+      
+      <!-- Traits -->
+      <div style="font-size:11px;font-weight:900;color:var(--brown-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Character traits:</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
         ${traits.map(t => `<span style="background:${ch.color}22;color:${ch.color};border-radius:99px;padding:3px 10px;font-size:11px;font-weight:700;">${t}</span>`).join('')}
       </div>
-      <div style="font-size:12px;color:var(--brown-light);line-height:1.6;font-style:italic;">${ch.actingNote}</div>
-      <div style="margin-top:10px;padding:10px;background:var(--sand);border-radius:var(--rs);">
-        <div style="font-size:11px;font-weight:900;color:var(--brown-light);margin-bottom:4px;">MUDRA & MANTRA</div>
-        <div style="font-size:13px;font-weight:800;color:var(--brown);margin-bottom:2px;">${ch.mantra} — chant for 3 minutes</div>
-        <div style="font-size:11px;color:var(--brown-light);">${ch.mudra}</div>
+      
+      <!-- Acting note -->
+      <div style="font-size:12px;color:var(--brown-light);line-height:1.6;font-style:italic;margin-bottom:12px;">${ch.actingNote}</div>
+      
+      <!-- Activation -->
+      <div style="background:var(--sand);border-radius:var(--rs);padding:12px;">
+        <div style="font-size:11px;font-weight:900;color:var(--brown);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">⚡ Activation — Access this chakra in your body:</div>
+        ${ch.activation.map(a => `<div style="font-size:12px;color:var(--brown-light);line-height:1.6;margin-bottom:6px;padding-left:10px;border-left:2px solid ${ch.color};">• ${a}</div>`).join('')}
+        <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--sand-dark);">
+          <div style="font-size:12px;font-weight:900;color:var(--brown);">Mantra: <span style="color:${ch.color};">${ch.mantra}</span> — ${ch.mudra}</div>
+        </div>
       </div>
     </div>`;
   });
 
-  area.innerHTML = html;
-  saveChakraProfile();
+  document.getElementById('chakraResultArea').innerHTML = html;
 }
 
 function saveChakraProfile() {
@@ -3802,44 +3970,54 @@ function saveChakraProfile() {
 }
 
 function printChakraProfile() {
-  const stateColors = { balanced: '#388E3C', overactive: '#E53935', blocked: '#757575' };
+  const stateColors = { balanced: '#2E7D32', overactive: '#C62828', blocked: '#546E7A' };
   const stateLabel  = { balanced: 'Balanced ✅', overactive: 'Overactive 🔥', blocked: 'Blocked ⬇️' };
+  const stateDesc   = {
+    balanced: 'Healthy energy flow — this aspect of the character is integrated.',
+    overactive: 'Excessive energy — this chakra drives the character too hard.',
+    blocked: 'Restricted flow — this is where the character is stuck or shut down.'
+  };
 
-  let html = `
-    <html><head><title>Chakra Profile — ${chakraChar}</title>
-    <style>
-      body { font-family: Georgia, serif; max-width: 700px; margin: 40px auto; color: #2c1a0e; padding: 20px; }
-      h1 { font-size: 26px; margin-bottom: 4px; }
-      .subtitle { color: #888; margin-bottom: 30px; font-size: 14px; }
-      .chakra { border-left: 6px solid #ccc; padding: 14px 18px; margin-bottom: 20px; page-break-inside: avoid; }
-      .chakra-name { font-size: 18px; font-weight: bold; margin-bottom: 2px; }
-      .state { font-size: 13px; font-weight: bold; margin-bottom: 8px; }
-      .traits { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
-      .trait { background: #f0f0f0; border-radius: 99px; padding: 3px 12px; font-size: 12px; }
-      .note { font-size: 12px; color: #555; font-style: italic; margin-bottom: 8px; line-height: 1.6; }
-      .mudra { background: #f9f6f0; padding: 8px 12px; border-radius: 6px; font-size: 12px; }
-      @media print { body { margin: 20px; } }
-    </style></head><body>
-    <h1>🔮 Chakra Profile</h1>
-    <div class="subtitle">Character: ${chakraChar} · Created in EscoMind · ${new Date().toLocaleDateString()}</div>
-  `;
+  let html = `<html><head><title>Chakra Profile — ${chakraChar}</title>
+  <style>
+    body{font-family:Georgia,serif;max-width:720px;margin:40px auto;color:#2c1a0e;padding:20px;}
+    h1{font-size:28px;margin-bottom:4px;}
+    .sub{color:#888;margin-bottom:32px;font-size:14px;}
+    .chakra{border-left:6px solid #ccc;padding:16px 20px;margin-bottom:24px;page-break-inside:avoid;}
+    .name{font-size:18px;font-weight:bold;margin-bottom:2px;}
+    .state{font-size:14px;font-weight:bold;margin:8px 0;}
+    .desc{font-size:13px;color:#555;margin-bottom:10px;line-height:1.6;}
+    .traits{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+    .trait{background:#f0f0f0;border-radius:99px;padding:3px 12px;font-size:12px;}
+    .note{font-size:12px;color:#555;font-style:italic;margin-bottom:12px;line-height:1.6;}
+    .activation{background:#f9f6f0;padding:12px;border-radius:6px;}
+    .activation h4{font-size:12px;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;color:#333;}
+    .act-item{font-size:12px;color:#555;line-height:1.7;margin-bottom:4px;padding-left:12px;border-left:3px solid #ccc;}
+    .mantra{font-size:13px;font-weight:bold;margin-top:8px;padding-top:8px;border-top:1px solid #ddd;}
+    @media print{body{margin:20px;}}
+  </style></head><body>
+  <h1>🔮 Chakra Profile</h1>
+  <div class="sub">Character: <strong>${chakraChar}</strong> · EscoMind · ${new Date().toLocaleDateString()}</div>`;
 
   CHAKRAS.forEach(ch => {
     const state = chakraProfile[ch.id] || 'balanced';
     const traits = ch[state] || [];
-    html += `
-    <div class="chakra" style="border-left-color:${ch.color};">
-      <div class="chakra-name" style="color:${ch.color};">${ch.emoji} ${ch.name} Chakra — ${ch.sanskrit}</div>
-      <div style="font-size:12px;color:#888;margin-bottom:6px;">${ch.location} · Element: ${ch.element} · Mantra: ${ch.mantra}</div>
+    html += `<div class="chakra" style="border-left-color:${ch.color};">
+      <div class="name" style="color:${ch.color};">${ch.emoji} ${ch.name} Chakra — ${ch.sanskrit}</div>
+      <div style="font-size:12px;color:#888;margin-bottom:6px;">${ch.location} · Element: ${ch.element}</div>
       <div class="state" style="color:${stateColors[state]};">${stateLabel[state]}</div>
-      <div class="traits">${traits.map(t => `<span class="trait">${t}</span>`).join('')}</div>
+      <div class="desc">${stateDesc[state]}</div>
+      <div class="traits">${traits.map(t=>`<span class="trait">${t}</span>`).join('')}</div>
       <div class="note">${ch.actingNote}</div>
-      <div class="mudra"><strong>Mudra:</strong> ${ch.mudra}</div>
+      <div class="activation">
+        <h4>⚡ Activation</h4>
+        ${ch.activation.map(a=>`<div class="act-item" style="border-left-color:${ch.color};">• ${a}</div>`).join('')}
+        <div class="mantra">Mantra: <strong>${ch.mantra}</strong> · ${ch.mudra}</div>
+      </div>
     </div>`;
   });
 
   html += `</body></html>`;
-
   const w = window.open('', '_blank');
   w.document.write(html);
   w.document.close();
@@ -3847,9 +4025,7 @@ function printChakraProfile() {
 }
 
 // chakra refresh is handled inside navTo directly
-
-
-
+-e 
 </script>
 </body>
 </html>
