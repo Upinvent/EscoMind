@@ -551,182 +551,234 @@ body {
 
 <!-- ════════════════ SCRIPTS ════════════════ -->
 <div class="screen" id="scriptScreen">
-  <div class="app-header">
-    <div class="logo">Esco<span>Mind</span></div>
-    <div style="font-size:13px;font-weight:800;color:var(--brown-light);">Scripts</div>
+
+  <!-- LIBRARY VIEW -->
+  <div id="scriptHome">
+    <div class="app-header">
+      <div class="logo">Esco<span>Mind</span></div>
+      <button onclick="showScriptUpload()" style="background:var(--terra);border:none;color:white;border-radius:99px;padding:8px 16px;font-family:var(--font);font-weight:900;font-size:12px;cursor:pointer;">+ Upload</button>
+    </div>
+    <div class="scroll-content">
+      <div class="section-title">My Scripts 📄</div>
+      <div id="scriptLibrary">
+        <div class="empty-state"><div class="es-icon">📄</div><p>No scripts yet.<br>Upload your first script!</p><br>
+        <button class="btn btn-terra btn-sm" onclick="showScriptUpload()" style="width:auto;padding:10px 24px;">+ Upload Script</button></div>
+      </div>
+    </div>
   </div>
-  <div class="scroll-content">
 
-    <!-- IMPORT TABS -->
-    <div class="section-title">Add Your Script</div>
-    <div class="import-tabs">
-      <button class="itab active" onclick="switchImportTab('upload',this)">📂 Upload</button>
-      <button class="itab" onclick="switchImportTab('paste',this)">📋 Paste</button>
-      <button class="itab" onclick="switchImportTab('manual',this)">✏️ Manual</button>
+  <!-- UPLOAD VIEW -->
+  <div id="scriptUploadView" style="display:none;">
+    <div class="app-header">
+      <button class="back-btn" onclick="showScriptHome()">‹</button>
+      <div style="font-size:17px;font-weight:900;">Add Script</div>
     </div>
+    <div class="scroll-content">
+      <div class="import-tabs">
+        <button class="itab active" onclick="switchImportTab('upload',this)">📂 Upload</button>
+        <button class="itab" onclick="switchImportTab('paste',this)">📋 Paste</button>
+        <button class="itab" onclick="switchImportTab('manual',this)">✏️ Manual</button>
+      </div>
 
-    <!-- UPLOAD PANEL -->
-    <div class="import-panel active" id="uploadPanel">
-      <div class="import-zone" id="dropZone">
-        <input type="file" id="fileInput" accept=".txt,.pdf,.doc,.docx,.rtf" onchange="handleFileUpload(this)">
-        <div class="iz-icon">📂</div>
-        <div class="iz-title">Upload Your Script</div>
-        <div class="iz-sub">
-          Tap to choose a file — or drag and drop here<br>
-          <strong>PDF · TXT · Word Doc · RTF</strong><br><br>
-          📱 From your phone:<br>
-          Files app · Google Drive · AirDrop · iCloud
+      <!-- UPLOAD PANEL -->
+      <div class="import-panel active" id="uploadPanel">
+        <div class="import-zone" id="dropZone">
+          <input type="file" id="fileInput" accept=".txt,.pdf,.doc,.docx,.rtf" onchange="handleFileUpload(this)">
+          <div class="iz-icon">📂</div>
+          <div class="iz-title">Upload Your Script</div>
+          <div class="iz-sub">Tap to choose a file — or drag and drop here<br><strong>PDF · TXT · Word Doc · RTF</strong><br><br>📱 From your phone:<br>Files app · Google Drive · AirDrop · iCloud</div>
         </div>
       </div>
-      <div class="card" style="text-align:center;padding:16px;">
-        <div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--brown-light);">Or open from another app:</div>
-        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-          <div style="background:var(--sand);border-radius:var(--rs);padding:10px 16px;font-size:12px;font-weight:800;">📱 AirDrop</div>
-          <div style="background:var(--sand);border-radius:var(--rs);padding:10px 16px;font-size:12px;font-weight:800;">📁 Files App</div>
-          <div style="background:var(--sand);border-radius:var(--rs);padding:10px 16px;font-size:12px;font-weight:800;">🔵 Google Drive</div>
-          <div style="background:var(--sand);border-radius:var(--rs);padding:10px 16px;font-size:12px;font-weight:800;">☁️ iCloud</div>
+
+      <!-- PASTE PANEL -->
+      <div class="import-panel" id="pastePanel">
+        <div class="card">
+          <div style="font-size:13px;font-weight:800;margin-bottom:10px;">Paste your script below:</div>
+          <textarea class="paste-area" id="pasteArea" placeholder="Copy your script from Google Docs, Notes, or email and paste here.&#10;&#10;EscoMind will detect all characters automatically.&#10;&#10;Format:&#10;ELI&#10;Take out your phones.&#10;&#10;BROTHER 1&#10;Yo the fuck, Eli..."></textarea>
+          <button class="btn btn-terra" style="margin-top:12px;" onclick="processScript('paste')">🔍 Analyse Script</button>
         </div>
-        <div style="margin-top:12px;font-size:11px;color:var(--brown-light);">On iOS: open your script in any of these apps,<br>tap Share → Open in EscoMind</div>
       </div>
-    </div>
 
-    <!-- PASTE PANEL -->
-    <div class="import-panel" id="pastePanel">
-      <div class="card">
-        <div style="font-size:13px;font-weight:800;margin-bottom:10px;">Paste your script below:</div>
-        <textarea class="paste-area" id="pasteArea" placeholder="Copy your script from Google Docs, Notes, email, or anywhere else — then paste it here.
-
-EscoMind will automatically detect all the characters and find your lines.
-
-Example format:
-HAMLET
-To be, or not to be — that is the question.
-
-HORATIO
-Good my lord."></textarea>
-        <button class="btn btn-terra" style="margin-top:12px;" onclick="processScript('paste')">🔍 Analyse Script</button>
-      </div>
-    </div>
-
-    <!-- MANUAL ENTRY PANEL -->
-    <div class="import-panel" id="manualPanel">
-
-      <div class="card" id="manualStep1">
-        <div style="font-size:16px;font-weight:900;margin-bottom:6px;">✏️ Enter Lines Manually</div>
-        <div style="font-size:13px;color:var(--brown-light);margin-bottom:16px;line-height:1.6;">
-          Perfect for watermarked or locked PDFs like Universal scripts. Add one cue and one line at a time — do as many or as few as you like right now, and come back to add more later anytime!
+      <!-- MANUAL ENTRY PANEL -->
+      <div class="import-panel" id="manualPanel">
+        <div class="card" id="manualStep1">
+          <div style="font-size:16px;font-weight:900;margin-bottom:6px;">✏️ Enter Lines Manually</div>
+          <div style="font-size:13px;color:var(--brown-light);margin-bottom:16px;line-height:1.6;">Perfect for watermarked or locked PDFs. Add one cue and one line at a time.</div>
+          <div style="font-size:13px;font-weight:800;margin-bottom:8px;">What's your character name?</div>
+          <input class="char-input" id="manualCharName" type="text" placeholder="e.g. ELI">
+          <button class="btn btn-terra" style="margin-top:10px;" onclick="startManualEntry()">Let's go →</button>
         </div>
-        <div style="font-size:13px;font-weight:800;margin-bottom:8px;">What's your character name?</div>
-        <input class="char-input" id="manualCharName" type="text" placeholder="e.g. MILES">
-        <button class="btn btn-terra" style="margin-top:10px;" onclick="startManualEntry()">Let's go →</button>
-      </div>
-
-      <div id="manualStep2" style="display:none;">
-
-        <!-- Status banner -->
-        <div class="card" style="background:linear-gradient(135deg,var(--terra),var(--rose));color:white;margin-bottom:14px;">
-          <div style="font-size:14px;font-weight:900;margin-bottom:4px;">Adding lines for: <span id="manualCharDisplay"></span></div>
-          <div style="font-size:12px;opacity:0.9;line-height:1.6;">
-            <span id="manualLineCount">0</span> lines · 
-            Scene: <span id="manualCurrentSceneName">Scene 1</span>
+        <div id="manualStep2" style="display:none;">
+          <div class="card" style="background:linear-gradient(135deg,var(--terra),var(--rose));color:white;margin-bottom:14px;">
+            <div style="font-size:14px;font-weight:900;margin-bottom:4px;">Adding lines for: <span id="manualCharDisplay"></span></div>
+            <div style="font-size:12px;opacity:0.9;"><span id="manualLineCount">0</span> lines · Scene: <span id="manualCurrentSceneName">Scene 1</span></div>
+          </div>
+          <div id="manualSceneBanner" style="background:var(--sage);color:white;border-radius:var(--rs);padding:10px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;">
+            <div><div style="font-size:11px;font-weight:900;opacity:0.85;text-transform:uppercase;letter-spacing:1px;">Currently entering:</div><div style="font-size:15px;font-weight:900;" id="manualSceneBannerName">Scene 1</div></div>
+            <button onclick="newScene()" style="background:rgba(255,255,255,0.25);border:none;color:white;border-radius:99px;padding:8px 16px;font-family:var(--font);font-weight:900;font-size:12px;cursor:pointer;">+ New Scene</button>
+          </div>
+          <div class="card" style="margin-bottom:14px;">
+            <div style="font-size:13px;font-weight:900;color:var(--brown-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">📣 Cue — line just before yours:</div>
+            <textarea class="paste-area" id="manualCueInput" style="min-height:70px;" placeholder="What does the other character say just before you speak?"></textarea>
+            <div style="font-size:13px;font-weight:900;color:var(--terra);text-transform:uppercase;letter-spacing:1px;margin:14px 0 8px;">🎭 Your line:</div>
+            <textarea class="paste-area" id="manualLineInput" style="min-height:70px;border-color:var(--terra);" placeholder="Type your line exactly as it appears in the script."></textarea>
+            <div style="display:flex;gap:10px;margin-top:12px;">
+              <button class="btn btn-terra" style="flex:2;" onclick="addManualLine()">➕ Add Line</button>
+              <button class="btn btn-ghost" style="flex:1;" onclick="finishManualEntry()">✅ Done</button>
+            </div>
+          </div>
+          <div id="manualLinesList" style="display:none;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+              <div class="section-title" style="font-size:14px;margin-bottom:0;">Lines Added 📋</div>
+              <button class="btn btn-sage btn-sm" onclick="finishManualEntry()">✅ Save</button>
+            </div>
+            <div id="manualSceneTabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;"></div>
+            <div id="manualLinesListInner"></div>
           </div>
         </div>
+      </div>
 
-        <!-- Current scene indicator -->
-        <div id="manualSceneBanner" style="background:var(--sage);color:white;border-radius:var(--rs);padding:10px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;">
-          <div>
-            <div style="font-size:11px;font-weight:900;opacity:0.85;text-transform:uppercase;letter-spacing:1px;">Currently entering:</div>
-            <div style="font-size:15px;font-weight:900;" id="manualSceneBannerName">Scene 1</div>
-          </div>
-          <button onclick="newScene()" style="background:rgba(255,255,255,0.25);border:none;color:white;border-radius:99px;padding:8px 16px;font-family:var(--font);font-weight:900;font-size:12px;cursor:pointer;">
-            + New Scene
-          </button>
+      <!-- CHARACTER SETUP -->
+      <div class="char-setup" id="charSetup">
+        <h3>🎭 Who are you playing?</h3>
+        <div style="font-size:13px;color:var(--brown-light);margin-bottom:12px;">Characters found in your script — tap yours, or type below:</div>
+        <div class="detected-chars" id="detectedChars"></div>
+        <input class="char-input" id="myCharInput" type="text" placeholder="Or type your character name..." oninput="highlightTypedChar(this.value)">
+        <button class="btn btn-terra" onclick="confirmCharacter()">✅ That's me — Show My Lines</button>
+      </div>
+
+      <!-- SCENE SPLITTER -->
+      <div id="sceneSplitterSection" style="display:none;">
+        <div class="card" style="margin-bottom:14px;background:linear-gradient(135deg,var(--sage),var(--sage-dark));color:white;">
+          <div style="font-size:15px;font-weight:900;margin-bottom:6px;">📍 Split into Scenes</div>
+          <div style="font-size:12px;opacity:0.9;line-height:1.6;">Tap anywhere to add a scene divider. Name each scene. When done, tap Save Scenes.</div>
         </div>
-
-        <!-- Line entry card -->
-        <div class="card" style="margin-bottom:14px;">
-          <div style="font-size:13px;font-weight:900;color:var(--brown-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">📣 Cue — line just before yours:</div>
-          <textarea class="paste-area" id="manualCueInput" style="min-height:70px;" placeholder="What does the other character say just before you speak?&#10;&#10;e.g. What do you think we should do?"></textarea>
-
-          <div style="font-size:13px;font-weight:900;color:var(--terra);text-transform:uppercase;letter-spacing:1px;margin:14px 0 8px;">🎭 Your line:</div>
-          <textarea class="paste-area" id="manualLineInput" style="min-height:70px;border-color:var(--terra);" placeholder="Type your line exactly as it appears in the script.&#10;&#10;e.g. I think we need to talk to Marcus first."></textarea>
-
-          <div style="display:flex;gap:10px;margin-top:12px;">
-            <button class="btn btn-terra" style="flex:2;" onclick="addManualLine()">➕ Add Line</button>
-            <button class="btn btn-ghost" style="flex:1;" onclick="finishManualEntry()">✅ Done</button>
-          </div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+          <button class="btn btn-sage" style="flex:1;" onclick="saveSplitScenes()">✅ Save Scenes</button>
+          <button class="btn btn-ghost" style="flex:1;" onclick="skipSceneSplit()">Skip — No Scenes</button>
         </div>
+        <div id="splitterScript" style="background:var(--cream);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);"></div>
+      </div>
 
-        <!-- Lines added so far, grouped by scene -->
-        <div id="manualLinesList" style="display:none;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-            <div class="section-title" style="font-size:14px;margin-bottom:0;">Lines Added 📋</div>
-            <button class="btn btn-sage btn-sm" onclick="finishManualEntry()">✅ Save & Practise</button>
-          </div>
-
-          <!-- Scene filter tabs -->
-          <div id="manualSceneTabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;"></div>
-
-          <div id="manualLinesListInner"></div>
+      <!-- READER -->
+      <div id="readerSection" style="display:none;">
+        <div class="reader-toolbar">
+          <button class="tool-btn active" id="fontToggle" onclick="toggleFont(this)">OpenDyslexic</button>
+          <button class="tool-btn" onclick="changeFontSize(1,this)">A+</button>
+          <button class="tool-btn" onclick="changeFontSize(-1,this)">A−</button>
+          <button class="tool-btn" id="ttsToggle" onclick="readAloud()">🔊 Read</button>
+          <button class="tool-btn" id="myLinesOnly" onclick="toggleMyLinesOnly(this)">My Lines Only</button>
         </div>
-
+        <!-- TTS speed control -->
+        <div style="display:flex;align-items:center;gap:10px;background:var(--sand);border-radius:var(--rs);padding:10px 14px;margin-bottom:10px;">
+          <span style="font-size:12px;font-weight:900;color:var(--brown-light);">Speed:</span>
+          <input type="range" id="ttsSpeedSlider" min="0.5" max="2" step="0.1" value="0.85" style="flex:1;" oninput="updateTTSSpeed(this.value)">
+          <span id="ttsSpeedLabel" style="font-size:12px;font-weight:900;color:var(--brown);min-width:32px;">0.9x</span>
+          <button onclick="stopReading()" style="background:var(--terra);color:white;border:none;border-radius:99px;padding:5px 12px;font-size:11px;font-weight:900;cursor:pointer;font-family:var(--font);">⏹ Stop</button>
+        </div>
+        <div class="script-reader show" id="scriptReader"></div>
       </div>
-    </div>
 
-    <!-- CHARACTER SETUP (shown after upload/paste) -->
-    <div class="char-setup" id="charSetup">
-      <h3>🎭 Who are you playing?</h3>
-      <div style="font-size:13px;color:var(--brown-light);margin-bottom:12px;">We found these characters in your script — tap yours, or type it below:</div>
-      <div class="detected-chars" id="detectedChars"></div>
-      <input class="char-input" id="myCharInput" type="text" placeholder="Or type your character name..." oninput="highlightTypedChar(this.value)">
-      <button class="btn btn-terra" onclick="confirmCharacter()">✅ That's me — Show My Lines</button>
-    </div>
+    </div><!-- scroll-content -->
+  </div><!-- scriptUploadView -->
 
-    <!-- SCENE SPLITTER (shown after character confirmed if user wants to split manually) -->
-    <div id="sceneSplitterSection" style="display:none;">
-      <div class="card" style="margin-bottom:14px;background:linear-gradient(135deg,var(--sage),var(--sage-dark));color:white;">
-        <div style="font-size:15px;font-weight:900;margin-bottom:6px;">📍 Split into Scenes</div>
-        <div style="font-size:12px;opacity:0.9;line-height:1.6;">Tap anywhere in your script below to drop a scene divider. Name each scene whatever makes sense to you. When you're done, tap <strong>Save Scenes</strong>.</div>
+  <!-- SCRIPT DETAIL VIEW -->
+  <div id="scriptDetailView" style="display:none;">
+    <div class="app-header">
+      <button class="back-btn" onclick="showScriptHome()">‹</button>
+      <div style="flex:1;">
+        <div style="font-size:17px;font-weight:900;" id="detailTitle">Script</div>
+        <div style="font-size:11px;color:var(--brown-light);" id="detailSub">Loading...</div>
       </div>
-      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
-        <button class="btn btn-sage" style="flex:1;" onclick="saveSplitScenes()">✅ Save Scenes</button>
-        <button class="btn btn-ghost" style="flex:1;" onclick="skipSceneSplit()">Skip — No Scenes</button>
-      </div>
-      <div id="splitterScript" style="background:var(--cream);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);"></div>
+      <button onclick="deleteCurrentScript()" style="background:none;border:none;font-size:20px;cursor:pointer;padding:4px 8px;" title="Delete script">🗑</button>
     </div>
-
-    <!-- READER TOOLBAR + SCRIPT VIEW -->
-    <div id="readerSection" style="display:none;">
-      <div class="reader-toolbar">
-        <button class="tool-btn active" id="fontToggle" onclick="toggleFont(this)">OpenDyslexic</button>
-        <button class="tool-btn" onclick="changeFontSize(1,this)">A+</button>
-        <button class="tool-btn" onclick="changeFontSize(-1,this)">A−</button>
-        <button class="tool-btn" id="ttsToggle" onclick="readAloud()">🔊 Read</button>
-        <button class="tool-btn" id="myLinesOnly" onclick="toggleMyLinesOnly(this)">My Lines Only</button>
+    <div class="scroll-content">
+      <!-- Action buttons -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px;">
+        <button onclick="practiceCurrentScript()" style="background:var(--sage);color:white;border:none;border-radius:var(--r);padding:16px 8px;font-family:var(--font);font-size:12px;font-weight:900;cursor:pointer;text-align:center;"><div style="font-size:24px;margin-bottom:4px;">📚</div>Practice</button>
+        <button onclick="editCurrentScript()" style="background:var(--amber);color:var(--brown);border:none;border-radius:var(--r);padding:16px 8px;font-family:var(--font);font-size:12px;font-weight:900;cursor:pointer;text-align:center;"><div style="font-size:24px;margin-bottom:4px;">✏️</div>Edit</button>
+        <button onclick="gameCurrentScript()" style="background:var(--terra);color:white;border:none;border-radius:var(--r);padding:16px 8px;font-family:var(--font);font-size:12px;font-weight:900;cursor:pointer;text-align:center;"><div style="font-size:24px;margin-bottom:4px;">🎮</div>Games</button>
       </div>
-      <div class="script-reader show" id="scriptReader"></div>
+
+      <!-- Character label -->
+      <div id="detailCharBadge" style="margin-bottom:16px;"></div>
+
+      <!-- Script reader with highlighting -->
+      <div id="detailReaderToolbar" style="margin-bottom:10px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">
+          <button class="tool-btn active" onclick="toggleFont(this)">OpenDyslexic</button>
+          <button class="tool-btn" onclick="changeFontSize(1,this)">A+</button>
+          <button class="tool-btn" onclick="changeFontSize(-1,this)">A−</button>
+          <button class="tool-btn" id="detailTtsBtn" onclick="readAloud()">🔊 Read</button>
+          <button class="tool-btn" id="detailMyLinesOnly" onclick="toggleMyLinesOnly(this)">My Lines Only</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;background:var(--sand);border-radius:var(--rs);padding:8px 12px;margin-bottom:8px;">
+          <span style="font-size:11px;font-weight:900;color:var(--brown-light);">Speed:</span>
+          <input type="range" id="ttsSpeedSlider2" min="0.5" max="2" step="0.1" value="0.85" style="flex:1;" oninput="updateTTSSpeed(this.value)">
+          <span id="ttsSpeedLabel2" style="font-size:11px;font-weight:900;color:var(--brown);min-width:32px;">0.9x</span>
+          <button onclick="stopReading()" style="background:var(--terra);color:white;border:none;border-radius:99px;padding:4px 10px;font-size:10px;font-weight:900;cursor:pointer;font-family:var(--font);">⏹ Stop</button>
+        </div>
+        <!-- Character assignment bar -->
+        <div style="background:var(--sand);border-radius:var(--rs);padding:10px 12px;margin-bottom:8px;" id="charAssignBar">
+          <div style="font-size:11px;font-weight:900;color:var(--brown);margin-bottom:8px;">🎭 Assign lines to characters — tap a line then pick the character:</div>
+          <div id="charAssignPills" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+          <div style="font-size:10px;color:var(--brown-light);margin-top:6px;">Tap any line in the script below to reassign it, or select multiple by tapping them then tap a character above.</div>
+        </div>
+      </div>
+      <div class="script-reader show" id="detailScriptReader"></div>
     </div>
-
-    <!-- PRODUCTIONS LIST -->
-    <div id="productionsList" style="margin-top:20px;"></div>
-
   </div>
-</div>
+
+  <!-- SCRIPT EDITOR VIEW -->
+  <div id="scriptEditorView" style="display:none;">
+    <div class="app-header">
+      <button class="back-btn" onclick="exitEditor()">‹</button>
+      <div style="flex:1;font-size:17px;font-weight:900;">Edit Script</div>
+      <button onclick="saveEditorChanges()" style="background:var(--sage);border:none;color:white;border-radius:99px;padding:6px 14px;font-family:var(--font);font-weight:900;font-size:12px;cursor:pointer;">Save ✅</button>
+    </div>
+    <div class="scroll-content">
+      <div class="card" style="margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:900;color:var(--brown-light);margin-bottom:8px;">Script name:</div>
+        <input class="char-input" id="editorScriptName" placeholder="Script name...">
+      </div>
+      <div style="font-size:12px;font-weight:900;color:var(--brown);margin-bottom:8px;">Edit lines — tap any line to edit its text or reassign its character:</div>
+      <div id="editorLinesList"></div>
+      <div class="card" style="margin-top:12px;">
+        <div style="font-size:13px;font-weight:900;margin-bottom:10px;">+ Add new line:</div>
+        <select id="editorNewChar" style="width:100%;padding:10px;border-radius:var(--rs);border:2px solid var(--sand-dark);font-family:var(--font);font-weight:700;margin-bottom:8px;"></select>
+        <textarea class="paste-area" id="editorNewText" style="min-height:60px;" placeholder="Line text..."></textarea>
+        <button class="btn btn-terra" style="margin-top:8px;" onclick="editorAddLine()">+ Add Line</button>
+      </div>
+      <!-- Upload additional pages -->
+      <div class="card" style="margin-top:12px;">
+        <div style="font-size:13px;font-weight:900;margin-bottom:6px;">📄 Upload additional pages:</div>
+        <div style="font-size:12px;color:var(--brown-light);margin-bottom:10px);">Upload a new page to insert into this script. You can choose where it goes.</div>
+        <input type="file" id="editorPageUpload" accept=".txt,.pdf" style="display:none;" onchange="handleEditorPageUpload(this)">
+        <button class="btn btn-sage" onclick="document.getElementById('editorPageUpload').click()">📂 Upload Page / Pages</button>
+        <div id="editorInsertArea" style="display:none;margin-top:10px;">
+          <div style="font-size:12px;font-weight:900;margin-bottom:6px;">Insert after which line?</div>
+          <select id="editorInsertAfter" style="width:100%;padding:10px;border-radius:var(--rs);border:2px solid var(--sand-dark);font-family:var(--font);"></select>
+          <button class="btn btn-terra" style="margin-top:8px;" onclick="confirmEditorInsert()">Insert Here ✅</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- scriptScreen -->
 
 <!-- ════════════════ PRACTICE ════════════════ -->
 <div class="screen" id="practiceScreen">
-  <div class="app-header">
-    <div class="logo">Esco<span>Mind</span></div>
-    <div style="font-size:13px;font-weight:800;color:var(--brown-light);">Practice</div>
-  </div>
-  <div class="scroll-content">
-    <div class="section-title">Choose Your Mode</div>
-    <div id="practiceContent">
-      <div class="empty-state">
-        <div class="es-icon">📚</div>
-        <p>Upload a script first to start practising your lines!</p>
-        <br>
-        <button class="btn btn-terra btn-sm" onclick="navTo('scriptScreen',1)" style="width:auto;padding:10px 24px;">Upload Script</button>
+  <div id="practiceHome">
+    <div class="app-header">
+      <div class="logo">Esco<span>Mind</span></div>
+      <div style="font-size:13px;font-weight:800;color:var(--brown-light);">Practice</div>
+    </div>
+    <div class="scroll-content">
+      <div class="section-title">Choose Script</div>
+      <div id="practiceScriptPicker" style="margin-bottom:16px;"></div>
+      <div id="practiceContent">
+        <div class="empty-state"><div class="es-icon">📚</div><p>Upload a script first to start practising!</p><br>
+        <button class="btn btn-terra btn-sm" onclick="navTo('scriptScreen',1)" style="width:auto;padding:10px 24px;">Upload Script</button></div>
       </div>
     </div>
   </div>
@@ -735,30 +787,27 @@ Good my lord."></textarea>
 <!-- ════════════════ CUE CARDS ════════════════ -->
 <div class="screen" id="cueScreen">
   <div class="cue-header">
-    <button class="back-btn" onclick="navTo('practiceScreen',2)">‹</button>
+    <button class="back-btn" onclick="exitToGameChooser()">‹</button>
     <div>
       <div style="font-size:17px;font-weight:900;" id="cueScreenTitle">Cue Cards</div>
       <div style="font-size:11px;color:var(--brown-light);" id="cueScreenSub">Loading...</div>
     </div>
+    <button onclick="pauseCueCards()" id="cuePauseBtn" style="margin-left:auto;background:var(--sand);border:2px solid var(--sand-dark);border-radius:99px;padding:6px 14px;font-family:var(--font);font-weight:900;font-size:12px;cursor:pointer;">⏸ Pause</button>
   </div>
   <div class="cue-body">
     <div class="prog-wrap"><div class="prog-fill" id="cueProgBar" style="width:0%"></div></div>
     <div class="prog-label" id="cueProgLabel">Line 1 of 0</div>
-
     <div class="cue-box">
       <div class="cue-lbl">🎤 Cue line:
         <button onclick="speakCue()" style="float:right;background:var(--sand);border:2px solid var(--sand-dark);border-radius:99px;padding:3px 12px;font-size:11px;font-weight:900;cursor:pointer;font-family:var(--font);color:var(--brown);">🔊 Hear it</button>
       </div>
       <div class="cue-txt" id="cueTxt">Loading...</div>
     </div>
-
     <div class="myline-reveal" id="myLineReveal" onclick="revealMyLine()">
       <div class="reveal-hint" id="revealHint">👆 Tap to reveal your line — or speak it below</div>
       <div class="reveal-txt" id="revealTxt"></div>
     </div>
-
     <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()">🎙 Speak Your Line</button>
-
     <div class="word-analysis" id="wordAnalysis"></div>
     <div class="result-banner" id="cueBanner"></div>
     <div class="feedback-row" id="feedbackRow" style="display:none;">
@@ -767,73 +816,100 @@ Good my lord."></textarea>
       <button class="fb-btn fb-right" onclick="nextCue('correct')">✓ Got it!</button>
     </div>
     <button class="next-btn" id="nextCueBtn" onclick="nextCue('correct')">Next Line →</button>
+    <button onclick="exitToGameChooser()" style="background:none;border:2px solid var(--sand-dark);border-radius:99px;padding:8px 20px;font-family:var(--font);font-size:12px;font-weight:900;cursor:pointer;color:var(--brown-light);margin-top:8px;width:100%;">✕ Quit Game</button>
   </div>
 </div>
 
 <!-- ════════════════ GAMES ════════════════ -->
 <div class="screen" id="gameScreen">
-  <div class="app-header">
-    <div class="logo">Esco<span>Mind</span></div>
-    <div style="font-size:13px;font-weight:800;color:var(--brown-light);">Game Center</div>
+
+  <!-- GAME HOME -->
+  <div id="gameHome">
+    <div class="app-header">
+      <div class="logo">Esco<span>Mind</span></div>
+      <div style="font-size:13px;font-weight:800;color:var(--brown-light);">Game Center 🎮</div>
+    </div>
+    <div class="scroll-content">
+
+      <!-- Script picker -->
+      <div class="section-title">Choose Script</div>
+      <div id="gameScriptPicker" style="margin-bottom:4px;"></div>
+      <!-- Scene picker -->
+      <div id="gameScenePicker" style="margin-bottom:16px;display:none;">
+        <div style="font-size:12px;font-weight:900;color:var(--brown-light);margin-bottom:8px;">Practice which section?</div>
+        <div id="gameScenePills" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+      </div>
+
+      <!-- Daily challenge -->
+      <div class="daily-chal" onclick="startGameById('fillblank')">
+        <div class="dc-info"><h3>⚡ Daily Challenge</h3><p id="dailyChalDesc">Today: Fill in the Blank</p></div>
+        <div style="font-size:40px;">🏆</div>
+      </div>
+
+      <!-- Game grid -->
+      <div class="section-title">Games</div>
+      <div class="gc-grid">
+        <div class="gc-card gc-1" onclick="startGameById('cue')">
+          <div class="gc-best" id="gcBest-cue">Best: --</div>
+          <div class="gc-icon">🃏</div>
+          <div class="gc-name">Cue Cards</div>
+          <div class="gc-desc">See the cue, recall your line</div>
+        </div>
+        <div class="gc-card gc-2" onclick="startGameById('fillblank')">
+          <div class="gc-best" id="gcBest-fillblank">Best: --</div>
+          <div class="gc-icon">📝</div>
+          <div class="gc-name">Fill in the Blank</div>
+          <div class="gc-desc">Complete the missing word</div>
+        </div>
+        <div class="gc-card gc-3" onclick="startGameById('speed')">
+          <div class="gc-best" id="gcBest-speed">Best: --</div>
+          <div class="gc-icon">⚡</div>
+          <div class="gc-name">Speed Drill</div>
+          <div class="gc-desc">Race through all your lines</div>
+        </div>
+        <div class="gc-card gc-4" onclick="startGameById('partner')">
+          <div class="gc-best" id="gcBest-partner">Best: --</div>
+          <div class="gc-icon">🎭</div>
+          <div class="gc-name">Scene Partner</div>
+          <div class="gc-desc">App reads others, you speak yours</div>
+        </div>
+      </div>
+
+      <!-- XP -->
+      <div class="xp-card">
+        <div class="xp-hdr"><div class="xp-ttl" id="gameXpLabel">Level 1 — Just Starting 🌱</div><div class="xp-lvl" id="gameXpTotal">0 XP</div></div>
+        <div class="xp-bar"><div class="xp-fill" id="gameXpBar" style="width:0%"></div></div>
+        <div style="font-size:11px;color:var(--brown-light);" id="gameXpNext">100 XP to Level 2</div>
+        <div class="badges" id="gameBadges"><div style="font-size:12px;color:var(--brown-light);padding:8px 0;">Play games to earn badges! 🏅</div></div>
+      </div>
+    </div>
   </div>
-  <div class="scroll-content">
-    <div class="hero hero-brown" data-emoji="🎮">
-      <h2>Game Center 🎮</h2>
-      <p>Learn your lines through play. Pick a game!</p>
-    </div>
 
-    <div class="daily-chal" onclick="startGame('fillblank')">
-      <div class="dc-info"><h3>⚡ Daily Challenge</h3><p>Today: Fill in the Blank · Your script</p></div>
-      <div style="font-size:40px;">🏆</div>
-    </div>
-
-    <div class="src-tabs">
-      <button class="src-tab active" onclick="switchSrc('mine',this)">My Scripts</button>
-      <button class="src-tab" onclick="switchSrc('sample',this)">Sample Scripts</button>
-    </div>
-
-    <div class="gc-grid">
-      <div class="gc-card gc-1" onclick="startGame('fillblank')">
-        <div class="gc-best">Best: 420</div>
-        <div class="gc-icon">📝</div>
-        <div class="gc-name">Fill in the Blank</div>
-        <div class="gc-desc">Complete the missing word in your line</div>
-      </div>
-      <div class="gc-card gc-2" onclick="startGame('scramble')">
-        <div class="gc-best">Best: 380</div>
-        <div class="gc-icon">🔀</div>
-        <div class="gc-name">Word Scramble</div>
-        <div class="gc-desc">Put your jumbled line back in order</div>
-      </div>
-      <div class="gc-card gc-3" onclick="startGame('match')">
-        <div class="gc-best">Best: 290</div>
-        <div class="gc-icon">🧩</div>
-        <div class="gc-name">Memory Match</div>
-        <div class="gc-desc">Match the cue to the right line</div>
-      </div>
-      <div class="gc-card gc-4" onclick="startGame('clock')">
-        <div class="gc-best">Best: 510</div>
-        <div class="gc-icon">⚡</div>
-        <div class="gc-name">Beat the Clock</div>
-        <div class="gc-desc">Race against the timer for big points</div>
+  <!-- GAME CHOOSER (after script is picked, before game starts) -->
+  <div id="gameChooser" style="display:none;">
+    <div class="app-header">
+      <button class="back-btn" onclick="showGameHome()">‹</button>
+      <div>
+        <div style="font-size:17px;font-weight:900;" id="chooserTitle">Choose Game</div>
+        <div style="font-size:11px;color:var(--brown-light);" id="chooserSub"></div>
       </div>
     </div>
-
-    <div class="xp-card">
-      <div class="xp-hdr"><div class="xp-ttl" id="gameXpLabel">Level 1 — Just Starting 🌱</div><div class="xp-lvl" id="gameXpTotal">0 XP</div></div>
-      <div class="xp-bar"><div class="xp-fill" id="gameXpBar" style="width:0%"></div></div>
-      <div style="font-size:11px;color:var(--brown-light);" id="gameXpNext">100 XP to Level 2</div>
-      <div class="badges" id="gameBadges">
-        <div style="font-size:12px;color:var(--brown-light);padding:8px 0;">Play games to earn badges! 🏅</div>
+    <div class="scroll-content">
+      <div class="gc-grid">
+        <div class="gc-card gc-1" onclick="launchGame('cue')"><div class="gc-icon">🃏</div><div class="gc-name">Cue Cards</div></div>
+        <div class="gc-card gc-2" onclick="launchGame('fillblank')"><div class="gc-icon">📝</div><div class="gc-name">Fill in the Blank</div></div>
+        <div class="gc-card gc-3" onclick="launchGame('speed')"><div class="gc-icon">⚡</div><div class="gc-name">Speed Drill</div></div>
+        <div class="gc-card gc-4" onclick="launchGame('partner')"><div class="gc-icon">🎭</div><div class="gc-name">Scene Partner</div></div>
       </div>
     </div>
   </div>
-</div>
+
+</div><!-- gameScreen -->
 
 <!-- ════════════════ FILL IN BLANK GAME ════════════════ -->
 <div class="game-screen" id="fillBlankScreen">
   <div class="game-header">
-    <button class="back-btn" onclick="navTo('gameScreen',3)">‹</button>
+    <button class="back-btn" onclick="exitToGameChooser()">‹</button>
     <div style="flex:1;font-size:17px;font-weight:900;">Fill in the Blank 📝</div>
     <select id="diffSel" onchange="setDiff(this.value)" style="background:var(--sand);border:2px solid var(--sand-dark);border-radius:99px;padding:6px 12px;font-family:var(--font);font-weight:700;color:var(--brown);font-size:11px;cursor:pointer;">
       <option value="easy">Easy</option>
@@ -842,23 +918,21 @@ Good my lord."></textarea>
     </select>
   </div>
   <div class="game-body">
-    <div class="score-strip">
-      <div class="pill pill-terra">⭐ <span id="gScore">0</span> pts</div>
-      <div class="pill pill-amber">🔥 <span id="gStreak">0</span></div>
-      <div class="pill pill-sage">⏱ <span id="gTimer">60</span>s</div>
+    <div class="game-stats">
+      <div class="gstat"><div id="gScore">0</div><div>Score</div></div>
+      <div class="gstat"><div id="gStreak">0</div><div>Streak 🔥</div></div>
+      <div class="gstat"><div id="gTimer">60</div><div>Secs</div></div>
     </div>
     <div class="prog-wrap"><div class="prog-fill" id="gameProgBar" style="width:0%"></div></div>
-    <div class="game-line-card" id="gameLineCard"></div>
-    <div>
-      <div style="font-size:12px;font-weight:900;color:var(--brown-light);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">Choose the missing word:</div>
-      <div class="word-opts" id="wordOpts"></div>
-    </div>
+    <div class="game-line-card" id="gameLineCard">Loading...</div>
+    <div class="word-opts" id="wordOpts"></div>
     <div class="result-banner" id="gameBanner"></div>
-    <button class="next-btn" id="gameNextBtn" onclick="nextGameQ()" style="display:none;">Next Line →</button>
+    <button class="next-btn" id="gameNextBtn" onclick="nextGameQ()" style="display:none;">Next →</button>
+    <button onclick="exitToGameChooser()" style="background:none;border:2px solid var(--sand-dark);border-radius:99px;padding:8px 20px;font-family:var(--font);font-size:12px;font-weight:900;cursor:pointer;color:var(--brown-light);margin-top:8px;width:100%;">✕ Quit Game</button>
   </div>
 </div>
 
-<!-- ════════════════ SETTINGS ════════════════ -->
+
 <div class="screen" id="settingsScreen">
   <div class="app-header">
     <div class="logo">Esco<span>Mind</span></div>
@@ -931,14 +1005,19 @@ Good my lord."></textarea>
     <div class="set-sec">
       <h3>⏱ Study Timer</h3>
       <div class="set-row">
-        <div class="set-name">Session Length</div>
-        <div style="font-weight:900;color:var(--terra);">20 min</div>
+        <div><div class="set-name">Session Length</div><div class="set-desc">How long each focus block lasts</div></div>
+        <button onclick="openTimer()" style="background:var(--terra);color:white;border:none;border-radius:99px;padding:6px 14px;font-family:var(--font);font-weight:900;font-size:12px;cursor:pointer;">Set Timer</button>
       </div>
       <div class="set-row">
-        <div class="set-name">Break Length</div>
-        <div style="display:flex;gap:8px;">
-          <button class="tool-btn active" id="break5Btn" onclick="setBreakLen(5)">5 min</button>
-          <button class="tool-btn" id="break10Btn" onclick="setBreakLen(10)">10 min</button>
+        <div><div class="set-name">Day of Week Reminder</div><div class="set-desc">Which days to practice</div></div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;">
+          <button class="tool-btn active" onclick="this.classList.toggle('active')">M</button>
+          <button class="tool-btn active" onclick="this.classList.toggle('active')">T</button>
+          <button class="tool-btn active" onclick="this.classList.toggle('active')">W</button>
+          <button class="tool-btn active" onclick="this.classList.toggle('active')">Th</button>
+          <button class="tool-btn active" onclick="this.classList.toggle('active')">F</button>
+          <button class="tool-btn" onclick="this.classList.toggle('active')">Sa</button>
+          <button class="tool-btn" onclick="this.classList.toggle('active')">Su</button>
         </div>
       </div>
     </div>
@@ -973,7 +1052,7 @@ Good my lord."></textarea>
         Set this up once and your lines, scenes and progress will automatically appear on your phone, computer and tablet.
       </p>
       <div id="syncSetupArea">
-        <div style="text-align:center;padding:10px;color:var(--brown-light);font-size:13px;">Loading sync status...</div>
+        <div id="syncStatus" style="text-align:center;padding:10px;color:var(--brown-light);font-size:13px;">Loading sync status...</div>
       </div>
     </div>
 
@@ -1027,7 +1106,11 @@ Good my lord."></textarea>
     <div class="hf-status" id="spStatus">App will read all other lines aloud. You speak yours.</div>
     <button class="hf-big-btn idle" id="spMicBtn" onclick="spMicTap()" style="display:none;">🎙</button>
     <div class="hf-result" id="spResult" style="display:none;"></div>
-    <button class="btn btn-terra" id="spStartBtn" onclick="spStart()" style="width:100%;max-width:500px;">▶ Start Scene</button>
+    <div style="display:flex;gap:10px;width:100%;max-width:500px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="spNext()">Next →</button>
+    </div>
+    <button class="btn btn-terra" id="spStartBtn" onclick="spStart()" style="width:100%;max-width:500px;margin-top:8px;">▶ Start Scene</button>
+    <button onclick="stopScenePartner()" style="background:none;border:2px solid var(--sand-dark);border-radius:99px;padding:8px 20px;font-family:var(--font);font-size:12px;font-weight:900;cursor:pointer;color:var(--brown-light);margin-top:8px;width:100%;max-width:500px;">✕ Quit</button>
   </div>
 </div>
 
@@ -1054,10 +1137,14 @@ Good my lord."></textarea>
       <button class="btn btn-ghost" style="flex:1;" onclick="sdMark('wrong')">✗ Stumbled</button>
       <button class="btn btn-terra" style="flex:2;" onclick="sdMark('correct')">✓ Got it!</button>
     </div>
-    <div id="sdFinished" style="display:none;width:100%;max-width:500px;text-align:center;">
+    <button onclick="stopSpeedDrill()" style="background:none;border:2px solid var(--sand-dark);border-radius:99px;padding:8px 20px;font-family:var(--font);font-size:12px;font-weight:900;cursor:pointer;color:var(--brown-light);margin-top:8px;width:100%;max-width:500px;">✕ Quit</button>
+    <div id="sdFinished" style="display:none;width:100%;max-width:500px;text-align:center;margin-top:16px;">
       <div style="font-size:18px;font-weight:900;margin-bottom:8px;">Run complete! 🎉</div>
       <div style="font-size:14px;color:var(--brown-light);margin-bottom:16px;" id="sdFinishStats"></div>
-      <button class="btn btn-terra" onclick="startSpeedDrill()">Run Again ⚡</button>
+      <div style="display:flex;gap:10px;justify-content:center;">
+        <button class="btn btn-terra" style="flex:1;" onclick="startSpeedDrill()">Run Again ⚡</button>
+        <button class="btn btn-ghost" style="flex:1;" onclick="exitToGameChooser()">Done ✓</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1166,14 +1253,34 @@ Good my lord."></textarea>
     <div class="modal-title">⏱ Study Timer</div>
     <div class="timer-mode" id="timerModeLabel">20 min focus session</div>
     <div class="timer-big" id="timerDisplay">20:00</div>
+    <div style="font-size:12px;font-weight:900;margin-bottom:8px;color:var(--brown-light);">Session length:</div>
+    <div class="break-opts" style="margin-bottom:12px;">
+      <div class="break-opt active" onclick="setSessionLength(10);document.querySelectorAll('.sess-opt').forEach(b=>b.classList.remove('active'));this.classList.add('active');" class="sess-opt">10 min</div>
+      <div class="break-opt" onclick="setSessionLength(20);document.querySelectorAll('.sess-opt').forEach(b=>b.classList.remove('active'));this.classList.add('active');" class="sess-opt">20 min</div>
+      <div class="break-opt" onclick="setSessionLength(30);document.querySelectorAll('.sess-opt').forEach(b=>b.classList.remove('active'));this.classList.add('active');" class="sess-opt">30 min</div>
+      <div class="break-opt" onclick="setSessionLength(45);document.querySelectorAll('.sess-opt').forEach(b=>b.classList.remove('active'));this.classList.add('active');" class="sess-opt">45 min</div>
+      <div class="break-opt" onclick="setSessionLength(60);document.querySelectorAll('.sess-opt').forEach(b=>b.classList.remove('active'));this.classList.add('active');" class="sess-opt">60 min</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <span style="font-size:12px;font-weight:900;color:var(--brown-light);">Custom (min):</span>
+      <input type="number" min="1" max="120" value="20" id="customSessionInput" style="width:70px;padding:8px;border-radius:var(--rs);border:2px solid var(--sand-dark);font-family:var(--font);font-size:14px;font-weight:900;">
+      <button onclick="setSessionLength(parseInt(document.getElementById('customSessionInput').value)||20)" style="background:var(--terra);color:white;border:none;border-radius:99px;padding:8px 14px;font-family:var(--font);font-weight:900;font-size:12px;cursor:pointer;">Set</button>
+    </div>
     <div style="font-size:12px;font-weight:900;margin-bottom:8px;color:var(--brown-light);">Break length:</div>
-    <div class="break-opts">
-      <div class="break-opt active" id="bo5" onclick="selectBreak(5)">5 minutes</div>
-      <div class="break-opt" id="bo10" onclick="selectBreak(10)">10 minutes</div>
+    <div class="break-opts" style="margin-bottom:12px;">
+      <div class="break-opt active" id="bo5" onclick="setBreakLength(5);document.getElementById('bo5').classList.add('active');document.getElementById('bo10').classList.remove('active');document.getElementById('bo15').classList.remove('active');">5 min</div>
+      <div class="break-opt" id="bo10" onclick="setBreakLength(10);document.getElementById('bo5').classList.remove('active');document.getElementById('bo10').classList.add('active');document.getElementById('bo15').classList.remove('active');">10 min</div>
+      <div class="break-opt" id="bo15" onclick="setBreakLength(15);document.getElementById('bo5').classList.remove('active');document.getElementById('bo10').classList.remove('active');document.getElementById('bo15').classList.add('active');">15 min</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+      <span style="font-size:12px;font-weight:900;color:var(--brown-light);">Custom break (min):</span>
+      <input type="number" min="1" max="60" value="5" id="customBreakInput" style="width:60px;padding:8px;border-radius:var(--rs);border:2px solid var(--sand-dark);font-family:var(--font);font-size:14px;font-weight:900;">
+      <button onclick="setBreakLength(parseInt(document.getElementById('customBreakInput').value)||5)" style="background:var(--sage);color:white;border:none;border-radius:99px;padding:8px 14px;font-family:var(--font);font-weight:900;font-size:12px;cursor:pointer;">Set</button>
     </div>
     <div class="timer-ctrl-row">
       <button class="tcbtn tcbtn-go" id="timerToggleBtn" onclick="toggleTimer()">▶ Start</button>
-      <button class="tcbtn tcbtn-stop" onclick="closeTimer()">Close</button>
+      <button class="tcbtn" onclick="resetTimer()" style="background:var(--sand);color:var(--brown);">↺ Reset</button>
+      <button class="tcbtn tcbtn-stop" onclick="closeTimer()">✕ Close</button>
     </div>
   </div>
 </div>
@@ -1211,6 +1318,9 @@ let gameTimerInt = null;
 let gameQIndex = 0;
 let gameQuestions = [];
 let rawScriptText = '';
+let splitterParsed = [];
+let splitterDividers = [];
+let splitterMyChar = '';
 let myLinesOnlyMode = false;
 
 // Real tracking
@@ -1252,16 +1362,20 @@ function addXP(pts) {
 function updateXPDisplays() {
   const lvl = getCurrentLevel();
   const pct = lvl.next < 99999 ? Math.min(100,((totalXP-lvl.min)/(lvl.next-lvl.min))*100) : 100;
-  document.getElementById('heroXP').textContent = totalXP;
-  document.getElementById('heroStreak').textContent = dayStreak+'🔥';
-  document.getElementById('xpLevelLabel').textContent = `Level ${lvl.index+1} — ${lvl.label}`;
-  document.getElementById('xpTotal').textContent = totalXP+' XP';
-  document.getElementById('xpBar').style.width = pct+'%';
-  document.getElementById('xpNext').textContent = lvl.next < 99999 ? `${lvl.next-totalXP} XP to next level` : 'Max level reached! 🏆';
-  document.getElementById('gameXpLabel').textContent = `Level ${lvl.index+1} — ${lvl.label}`;
-  document.getElementById('gameXpTotal').textContent = totalXP+' XP';
-  document.getElementById('gameXpBar').style.width = pct+'%';
-  document.getElementById('gameXpNext').textContent = lvl.next < 99999 ? `${lvl.next-totalXP} XP to next level` : 'Max level reached! 🏆';
+  const nextLabel = lvl.next < 99999 ? `${lvl.next-totalXP} XP to next level` : 'Max level reached! 🏆';
+  const lvlLabel = `Level ${lvl.index+1} — ${lvl.label}`;
+  function safe(id, prop, val) { const el = document.getElementById(id); if(el) el[prop] = val; }
+  function safeStyle(id, prop, val) { const el = document.getElementById(id); if(el) el.style[prop] = val; }
+  safe('heroXP', 'textContent', totalXP);
+  safe('heroStreak', 'textContent', dayStreak+'🔥');
+  safe('xpLevelLabel', 'textContent', lvlLabel);
+  safe('xpTotal', 'textContent', totalXP+' XP');
+  safeStyle('xpBar', 'width', pct+'%');
+  safe('xpNext', 'textContent', nextLabel);
+  safe('gameXpLabel', 'textContent', lvlLabel);
+  safe('gameXpTotal', 'textContent', totalXP+' XP');
+  safeStyle('gameXpBar', 'width', pct+'%');
+  safe('gameXpNext', 'textContent', nextLabel);
   updateBadgeDisplay();
 }
 
@@ -1365,11 +1479,9 @@ const dict = {
 const screenIds = ['homeScreen','scriptScreen','practiceScreen','gameScreen','settingsScreen','chakraScreen'];
 
 function navTo(id, navIdx) {
-  screenIds.forEach(s => {
-    const el = document.getElementById(s);
-    if(el) el.classList.remove('active');
-  });
-  document.querySelectorAll('.game-screen').forEach(s => s.classList.remove('active'));
+  stopReading();
+  screenIds.forEach(s => { const el=document.getElementById(s); if(el) el.classList.remove('active'); });
+  document.querySelectorAll('.game-screen,.hf-screen,.prog-dash').forEach(s => s.classList.remove('active'));
   const target = document.getElementById(id);
   if(target) target.classList.add('active');
   if(navIdx !== undefined) {
@@ -1379,17 +1491,377 @@ function navTo(id, navIdx) {
   if(id === 'practiceScreen') refreshPracticeScreen();
   if(id === 'homeScreen') refreshHome();
   if(id === 'chakraScreen') refreshChakraScreen();
+  if(id === 'scriptScreen') { showScriptHome(); renderScriptLibrary(); }
+  if(id === 'gameScreen') { showGameHome(); refreshGameScreen(); }
 }
 
 function goToGameScreen(id) {
   screenIds.forEach(s => { const el=document.getElementById(s); if(el) el.classList.remove('active'); });
-  document.querySelectorAll('.game-screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.game-screen,.hf-screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0,0);
 }
 
 // ════════════════════════════════════════
-//  SCRIPT IMPORT — TABS
+//  SCRIPT LIBRARY
+// ════════════════════════════════════════
+let currentScriptIdx = null;
+
+function showScriptHome() {
+  document.getElementById('scriptHome').style.display = 'block';
+  document.getElementById('scriptUploadView').style.display = 'none';
+  document.getElementById('scriptDetailView').style.display = 'none';
+  document.getElementById('scriptEditorView').style.display = 'none';
+  renderScriptLibrary();
+}
+
+function showScriptUpload() {
+  document.getElementById('scriptHome').style.display = 'none';
+  document.getElementById('scriptUploadView').style.display = 'block';
+  document.getElementById('scriptDetailView').style.display = 'none';
+  document.getElementById('scriptEditorView').style.display = 'none';
+  // Reset upload state
+  document.getElementById('charSetup').style.display = 'none';
+  document.getElementById('sceneSplitterSection').style.display = 'none';
+  document.getElementById('readerSection').style.display = 'none';
+}
+
+function showScriptDetail(idx) {
+  currentScriptIdx = idx;
+  const prod = productions[idx];
+  if(!prod) return;
+  activeProduction = prod;
+  document.getElementById('scriptHome').style.display = 'none';
+  document.getElementById('scriptUploadView').style.display = 'none';
+  document.getElementById('scriptDetailView').style.display = 'block';
+  document.getElementById('scriptEditorView').style.display = 'none';
+  document.getElementById('detailTitle').textContent = prod.name || prod.myChar;
+  document.getElementById('detailSub').textContent = `${prod.myChar} · ${prod.cuePairs ? (prod.cuePairs||[]).length : 0} lines`;
+  // Character badge
+  document.getElementById('detailCharBadge').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;background:var(--sand);border-radius:var(--rs);padding:10px 14px;margin-bottom:4px;">
+      <div style="font-size:11px;font-weight:900;color:var(--brown-light);text-transform:uppercase;letter-spacing:1px;">You are playing:</div>
+      <div style="font-size:16px;font-weight:900;color:var(--terra);">${prod.myChar}</div>
+      <div style="font-size:11px;color:var(--brown-light);margin-left:auto;">${prod.scriptData ? prod.scriptData.filter(l=>l.mine).length : 0} lines</div>
+    </div>`;
+  renderDetailScript(idx);
+  renderCharAssignBar(idx);
+}
+
+function renderScriptLibrary() {
+  const lib = document.getElementById('scriptLibrary');
+  if(!lib) return;
+  if(productions.length === 0) {
+    lib.innerHTML = `<div class="empty-state"><div class="es-icon">📄</div><p>No scripts yet.<br>Upload your first script!</p><br><button class="btn btn-terra btn-sm" onclick="showScriptUpload()" style="width:auto;padding:10px 24px;">+ Upload Script</button></div>`;
+    return;
+  }
+  const colors = ['var(--terra)','var(--sage)','var(--amber)','#7B1FA2','#1565C0'];
+  lib.innerHTML = productions.map((p,i) => {
+    const lineCount = p.scriptData ? p.scriptData.filter(l=>l.mine).length : 0;
+    const totalLines = p.scriptData ? p.scriptData.length : 0;
+    const prog = p.progress || 0;
+    return `<div class="prod-card" onclick="showScriptDetail(${i})" style="border-left-color:${colors[i%colors.length]}">
+      <div class="prod-icon">🎭</div>
+      <div class="prod-info" style="flex:1;">
+        <div class="prod-name">${p.name || p.myChar}</div>
+        <div class="prod-sub">${p.myChar} · ${lineCount} lines · ${totalLines} total</div>
+        <div class="prog-wrap" style="margin-top:8px;"><div class="prog-fill" style="width:${prog}%"></div></div>
+        <div class="prod-sub">${prog}% learned</div>
+      </div>
+      <button onclick="event.stopPropagation();deleteProduction(${i})" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--brown-light);padding:4px 8px;">🗑</button>
+    </div>`;
+  }).join('');
+}
+
+function renderDetailScript(idx) {
+  const prod = productions[idx];
+  if(!prod || !prod.scriptData) return;
+  const reader = document.getElementById('detailScriptReader');
+  const myChar = prod.myChar;
+  // Group consecutive lines by character, keeping original order
+  // Show each line with character name, highlight mine with red border
+  let html = '';
+  prod.scriptData.forEach((line, lineIdx) => {
+    const isMine = line.char === myChar || line.mine;
+    const charColors = getCharColor(line.char, prod);
+    html += `<div class="script-block ${isMine?'my-line':''}" 
+      id="sline_${lineIdx}" 
+      onclick="selectLineForReassign(${lineIdx},${idx})"
+      style="border-left:4px solid ${isMine?'var(--terra)':charColors};margin-bottom:8px;padding:8px 12px;border-radius:0 var(--rs) var(--rs) 0;background:${isMine?'rgba(193,97,79,0.08)':'var(--cream)'};cursor:pointer;">
+      <div style="font-size:10px;font-weight:900;color:${isMine?'var(--terra)':charColors};text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">${line.char || 'UNKNOWN'}</div>
+      <div style="font-size:14px;line-height:1.8;">${line.text}</div>
+    </div>`;
+  });
+  reader.innerHTML = html;
+}
+
+// Character color map for script display
+function getCharColor(charName, prod) {
+  if(!prod._charColors) prod._charColors = {};
+  const palette = ['#1565C0','#2E7D32','#6A1B9A','#E65100','#00838F','#AD1457','#4527A0','#558B2F'];
+  if(!prod._charColors[charName]) {
+    const keys = Object.keys(prod._charColors);
+    prod._charColors[charName] = palette[keys.length % palette.length];
+  }
+  return prod._charColors[charName];
+}
+
+// Character reassignment
+let selectedLines = [];
+let reassignMode = false;
+
+function renderCharAssignBar(idx) {
+  const prod = productions[idx];
+  if(!prod || !prod.scriptData) return;
+  const bar = document.getElementById('charAssignPills');
+  if(!bar) return;
+  const chars = [...new Set(prod.scriptData.map(l => l.char).filter(Boolean))];
+  bar.innerHTML = chars.map(c => {
+    const isMine = c === prod.myChar;
+    return `<button onclick="assignSelectedLines('${c}',${idx})" 
+      style="background:${isMine?'var(--terra)':'var(--sand)'};color:${isMine?'white':'var(--brown)'};border:2px solid ${isMine?'var(--terra)':'var(--sand-dark)'};border-radius:99px;padding:6px 14px;font-family:var(--font);font-size:11px;font-weight:900;cursor:pointer;">
+      ${isMine?'🎭 ':''}${c}${isMine?' (you)':''}
+    </button>`;
+  }).join('');
+}
+
+function selectLineForReassign(lineIdx, prodIdx) {
+  const el = document.getElementById('sline_' + lineIdx);
+  if(!el) return;
+  const alreadySelected = (el.style.outline || '').includes('3px');
+  if(alreadySelected) {
+    el.style.outline = '';
+    selectedLines = selectedLines.filter(i => i !== lineIdx);
+  } else {
+    el.style.outline = '3px solid var(--amber)';
+    selectedLines.push(lineIdx);
+  }
+  showToast(selectedLines.length > 0 ? `${selectedLines.length} line(s) selected — tap a character above` : 'Line deselected');
+}
+
+function assignSelectedLines(charName, prodIdx) {
+  const prod = productions[prodIdx];
+  if(!prod) return;
+  if(selectedLines.length === 0) { showToast('Tap lines in the script first, then assign here'); return; }
+  selectedLines.forEach(i => {
+    if(prod.scriptData[i]) {
+      prod.scriptData[i].char = charName;
+      prod.scriptData[i].mine = (charName === prod.myChar);
+    }
+  });
+  // Rebuild cue pairs
+  const assignedCount = selectedLines.length;
+  rebuildCuePairs(prod);
+  selectedLines = [];
+  autoSave();
+  renderDetailScript(prodIdx);
+  renderCharAssignBar(prodIdx);
+  showToast(`${assignedCount} line${assignedCount!==1?'s':''} assigned to ${charName} ✅`);
+}
+
+function rebuildCuePairs(prod) {
+  const myChar = prod.myChar;
+  const pairs = [];
+  for(let i = 0; i < prod.scriptData.length; i++) {
+    if(prod.scriptData[i].mine || prod.scriptData[i].char === myChar) {
+      const cue = i > 0 ? prod.scriptData[i-1].text : 'Start of scene';
+      pairs.push({ cue, myLine: prod.scriptData[i].text, scene: prod.scriptData[i].scene || 'Scene 1' });
+    }
+  }
+  prod.cuePairs = pairs;
+  prod.scriptData.forEach(l => { l.mine = (l.char === myChar); });
+}
+
+function practiceCurrentScript() {
+  if(currentScriptIdx === null) return;
+  activeProduction = productions[currentScriptIdx];
+  navTo('practiceScreen', 2);
+}
+
+function gameCurrentScript() {
+  if(currentScriptIdx === null) return;
+  activeProduction = productions[currentScriptIdx];
+  navTo('gameScreen', 3);
+}
+
+function deleteCurrentScript() {
+  if(currentScriptIdx === null) return;
+  if(!confirm('Delete this script?')) return;
+  productions.splice(currentScriptIdx, 1);
+  if(activeProduction === productions[currentScriptIdx]) activeProduction = null;
+  currentScriptIdx = null;
+  autoSave();
+  showScriptHome();
+  refreshHome();
+  showToast('Script deleted');
+}
+
+// ════════════════════════════════════════
+//  SCRIPT EDITOR
+// ════════════════════════════════════════
+let editorNewLines = null;
+
+function editCurrentScript() {
+  if(currentScriptIdx === null) return;
+  const prod = productions[currentScriptIdx];
+  if(!prod) return;
+  document.getElementById('scriptDetailView').style.display = 'none';
+  document.getElementById('scriptEditorView').style.display = 'block';
+  document.getElementById('editorScriptName').value = prod.name || prod.myChar;
+  renderEditorLines(currentScriptIdx);
+  // Populate char select
+  const chars = [...new Set(prod.scriptData.map(l=>l.char).filter(Boolean))];
+  document.getElementById('editorNewChar').innerHTML = chars.map(c=>`<option value="${c}">${c}</option>`).join('');
+}
+
+function renderEditorLines(idx) {
+  const prod = productions[idx];
+  if(!prod) return;
+  const chars = [...new Set(prod.scriptData.map(l=>l.char).filter(Boolean))];
+  document.getElementById('editorLinesList').innerHTML = prod.scriptData.map((line, i) => `
+    <div class="card" style="margin-bottom:8px;border-left:4px solid ${line.mine?'var(--terra)':'var(--sand-dark)'};">
+      <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;">
+        <select onchange="editorChangeChar(${i},this.value,${idx})" style="background:var(--sand);border:1px solid var(--sand-dark);border-radius:var(--rs);padding:4px 8px;font-family:var(--font);font-size:11px;font-weight:900;">
+          ${chars.map(c=>`<option value="${c}" ${c===line.char?'selected':''}>${c}</option>`).join('')}
+        </select>
+        <button onclick="editorDeleteLine(${i},${idx})" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--brown-light);margin-left:auto;">✕</button>
+      </div>
+      <textarea onchange="editorChangeLine(${i},this.value,${idx})" style="width:100%;border:1px solid var(--sand-dark);border-radius:var(--rs);padding:8px;font-family:var(--font);font-size:13px;background:var(--cream);min-height:50px;resize:vertical;">${line.text}</textarea>
+    </div>
+  `).join('');
+}
+
+function editorChangeChar(lineIdx, newChar, prodIdx) {
+  const prod = productions[prodIdx];
+  if(!prod) return;
+  prod.scriptData[lineIdx].char = newChar;
+  prod.scriptData[lineIdx].mine = (newChar === prod.myChar);
+}
+
+function editorChangeLine(lineIdx, newText, prodIdx) {
+  const prod = productions[prodIdx];
+  if(!prod) return;
+  prod.scriptData[lineIdx].text = newText.trim();
+}
+
+function editorDeleteLine(lineIdx, prodIdx) {
+  const prod = productions[prodIdx];
+  if(!prod) return;
+  prod.scriptData.splice(lineIdx, 1);
+  renderEditorLines(prodIdx);
+}
+
+function editorAddLine() {
+  if(currentScriptIdx === null) return;
+  const prod = productions[currentScriptIdx];
+  const char = document.getElementById('editorNewChar').value;
+  const text = document.getElementById('editorNewText').value.trim();
+  if(!text) { showToast('Please enter line text'); return; }
+  prod.scriptData.push({ char, text, mine: char === prod.myChar });
+  document.getElementById('editorNewText').value = '';
+  renderEditorLines(currentScriptIdx);
+  showToast('Line added ✅');
+}
+
+function saveEditorChanges() {
+  if(currentScriptIdx === null) return;
+  const prod = productions[currentScriptIdx];
+  const nameEl = document.getElementById('editorScriptName');
+  if(nameEl.value.trim()) prod.name = nameEl.value.trim();
+  rebuildCuePairs(prod);
+  autoSave();
+  showToast('Changes saved ✅');
+  exitEditor();
+}
+
+function exitEditor() {
+  document.getElementById('scriptEditorView').style.display = 'none';
+  document.getElementById('scriptDetailView').style.display = 'block';
+}
+
+async function handleEditorPageUpload(input) {
+  const file = input.files[0];
+  if(!file) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+  showToast('Reading new pages...');
+  let text = '';
+  if(ext === 'pdf') {
+    try {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      const ab = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({data:ab}).promise;
+      for(let p=1;p<=pdf.numPages;p++){
+        const page = await pdf.getPage(p);
+        const ct = await page.getTextContent();
+        let lastY=null,lb='';
+        const pl=[];
+        ct.items.forEach(item=>{
+          const y=item.transform?Math.round(item.transform[5]):0;
+          if(lastY!==null&&Math.abs(y-lastY)>3){if(lb.trim())pl.push(lb.trimEnd());lb=item.str;}
+          else lb+=item.str;
+          lastY=y;
+        });
+        if(lb.trim())pl.push(lb.trimEnd());
+        text+=pl.reverse().join('\n')+'\n';
+      }
+    } catch(e){ text=''; }
+  } else {
+    text = await new Promise(res=>{ const r=new FileReader(); r.onload=e=>res(e.target.result); r.readAsText(file); });
+  }
+  if(!text.trim()){ showToast('Could not read file'); return; }
+  editorNewLines = parseRawScript(text);
+  document.getElementById('editorInsertArea').style.display = 'block';
+  const prod = productions[currentScriptIdx];
+  const sel = document.getElementById('editorInsertAfter');
+  sel.innerHTML = `<option value="-1">At the beginning</option>` +
+    (prod.scriptData||[]).map((l,i)=>`<option value="${i}">${i+1}. [${l.char}] ${l.text.substring(0,40)}...</option>`).join('');
+  showToast(`Parsed ${editorNewLines.length} lines from new page ✅`);
+}
+
+function confirmEditorInsert() {
+  if(!editorNewLines || currentScriptIdx === null) return;
+  const prod = productions[currentScriptIdx];
+  const insertAfter = parseInt(document.getElementById('editorInsertAfter').value);
+  if(insertAfter === -1) {
+    prod.scriptData = [...editorNewLines, ...(prod.scriptData||[])];
+  } else {
+    prod.scriptData.splice(insertAfter+1, 0, ...editorNewLines);
+  }
+  rebuildCuePairs(prod);
+  autoSave();
+  editorNewLines = null;
+  document.getElementById('editorInsertArea').style.display = 'none';
+  renderEditorLines(currentScriptIdx);
+  showToast(`${editorNewLines ? editorNewLines.length : 'New'} lines inserted ✅`);
+}
+
+function parseRawScript(text) {
+  const lines = text.split('\n');
+  const parsed = [];
+  let currentChar = null, currentText = [];
+  const SKIP = /^(ACT|SCENE|INT\.|EXT\.|SHIFT|LIGHTS|BLACKOUT)/;
+  function flush() {
+    if(currentChar && currentText.length > 0) {
+      const t = currentText.join(' ').replace(/\s+/g,' ').trim();
+      if(t) parsed.push({ char: currentChar, text: t, mine: false });
+      currentText = [];
+    }
+  }
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if(!trimmed) return;
+    if(/^[A-Z0-9][A-Z0-9\s\.\'\-\&]*$/.test(trimmed) && /[A-Z]/.test(trimmed) && !SKIP.test(trimmed) && trimmed.length>=2 && trimmed.length<=45 && !['A','I','HE','SHE','WE','OH','NO'].includes(trimmed)) {
+      flush(); currentChar = trimmed;
+    } else if(currentChar && !/^\(.*\)$/.test(trimmed) && !/^\[.*\]$/.test(trimmed)) {
+      currentText.push(trimmed);
+    }
+  });
+  flush();
+  return parsed;
+}
+
+// ════════════════════════════════════════
+//  IMPORT TABS
 // ════════════════════════════════════════
 function switchImportTab(tab, btn) {
   document.querySelectorAll('.itab').forEach(b => b.classList.remove('active'));
@@ -1400,713 +1872,210 @@ function switchImportTab(tab, btn) {
 }
 
 // ════════════════════════════════════════
-//  FILE UPLOAD
+//  TTS — READ ALOUD + SPEED CONTROL
 // ════════════════════════════════════════
-function handleFileUpload(input) {
-  const file = input.files[0];
-  if(!file) return;
-  const ext = file.name.split('.').pop().toLowerCase();
-  showToast(`Loading: ${file.name} 📂`);
-  if(ext === 'pdf') {
-    extractPDFwithPDFjs(file);
-  } else {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      rawScriptText = e.target.result;
-      processScript('file');
-    };
-    reader.readAsText(file);
-  }
+let ttsRate = 0.85;
+let ttsActive = false;
+
+function updateTTSSpeed(val) {
+  ttsRate = parseFloat(val);
+  const label = ttsRate.toFixed(1) + 'x';
+  const el1 = document.getElementById('ttsSpeedLabel');
+  const el2 = document.getElementById('ttsSpeedLabel2');
+  if(el1) el1.textContent = label;
+  if(el2) el2.textContent = label;
+  // Sync both sliders
+  const s1 = document.getElementById('ttsSpeedSlider');
+  const s2 = document.getElementById('ttsSpeedSlider2');
+  if(s1) s1.value = ttsRate;
+  if(s2) s2.value = ttsRate;
 }
 
-async function extractPDFwithPDFjs(file) {
-  showToast('Reading PDF... this takes a moment ⏳');
-  try {
-    // Configure PDF.js worker
-    if(window.pdfjsLib) {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    } else {
-      throw new Error('PDF.js not loaded');
-    }
-
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    let fullText = '';
-    const totalPages = pdf.numPages;
-
-    for(let pageNum = 1; pageNum <= totalPages; pageNum++) {
-      const page = await pdf.getPage(pageNum);
-      const content = await page.getTextContent();
-      // Reconstruct lines from text items, preserving vertical position groupings
-      const items = content.items;
-      if(items.length === 0) continue;
-
-      // Group by Y position (same line = within 3pt of each other)
-      let lastY = null;
-      let lineBuffer = '';
-      const pageLines = [];
-
-      items.forEach(item => {
-        const y = item.transform ? Math.round(item.transform[5]) : 0;
-        const text = item.str;
-        if(lastY !== null && Math.abs(y - lastY) > 3) {
-          // New line
-          if(lineBuffer.trim()) pageLines.push(lineBuffer.trimEnd());
-          lineBuffer = text;
-        } else {
-          lineBuffer += text;
-        }
-        lastY = y;
-      });
-      if(lineBuffer.trim()) pageLines.push(lineBuffer.trimEnd());
-
-      // Reverse lines (PDFs render bottom-up)
-      fullText += pageLines.reverse().join('\n') + '\n';
-    }
-
-    const cleaned = fullText.trim();
-    if(cleaned.length > 100) {
-      rawScriptText = cleaned;
-      showToast(`PDF loaded — ${totalPages} pages extracted ✅`);
-      processScript('file');
-    } else {
-      showToast('PDF appears image-based — please paste the text instead 📋');
-      document.querySelectorAll('.itab')[1]?.click();
-    }
-  } catch(err) {
-    console.error('PDF.js error:', err);
-    // Fallback: try raw binary extraction
-    showToast('Trying backup PDF reader... 🔄');
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const text = extractTextFromPDFFallback(e.target.result);
-      if(text.length > 100) {
-        rawScriptText = text;
-        processScript('file');
-      } else {
-        showToast('Could not read this PDF — please paste the script text 📋');
-        document.querySelectorAll('.itab')[1]?.click();
-      }
-    };
-    reader.readAsBinaryString(file);
-  }
-}
-
-function extractTextFromPDFFallback(binary) {
-  // Backup: extract readable strings from PDF binary stream
-  try {
-    let text = '';
-    // Look for text between parentheses in BT/ET blocks
-    const btBlocks = binary.match(/BT[\s\S]*?ET/g) || [];
-    btBlocks.forEach(block => {
-      const strings = block.match(/\(([^)\\]|\\.)*\)/g) || [];
-      strings.forEach(s => {
-        const clean = s.slice(1,-1)
-          .replace(/\\n/g,'\n').replace(/\\r/g,'')
-          .replace(/\\t/g,' ').replace(/\\\(/g,'(').replace(/\\\)/g,')')
-          .replace(/\\\\/g,'\\');
-        text += clean + ' ';
-      });
-      text += '\n';
-    });
-    return text.trim();
-  } catch(e) { return ''; }
-}
-
-// Drag and drop
-const dropZone = document.getElementById('dropZone');
-if(dropZone) {
-  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-  dropZone.addEventListener('drop', e => {
-    e.preventDefault();
-    dropZone.classList.remove('drag-over');
-    const file = e.dataTransfer.files[0];
-    if(file) {
-      const fakeInput = { files: [file] };
-      handleFileUpload(fakeInput);
-    }
-  });
-}
-
-// ════════════════════════════════════════
-//  SCRIPT PROCESSING — THE BRAIN
-// ════════════════════════════════════════
-function processScript(source) {
-  let text = '';
-  if(source === 'paste') {
-    text = document.getElementById('pasteArea').value.trim();
-    if(!text) { showToast('Please paste your script text first! 📋'); return; }
-  } else {
-    text = rawScriptText;
-  }
-  if(text.length < 20) { showToast('Script seems too short — please try again'); return; }
-  rawScriptText = text;
-
-  // Detect characters
-  const chars = detectCharacters(text);
-  showCharacterSetup(chars);
-  showToast(`Script loaded! Found ${chars.length} characters 🎭`);
-}
-
-function detectCharacters(text) {
-  const lines = text.split('\n');
-  const charCounts = {};
-
-  // Patterns for play script character names:
-  // 1. ALL CAPS line on its own (standard US play format)
-  // 2. ALL CAPS with numbers like "BROTHER 1", "1st LADY", "2nd WIFE"
-  // 3. Names with apostrophes or hyphens: "MR. MANO", "MRS. 2ND"
-  const SKIP = /^(ACT|SCENE|INT\.|EXT\.|THE END|LIGHTS|BLACKOUT|CURTAIN|END OF|FADE|CUT TO|SHIFT|VOICE OVER|STAGE DIRECTION|NEVER WRESTLE)/;
-  
-  lines.forEach((line, i) => {
-    const trimmed = line.trim();
-    if(!trimmed || trimmed.length < 2 || trimmed.length > 40) return;
-    if(SKIP.test(trimmed)) return;
-    
-    // Pattern 1: Pure ALL CAPS line (standard character cue)
-    // Allows: letters, spaces, numbers, apostrophes, periods, hyphens
-    if(/^[A-Z0-9][A-Z0-9\s\.\'\-]*$/.test(trimmed)) {
-      // Must have at least one letter
-      if(!/[A-Z]/.test(trimmed)) return;
-      // Must not be a single common word that's likely a direction
-      if(['A','I','HE','SHE','IT','WE','TO','GO','NO','OH','MY','UP'].includes(trimmed)) return;
-      const name = trimmed;
-      charCounts[name] = (charCounts[name]||0) + 1;
-    }
-    
-    // Pattern 2: "NAME:" format
-    const colonMatch = trimmed.match(/^([A-Z][A-Z0-9\s\.\'\-]{1,28}):/);
-    if(colonMatch) {
-      const name = colonMatch[1].trim();
-      charCounts[name] = (charCounts[name]||0) + 1;
-    }
-
-    // Pattern 3: Mixed case with parenthetical — "Mr. Mano" style in stage directions
-    // Already covered by ALL CAPS — skip
-  });
-
-  // Filter: must appear at least 2 times (once = likely a direction or word)
-  // For short scripts (readings), lower threshold to 1
-  const totalMatches = Object.values(charCounts).reduce((a,b)=>a+b, 0);
-  const minCount = totalMatches > 50 ? 2 : 1;
-
-  return Object.entries(charCounts)
-    .filter(([,count]) => count >= minCount)
-    .sort((a,b) => b[1]-a[1])
-    .map(([name]) => name)
-    .slice(0, 20); // Allow up to 20 characters
-}
-
-function showCharacterSetup(chars) {
-  const setup = document.getElementById('charSetup');
-  const pills = document.getElementById('detectedChars');
-  setup.classList.add('show');
-  if(chars.length === 0) {
-    pills.innerHTML = '<div style="font-size:13px;color:var(--brown-light);">No characters auto-detected — type your character name below</div>';
-    return;
-  }
-  pills.innerHTML = chars.map(c =>
-    `<div class="char-pill" onclick="selectCharPill(this,'${c}')">${c}</div>`
-  ).join('');
-}
-
-function selectCharPill(el, name) {
-  document.querySelectorAll('.char-pill').forEach(p => p.classList.remove('selected'));
-  el.classList.add('selected');
-  document.getElementById('myCharInput').value = name;
-}
-
-function highlightTypedChar(val) {
-  const upper = val.toUpperCase();
-  document.querySelectorAll('.char-pill').forEach(p => {
-    p.classList.toggle('selected', p.textContent === upper);
-  });
-}
-
-function confirmCharacter() {
-  const name = (document.getElementById('myCharInput').value || '').trim().toUpperCase();
-  if(!name) { showToast('Please choose or type your character name 🎭'); return; }
-  // Hide character setup
-  document.getElementById('charSetup').classList.remove('show');
-  document.getElementById('charSetup').style.display = 'none';
-  // Show scene splitter
-  showSceneSplitter(rawScriptText, name);
-}
-
-// ═══════════════════════════════════════
-//  SCENE SPLITTER
-// ═══════════════════════════════════════
-let splitterParsed = [];
-let splitterMyChar = '';
-let splitterDividers = []; // [{afterIdx, name}]
-
-function showSceneSplitter(text, myChar) {
-  splitterMyChar = myChar;
-  splitterDividers = [];
-
-  // Quick parse to get blocks
-  const lines = text.split('\n');
-  splitterParsed = [];
-  let currentChar = null, currentText = [];
-  function flush() {
-    if(currentChar && currentText.length > 0) {
-      const t = currentText.join(' ').replace(/\s+/g,' ').trim();
-      if(t) splitterParsed.push({ char: currentChar, text: t, mine: currentChar === myChar });
-      currentText = [];
-    }
-  }
-  lines.forEach(function(line) {
-    const trimmed = line.trim();
-    if(!trimmed) return;
-    const isChar = /^[A-Z0-9][A-Z0-9\s\.\'\-\&]*$/.test(trimmed) && /[A-Z]/.test(trimmed) && !trimmed.match(/^(ACT|SCENE|INT\.|EXT\.|SHIFT|LIGHTS|BLACKOUT|NEVER WRESTLE)/) && trimmed.length >= 2 && trimmed.length <= 45 && !['A','I','HE','SHE','WE','OH','NO','GO','UP','AH'].includes(trimmed);
-    const colonMatch = trimmed.match(/^([A-Z][A-Z0-9\s\.\'\-]{1,28}):\s*(.*)/);
-    if(colonMatch) { flush(); currentChar = colonMatch[1].trim(); if(colonMatch[2]) currentText.push(colonMatch[2]); }
-    else if(isChar) { flush(); currentChar = trimmed; }
-    else if(currentChar && !/^\(.*\)$/.test(trimmed) && !/^\[.*\]$/.test(trimmed)) currentText.push(trimmed);
-  });
-  flush();
-
-  if(splitterParsed.length === 0) {
-    // Nothing parsed — go straight to buildScriptData
-    buildScriptData(text, myChar);
-    return;
-  }
-
-  // Render splitter view
-  document.getElementById('sceneSplitterSection').style.display = 'block';
-  renderSplitterScript();
-}
-
-function renderSplitterScript() {
-  const container = document.getElementById('splitterScript');
-  let html = '<div style="font-size:11px;color:var(--brown-light);margin-bottom:12px;font-weight:700;">Tap between any two lines to add a scene divider:</div>';
-
-  splitterParsed.forEach(function(block, i) {
-    // Show any divider that goes BEFORE this block
-    const divBefore = splitterDividers.find(function(d){ return d.afterIdx === i - 0.5; });
-    if(divBefore) {
-      html += renderDivider(i - 0.5, divBefore.name);
-    }
-
-    // The script block itself
-    html += '<div style="padding:8px 0;border-bottom:1px solid var(--sand-dark);">';
-    html += '<div style="font-size:10px;font-weight:900;color:' + (block.mine ? 'var(--terra)' : 'var(--brown-light)') + ';text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;">' + block.char + '</div>';
-    html += '<div style="font-size:13px;line-height:1.6;' + (block.mine ? 'font-weight:700;border-left:3px solid var(--terra);padding-left:8px;' : 'color:var(--brown-light);') + '">' + block.text.substring(0, 120) + (block.text.length > 120 ? '...' : '') + '</div>';
-    html += '</div>';
-
-    // Insert button AFTER this block
-    const hasDivider = splitterDividers.find(function(d){ return d.afterIdx === i + 0.5; });
-    if(!hasDivider) {
-      html += '<div style="text-align:center;margin:4px 0;">';
-      html += '<button onclick="addSceneDivider(' + (i + 0.5) + ')" style="background:none;border:1px dashed var(--sage);color:var(--sage);border-radius:99px;padding:3px 16px;font-size:10px;font-weight:900;cursor:pointer;font-family:var(--font);">+ scene break here</button>';
-      html += '</div>';
-    } else {
-      html += renderDivider(i + 0.5, hasDivider.name);
-    }
-  });
-
-  container.innerHTML = html;
-}
-
-function renderDivider(idx, name) {
-  return '<div style="background:var(--sage);color:white;border-radius:var(--rs);padding:8px 14px;margin:6px 0;display:flex;align-items:center;gap:8px;">' +
-    '<div style="font-size:12px;">📍</div>' +
-    '<input value="' + name + '" onchange="renameDivider(' + idx + ', this.value)" ' +
-      'style="flex:1;background:rgba(255,255,255,0.25);border:none;border-radius:6px;padding:4px 8px;font-family:var(--font);font-weight:900;font-size:12px;color:white;" ' +
-      'placeholder="Scene name...">' +
-    '<button onclick="removeDivider(' + idx + ')" style="background:rgba(255,255,255,0.2);border:none;color:white;border-radius:99px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:var(--font);">✕ Remove</button>' +
-  '</div>';
-}
-
-function addSceneDivider(afterIdx) {
-  const sceneNum = splitterDividers.length + 2;
-  splitterDividers.push({ afterIdx: afterIdx, name: 'Scene ' + sceneNum });
-  splitterDividers.sort(function(a,b){ return a.afterIdx - b.afterIdx; });
-  renderSplitterScript();
-  showToast('Scene break added — tap the name to rename it');
-}
-
-function renameDivider(idx, newName) {
-  const d = splitterDividers.find(function(d){ return d.afterIdx === idx; });
-  if(d) d.name = newName;
-}
-
-function removeDivider(idx) {
-  splitterDividers = splitterDividers.filter(function(d){ return d.afterIdx !== idx; });
-  renderSplitterScript();
-}
-
-function skipSceneSplit() {
-  document.getElementById('sceneSplitterSection').style.display = 'none';
-  buildScriptData(rawScriptText, splitterMyChar);
-}
-
-function saveSplitScenes() {
-  document.getElementById('sceneSplitterSection').style.display = 'none';
-  buildScriptDataWithScenes(splitterParsed, splitterMyChar, splitterDividers);
-}
-
-function buildScriptDataWithScenes(parsed, myChar, dividers) {
-  // Assign scene names to each block
-  var scenes = ['Scene 1'];
-  dividers.forEach(function(d){ scenes.push(d.name); });
-
-  function getScene(blockIdx) {
-    var sceneName = 'Scene 1';
-    for(var i=0; i<dividers.length; i++) {
-      if(blockIdx > dividers[i].afterIdx - 0.5) sceneName = dividers[i].name;
-    }
-    return sceneName;
-  }
-
-  var cuePairs = [];
-  var sceneList = [];
-  for(var i=0; i<parsed.length; i++) {
-    var scene = getScene(i);
-    if(!sceneList.includes(scene)) sceneList.push(scene);
-    if(parsed[i].mine) {
-      var cue = i > 0 ? parsed[i-1].text : 'Start of scene';
-      cuePairs.push({ cue: cue, myLine: parsed[i].text, scene: scene, needsWork: false });
-    }
-  }
-
-  var prod = {
-    name: 'My Script',
-    role: myChar,
-    type: '🎭',
-    scriptData: parsed.map(function(b,i){ return Object.assign({},b,{scene:getScene(i)}); }),
-    cuePairs: cuePairs,
-    scenes: sceneList,
-    myChar: myChar,
-    id: Date.now(),
-    progress: 0
-  };
-  productions.push(prod);
-  activeProduction = prod;
-
-  renderScriptReader(prod.scriptData, myChar);
-  document.getElementById('readerSection').style.display = 'block';
-
-  showToast('Found ' + cuePairs.length + ' lines across ' + sceneList.length + ' scenes!');
-  refreshHome();
-  refreshProductionsList();
-  refreshPracticeScreen();
-  autoSave();
-}
-
-function buildScriptData(text, myChar) {
-  const lines = text.split('\n');
-  const parsed = [];
-  let currentChar = null;
-  let currentText = [];
-
-  const SKIP_LINES = /^(ACT|SCENE|INT\.|EXT\.|THE END|LIGHTS|BLACKOUT|CURTAIN|END OF|FADE|CUT TO|SHIFT|VOICE OVER|NEVER WRESTLE)/;
-
-  function isCharacterName(trimmed) {
-    if(!trimmed || trimmed.length < 2 || trimmed.length > 45) return false;
-    if(SKIP_LINES.test(trimmed)) return false;
-    // Must be ALL CAPS (letters, numbers, spaces, periods, apostrophes, hyphens)
-    if(!/^[A-Z0-9][A-Z0-9\s\.\'\-\&]*$/.test(trimmed)) return false;
-    // Must contain at least one letter
-    if(!/[A-Z]/.test(trimmed)) return false;
-    // Skip single common words
-    if(['A','I','HE','SHE','IT','WE','TO','GO','NO','OH','MY','UP','HM','AH'].includes(trimmed)) return false;
-    return true;
-  }
-
-  function flush() {
-    if(currentChar && currentText.length > 0) {
-      const lineText = currentText.join(' ').replace(/\s+/g,' ').trim();
-      if(lineText) parsed.push({ char: currentChar, text: lineText, mine: currentChar === myChar });
-      currentText = [];
-    }
-  }
-
-  lines.forEach(line => {
-    const trimmed = line.trim();
-    if(!trimmed) return;
-
-    // Colon format: "NAME: dialogue"
-    const colonMatch = trimmed.match(/^([A-Z][A-Z0-9\s\.\'\-]{1,28}):\s*(.*)/);
-    if(colonMatch) {
-      flush();
-      currentChar = colonMatch[1].trim();
-      if(colonMatch[2].trim()) currentText.push(colonMatch[2].trim());
-      return;
-    }
-
-    // Check if this line is a character name
-    if(isCharacterName(trimmed)) {
-      // Only treat as char name if it matches one we detected (or is clearly a name)
-      flush();
-      currentChar = trimmed;
-      return;
-    }
-
-    if(currentChar) {
-      // Skip pure stage directions in parens or brackets
-      if(/^\(.*\)$/.test(trimmed) || /^\[.*\]$/.test(trimmed)) return;
-      // Skip lines that are clearly stage directions (start with * or italic markers)
-      if(/^\*.*\*$/.test(trimmed)) return;
-      // Include everything else as dialogue (inline stage directions are part of the line)
-      currentText.push(trimmed);
-    }
-  });
-  flush();
-
-  if(parsed.length === 0) {
-    showToast('Could not parse script — try the paste option with proper formatting');
-    return;
-  }
-
-  // Build cue pairs for my lines
-  const cuePairs = [];
-  for(let i=0; i<parsed.length; i++) {
-    if(parsed[i].mine) {
-      const cue = i > 0 ? parsed[i-1].text : 'Start of scene';
-      cuePairs.push({ cue, myLine: parsed[i].text });
-    }
-  }
-
-  // Save production
-  const prod = {
-    name: document.getElementById('myCharInput').dataset.prodName || 'My Script',
-    role: myChar,
-    type: '🎭',
-    scriptData: parsed,
-    cuePairs,
-    myChar,
-    id: Date.now()
-  };
-  productions.push(prod);
-  activeProduction = prod;
-
-  // Render script
-  renderScriptReader(parsed, myChar);
-  document.getElementById('readerSection').style.display = 'block';
-  document.getElementById('charSetup').classList.remove('show');
-  document.getElementById('charSetup').style.display = 'none';
-
-  const myLineCount = parsed.filter(l=>l.mine).length;
-  showToast(`✅ Found ${myLineCount} lines for ${myChar}! 🎭`);
-  refreshHome();
-  refreshProductionsList();
-  refreshPracticeScreen();
-}
-
-// ════════════════════════════════════════
-//  SCRIPT READER
-// ════════════════════════════════════════
-function renderScriptReader(data, myChar) {
-  const reader = document.getElementById('scriptReader');
-  reader.innerHTML = data.map(block => `
-    <div class="script-block ${myLinesOnlyMode && !block.mine ? 'my-lines-hidden' : ''}" style="${myLinesOnlyMode && !block.mine ? 'display:none;' : ''}">
-      <div class="s-charname">${block.char}</div>
-      <div class="${block.mine ? 's-myline' : 's-otherline'}">
-        ${block.text.split(' ').map(w =>
-          `<span class="clickword" onclick="lookupWord('${w.replace(/[^a-zA-Z]/g,'').toLowerCase()}')">${w} </span>`
-        ).join('')}
-      </div>
-    </div>
-  `).join('');
-}
-
-function toggleMyLinesOnly(btn) {
-  myLinesOnlyMode = !myLinesOnlyMode;
-  btn.classList.toggle('active', myLinesOnlyMode);
-  if(activeProduction) renderScriptReader(activeProduction.scriptData, activeProduction.myChar);
-}
-
-function toggleFont(btn) {
-  btn.classList.toggle('active');
-  document.body.style.fontFamily = btn.classList.contains('active') ? "OpenDyslexic, Nunito, sans-serif" : "Nunito, sans-serif";
-}
-
-function changeFontSize(delta, btn) {
-  scriptFontSize = Math.max(12, Math.min(26, scriptFontSize + delta));
-  document.documentElement.style.setProperty('--script-fs', scriptFontSize+'px');
-  showToast(`Font size: ${scriptFontSize}px`);
+function stopReading() {
+  if('speechSynthesis' in window) window.speechSynthesis.cancel();
+  ttsActive = false;
+  const btn1 = document.getElementById('ttsToggle');
+  const btn2 = document.getElementById('detailTtsBtn');
+  if(btn1) btn1.textContent = '🔊 Read';
+  if(btn2) btn2.textContent = '🔊 Read';
 }
 
 function readAloud() {
-  if(!activeProduction) { showToast('Load a script first! 📄'); return; }
-  const myLines = activeProduction.scriptData.filter(l=>l.mine).map(l=>l.text).join('. ');
-  speakText(myLines, 0.85);
-  showToast('🔊 Reading your lines aloud...');
+  if(ttsActive) { stopReading(); return; }
+  const prod = activeProduction;
+  if(!prod) { showToast('Load a script first! 📄'); return; }
+  const myLines = prod.scriptData.filter(l=>l.mine).map(l=>l.text).join('. ');
+  ttsActive = true;
+  const btn1 = document.getElementById('ttsToggle');
+  const btn2 = document.getElementById('detailTtsBtn');
+  if(btn1) btn1.textContent = '⏹ Stop';
+  if(btn2) btn2.textContent = '⏹ Stop';
+  speakText(myLines, ttsRate, () => {
+    ttsActive = false;
+    if(btn1) btn1.textContent = '🔊 Read';
+    if(btn2) btn2.textContent = '🔊 Read';
+  });
+  showToast('🔊 Reading your lines...');
 }
 
 function speakCue() {
   const txt = document.getElementById('cueTxt');
-  if(txt && txt.textContent) speakText(txt.textContent, 0.85);
+  if(txt && txt.textContent) speakText(txt.textContent, ttsRate);
 }
 
-function speakText(text, rate) {
+function speakText(text, rate, onEnd) {
   if(!('speechSynthesis' in window)) { showToast('Speech not supported in this browser'); return; }
-  // iOS requires cancel before speak and a tiny delay
   window.speechSynthesis.cancel();
   setTimeout(function() {
     const u = new SpeechSynthesisUtterance(text);
     u.rate = rate || 0.85;
     u.pitch = 1;
     u.volume = 1;
-    // Pick a good voice if available
     const voices = window.speechSynthesis.getVoices();
     const preferred = voices.find(v => v.lang.startsWith('en') && v.localService);
     if(preferred) u.voice = preferred;
+    if(onEnd) u.onend = onEnd;
     window.speechSynthesis.speak(u);
   }, 100);
 }
 
 // ════════════════════════════════════════
-//  DICTIONARY
-// ════════════════════════════════════════
-function lookupWord(word) {
-  const clean = word.toLowerCase().replace(/[^a-z]/g,'');
-  if(!clean) return;
-  const entry = dict[clean];
-  document.getElementById('dpWord').textContent = clean;
-  document.getElementById('dpPron').textContent = entry ? entry.pron : '/ˈwɜːrd/';
-  document.getElementById('dpDef').textContent = entry ? entry.def : 'Definition not in local dictionary. Tap "Hear it" to hear pronunciation.';
-  document.getElementById('dictPop').classList.add('show');
-}
-function closeDict() { document.getElementById('dictPop').classList.remove('show'); }
-function speakDictWord() {
-  const w = document.getElementById('dpWord').textContent;
-  if('speechSynthesis' in window) {
-    const u = new SpeechSynthesisUtterance(w);
-    u.rate = 0.7;
-    speechSynthesis.speak(u);
-  }
-}
-
-// ════════════════════════════════════════
-//  HOME & PRACTICE REFRESH
+//  HOME + PRACTICE REFRESH
 // ════════════════════════════════════════
 function refreshHome() {
   const container = document.getElementById('homeProductions');
+  if(!container) return;
   if(productions.length === 0) {
-    container.innerHTML = `<div class="empty-state"><div class="es-icon">🎭</div><p>No productions yet.<br>Upload your first script to get started!</p><br><button class="btn btn-terra btn-sm" onclick="navTo('scriptScreen',1)" style="width:auto;padding:10px 24px;">Upload Script</button></div>`;
+    container.innerHTML = `<div class="empty-state"><div class="es-icon">🎭</div><p>No productions yet.<br>Upload your first script!</p><br><button class="btn btn-terra btn-sm" onclick="navTo('scriptScreen',1)" style="width:auto;padding:10px 24px;">Upload Script</button></div>`;
     document.getElementById('homeLinesLearned').textContent = '0';
     return;
   }
+  const colors = ['var(--terra)','var(--sage)','var(--amber)','#7B1FA2','#1565C0'];
   container.innerHTML = productions.map((p,i) => `
-    <div class="prod-card" onclick="loadProduction(${i})" style="border-left-color:${i===0?'var(--terra)':i===1?'var(--sage)':'var(--amber)'}">
-      <div class="prod-icon">${p.type}</div>
+    <div class="prod-card" onclick="loadProduction(${i})" style="border-left-color:${colors[i%colors.length]}">
+      <div class="prod-icon">${p.type||'🎭'}</div>
       <div class="prod-info">
-        <div class="prod-name">${p.myChar}</div>
-        <div class="prod-sub">${p.scriptData.filter(l=>l.mine).length} lines · ${p.scriptData.length} total blocks</div>
+        <div class="prod-name">${p.name||p.myChar}</div>
+        <div class="prod-sub">${p.myChar} · ${p.scriptData?p.scriptData.filter(l=>l.mine).length:0} lines</div>
         <div class="prog-wrap" style="margin-top:8px;"><div class="prog-fill" style="width:${p.progress||0}%"></div></div>
         <div class="prog-label">${p.progress||0}% learned</div>
       </div>
     </div>
   `).join('');
-  const total = productions.reduce((a,p)=>a+p.scriptData.filter(l=>l.mine).length,0);
+  const total = productions.reduce((a,p)=>a+(p.scriptData?p.scriptData.filter(l=>l.mine).length:0),0);
   document.getElementById('homeLinesLearned').textContent = total;
 }
 
 function loadProduction(idx) {
   activeProduction = productions[idx];
-  renderScriptReader(activeProduction.scriptData, activeProduction.myChar);
-  document.getElementById('readerSection').style.display = 'block';
+  currentScriptIdx = idx;
   navTo('scriptScreen', 1);
-}
-
-function refreshProductionsList() {
-  const list = document.getElementById('productionsList');
-  if(productions.length === 0) { list.innerHTML = ''; return; }
-  list.innerHTML = `<div class="section-title">All Productions</div>` +
-    productions.map((p,i) => `
-      <div class="prod-card" onclick="loadProduction(${i})">
-        <div class="prod-icon">🎭</div>
-        <div class="prod-info">
-          <div class="prod-name">${p.myChar}</div>
-          <div class="prod-sub">${p.cuePairs ? p.cuePairs.length : 0} lines · ${p.scenes ? p.scenes.length + ' scenes' : 'no scenes'}</div>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          ${p.isManual ? `<button onclick="event.stopPropagation();editProduction(${i})" style="background:var(--sage);color:white;border:none;border-radius:99px;padding:6px 14px;font-size:11px;font-weight:900;cursor:pointer;font-family:var(--font);">✏️ Edit</button>` : ''}
-          <button onclick="event.stopPropagation();deleteProduction(${i})" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--brown-light);">🗑</button>
-        </div>
-      </div>
-    `).join('');
+  setTimeout(() => showScriptDetail(idx), 50);
 }
 
 function deleteProduction(idx) {
   productions.splice(idx, 1);
   if(activeProduction === productions[idx]) activeProduction = null;
   refreshHome();
-  refreshProductionsList();
+  renderScriptLibrary();
   refreshPracticeScreen();
-  showToast('Production removed');
+  autoSave();
+  showToast('Script deleted');
 }
 
 function refreshPracticeScreen() {
+  // Script picker
+  const picker = document.getElementById('practiceScriptPicker');
+  if(picker) {
+    if(productions.length === 0) {
+      picker.innerHTML = '';
+    } else {
+      picker.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px;">` +
+        productions.map((p,i) => `<button class="tool-btn ${(activeProduction===p||(!activeProduction&&i===0))?'active':''}" onclick="setPracticeScript(${i},this)">${p.name||p.myChar}</button>`).join('') +
+        `</div>`;
+    }
+  }
   const c = document.getElementById('practiceContent');
+  if(!c) return;
   if(productions.length === 0) {
-    c.innerHTML = `<div class="empty-state"><div class="es-icon">📚</div><p>Upload a script first to start practising!</p><br><button class="btn btn-terra btn-sm" onclick="navTo('scriptScreen',1)" style="width:auto;padding:10px 24px;">Upload Script</button></div>`;
+    c.innerHTML = `<div class="empty-state"><div class="es-icon">📚</div><p>Upload a script first!</p><br><button class="btn btn-terra btn-sm" onclick="navTo('scriptScreen',1)" style="width:auto;padding:10px 24px;">Upload Script</button></div>`;
     return;
   }
   const prod = activeProduction || productions[0];
+  if(!activeProduction) activeProduction = productions[0];
+  if(!prod) return;
+  const cps = prod.cuePairs || [];
   const scenes = prod.scenes && prod.scenes.length > 1 ? prod.scenes : null;
-
   const sceneSelector = scenes ? `
     <div class="card" style="margin-bottom:14px;">
       <div style="font-size:13px;font-weight:900;margin-bottom:10px;">Practice by scene:</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="tool-btn active" id="sceneAll" onclick="setSceneFilter('all',this)">All Scenes (${prod.cuePairs.length})</button>
+        <button class="tool-btn active" onclick="setSceneFilter('all',this)">All (${cps.length})</button>
         ${scenes.map(s => {
-          const count = prod.cuePairs.filter(p=>(p.scene||'Scene 1')===s).length;
-          return `<button class="tool-btn" id="scene_${s.replace(/\s/g,'_')}" onclick="setSceneFilter('${s}',this)">${s} (${count})</button>`;
+          const count = (prod.cuePairs||[]).filter(p=>(p.scene||'Scene 1')===s).length;
+          return `<button class="tool-btn" onclick="setSceneFilter('${s}',this)">${s} (${count})</button>`;
         }).join('')}
       </div>
-    </div>
-  ` : '';
+    </div>` : '';
 
   c.innerHTML = `
     <div class="card" style="margin-bottom:16px;">
       <div style="font-size:12px;color:var(--brown-light);font-weight:700;margin-bottom:4px;">Currently practising:</div>
       <div style="font-size:16px;font-weight:900;">${prod.myChar}</div>
-      <div style="font-size:12px;color:var(--brown-light);" id="practiceLineCount">${prod.cuePairs.length} lines ready</div>
+      <div style="font-size:12px;color:var(--brown-light);" id="practiceLineCount">${prod.cuePairs?(prod.cuePairs||[]).length:0} lines ready</div>
     </div>
     ${sceneSelector}
     <div class="pm-card" onclick="startCueCards()">
       <div class="pm-icon">🃏</div>
-      <div class="pm-info"><div class="pm-name">Cue Cards</div><div class="pm-desc">See the cue, recall your line. Word-perfect checking.</div></div>
+      <div class="pm-info"><div class="pm-name">Cue Cards</div><div class="pm-desc">See the cue, recall your line</div></div>
       <div class="pm-arrow">›</div>
     </div>
     <div class="pm-card" onclick="startHandsFree()">
       <div class="pm-icon">🔊</div>
-      <div class="pm-info"><div class="pm-name">Hands-Free Mode</div><div class="pm-desc">Phone reads the cue aloud — you speak your line back.</div></div>
+      <div class="pm-info"><div class="pm-name">Read My Lines</div><div class="pm-desc">Phone reads all your lines aloud — with speed control</div></div>
+      <div class="pm-arrow">›</div>
+    </div>
+    <div class="pm-card" onclick="showMyLinesOnly()">
+      <div class="pm-icon">🎭</div>
+      <div class="pm-info"><div class="pm-name">My Lines Only</div><div class="pm-desc">See just your lines in order. Tap to show all lines.</div></div>
       <div class="pm-arrow">›</div>
     </div>
     <div class="pm-card" onclick="startScenePartner()">
-      <div class="pm-icon">🎭</div>
-      <div class="pm-info"><div class="pm-name">Scene Partner</div><div class="pm-desc">App voices ALL other characters. Just you and your phone.</div></div>
+      <div class="pm-icon">👥</div>
+      <div class="pm-info"><div class="pm-name">Scene Partner</div><div class="pm-desc">App reads all other characters. You speak yours.</div></div>
       <div class="pm-arrow">›</div>
     </div>
     <div class="pm-card" onclick="startSpeedDrill()">
       <div class="pm-icon">⚡</div>
-      <div class="pm-info"><div class="pm-name">Speed Drill</div><div class="pm-desc">Race through all your lines. Beat your personal best!</div></div>
-      <div class="pm-arrow">›</div>
-    </div>
-    <div class="pm-card" onclick="startNeedsWork()">
-      <div class="pm-icon">🔁</div>
-      <div class="pm-info"><div class="pm-name">Needs Work</div><div class="pm-desc">Practise only the lines you've flagged as wrong.</div></div>
+      <div class="pm-info"><div class="pm-name">Speed Drill</div><div class="pm-desc">Race through all your lines. Beat your best time!</div></div>
       <div class="pm-arrow">›</div>
     </div>
     <div class="pm-card" onclick="showProgressDashboard()">
       <div class="pm-icon">📊</div>
-      <div class="pm-info"><div class="pm-name">Progress Dashboard</div><div class="pm-desc">See which scenes you've mastered and what needs work.</div></div>
+      <div class="pm-info"><div class="pm-name">Progress Dashboard</div><div class="pm-desc">See which scenes you've mastered</div></div>
       <div class="pm-arrow">›</div>
-    </div>
-    ${prod.cuePairs.some(p=>p.needsWork) ? `
-    <div class="card">
-      <div class="section-title" style="font-size:14px;">Flagged for Review 🔁</div>
-      ${prod.cuePairs.filter(p=>p.needsWork).map(p => `
-        <div style="font-size:13px;line-height:1.8;border-left:4px solid var(--terra);padding:8px 12px;margin-bottom:10px;background:rgba(193,97,79,0.06);border-radius:0 var(--rs) var(--rs) 0;font-style:italic;">"${p.myLine.substring(0,80)}${p.myLine.length>80?'...':''}"</div>
-      `).join('')}
-    </div>` : ''}
-  `;
+    </div>`;
+}
+
+function setPracticeScript(idx, btn) {
+  activeProduction = productions[idx];
+  document.querySelectorAll('#practiceScriptPicker .tool-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  refreshPracticeScreen();
+}
+
+// Show my lines only in practice
+function showMyLinesOnly() {
+  const prod = activeProduction || productions[0];
+  if(!prod) return;
+  navTo('scriptScreen', 1);
+  setTimeout(() => {
+    showScriptDetail(productions.indexOf(prod));
+    setTimeout(() => {
+      const myLinesBtn = document.getElementById('detailMyLinesOnly');
+      if(myLinesBtn && !myLinesBtn.classList.contains('active')) myLinesBtn.click();
+    }, 100);
+  }, 50);
 }
 
 let activeSceneFilter = 'all';
@@ -2117,247 +2086,216 @@ function setSceneFilter(scene, btn) {
   if(btn) btn.classList.add('active');
   const prod = activeProduction || productions[0];
   if(!prod) return;
-  const count = scene === 'all' ? prod.cuePairs.length : prod.cuePairs.filter(p=>(p.scene||'Scene 1')===scene).length;
+  const count = scene==='all' ? (prod.cuePairs||[]).length : (prod.cuePairs||[]).filter(p=>(p.scene||'Scene 1')===scene).length;
   const el = document.getElementById('practiceLineCount');
-  if(el) el.textContent = count + ' lines' + (scene !== 'all' ? ' in ' + scene : ' total');
+  if(el) el.textContent = count + ' lines' + (scene!=='all'?' in '+scene:' total');
 }
 
 // ════════════════════════════════════════
 //  CUE CARDS
 // ════════════════════════════════════════
+let cuePaused = false;
+
 function startCueCards() {
   const prod = activeProduction || productions[0];
-  if(!prod || prod.cuePairs.length === 0) { showToast('No lines found to practise!'); return; }
-
-  // Apply scene filter
-  if(activeSceneFilter !== 'all') {
-    cuePairs = prod.cuePairs.filter(p => (p.scene||'Scene 1') === activeSceneFilter);
-    if(cuePairs.length === 0) { showToast('No lines in that scene yet!'); return; }
-    document.getElementById('cueScreenTitle').textContent = `Cue Cards — ${activeSceneFilter}`;
-    document.getElementById('cueScreenSub').textContent = `${prod.myChar} · ${cuePairs.length} lines`;
-  } else {
-    cuePairs = prod.cuePairs;
-    document.getElementById('cueScreenTitle').textContent = `Cue Cards — ${prod.myChar}`;
-    document.getElementById('cueScreenSub').textContent = `${cuePairs.length} lines`;
-  }
-
-  cueIndex = 0;
+  if(!prod || !prod.cuePairs || (prod.cuePairs||[]).length === 0) { showToast('No lines found!'); return; }
+  cuePairs = activeSceneFilter !== 'all' ? (prod.cuePairs||[]).filter(p=>(p.scene||'Scene 1')===activeSceneFilter) : [...prod.cuePairs];
+  if(cuePairs.length === 0) { showToast('No lines in that section!'); return; }
+  cueIndex = 0; lineShown = false; cuePaused = false;
+  document.getElementById('cueScreenTitle').textContent = `Cue Cards${activeSceneFilter!=='all'?' — '+activeSceneFilter:''}`;
+  document.getElementById('cuePauseBtn').textContent = '⏸ Pause';
+  screenIds.forEach(s => { const el=document.getElementById(s); if(el) el.classList.remove('active'); });
+  document.querySelectorAll('.game-screen,.hf-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('cueScreen').classList.add('active');
   loadCue();
-  navTo('cueScreen', 2);
+  window.scrollTo(0,0);
 }
 
-function startNeedsWork() {
-  const prod = activeProduction || productions[0];
-  if(!prod) return;
-  const flagged = prod.cuePairs.filter(p=>p.needsWork);
-  if(flagged.length === 0) { showToast('No lines flagged yet! Great work!'); return; }
-  cuePairs = flagged;
-  cueIndex = 0;
-  document.getElementById('cueScreenTitle').textContent = 'Needs Work';
-  document.getElementById('cueScreenSub').textContent = flagged.length + ' lines to review';
-  loadCue();
-  navTo('cueScreen', 2);
+function pauseCueCards() {
+  cuePaused = !cuePaused;
+  document.getElementById('cuePauseBtn').textContent = cuePaused ? '▶ Resume' : '⏸ Pause';
+  if(cuePaused) stopReading();
+}
+
+function exitToGameChooser() {
+  stopReading();
+  clearInterval(gameTimerInt);
+  clearInterval(sdTimerInterval);
+  // Go back to the game screen home
+  screenIds.forEach(s => { const el=document.getElementById(s); if(el) el.classList.remove('active'); });
+  document.querySelectorAll('.game-screen,.hf-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('gameScreen').classList.add('active');
+  showGameHome();
+  document.querySelectorAll('.nav-btn').forEach((b,i) => b.classList.toggle('active', i===3));
+  window.scrollTo(0,0);
 }
 
 function loadCue() {
+  if(cueIndex >= cuePairs.length) { finishCueCards(); return; }
   const pair = cuePairs[cueIndex];
-  const pct = (cueIndex / cuePairs.length) * 100;
-  document.getElementById('cueProgBar').style.width = pct + '%';
+  const pct = (cueIndex/cuePairs.length)*100;
+  document.getElementById('cueProgBar').style.width = pct+'%';
   document.getElementById('cueProgLabel').textContent = `Line ${cueIndex+1} of ${cuePairs.length}`;
-  document.getElementById('cueScreenSub').textContent = `Line ${cueIndex+1} of ${cuePairs.length}`;
   document.getElementById('cueTxt').textContent = pair.cue;
-  document.getElementById('revealTxt').textContent = pair.myLine;
-  document.getElementById('revealTxt').style.display = 'none';
   document.getElementById('revealHint').style.display = 'block';
-  document.getElementById('myLineReveal').classList.remove('shown');
-  document.getElementById('feedbackRow').style.display = 'none';
-  document.getElementById('nextCueBtn').classList.remove('show');
+  document.getElementById('revealTxt').textContent = '';
+  document.getElementById('myLineReveal').style.background = '';
+  document.getElementById('wordAnalysis').innerHTML = '';
   document.getElementById('cueBanner').className = 'result-banner';
-  document.getElementById('wordAnalysis').className = 'word-analysis';
-  document.getElementById('voiceBtn').className = 'voice-btn';
-  document.getElementById('voiceBtn').textContent = '🎙 Speak Your Line';
+  document.getElementById('cueBanner').textContent = '';
+  document.getElementById('feedbackRow').style.display = 'none';
+  document.getElementById('nextCueBtn').style.display = 'block';
   lineShown = false;
 }
 
 function revealMyLine() {
-  if(!lineShown) {
-    lineShown = true;
-    document.getElementById('revealHint').style.display = 'none';
-    document.getElementById('revealTxt').style.display = 'block';
-    document.getElementById('myLineReveal').classList.add('shown');
-    document.getElementById('feedbackRow').style.display = 'flex';
-  }
-}
-
-function toggleVoice() {
-  if(!voiceActive) {
-    voiceActive = true;
-    const btn = document.getElementById('voiceBtn');
-    btn.classList.add('listening');
-    btn.textContent = '🔴 Listening... tap to stop';
-
-    if('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognition = new SR();
-      recognition.lang = 'en-GB';
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.onresult = function(e) {
-        const spoken = e.results[0][0].transcript;
-        voiceActive = false;
-        btn.classList.remove('listening');
-        btn.textContent = '🎙 Speak Your Line';
-        checkSpokenLine(spoken);
-      };
-      recognition.onerror = function() {
-        voiceActive = false;
-        btn.classList.remove('listening');
-        btn.textContent = '🎙 Speak Your Line';
-        simulateVoiceCheck();
-      };
-      recognition.start();
-      setTimeout(() => { if(voiceActive) recognition.stop(); }, 8000);
-    } else {
-      setTimeout(() => {
-        voiceActive = false;
-        btn.classList.remove('listening');
-        btn.textContent = '🎙 Speak Your Line';
-        simulateVoiceCheck();
-      }, 2500);
-    }
-  } else {
-    voiceActive = false;
-    document.getElementById('voiceBtn').classList.remove('listening');
-    document.getElementById('voiceBtn').textContent = '🎙 Speak Your Line';
-  }
-}
-
-function checkSpokenLine(spoken) {
-  const correct = cuePairs[cueIndex].myLine;
-  const result = compareLines(spoken, correct);
-  revealMyLine();
-  showWordAnalysis(spoken, correct, result);
-}
-
-function compareLines(spoken, correct) {
-  const sp = spoken.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/);
-  const co = correct.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/);
-  let matches = 0;
-  sp.forEach(w => { if(co.includes(w)) matches++; });
-  const pct = co.length > 0 ? matches/co.length : 0;
-  return { spoken:sp, correct:co, pct, matches, total:co.length };
-}
-
-function showWordAnalysis(spoken, correct, result) {
-  const banner = document.getElementById('cueBanner');
-  const analysis = document.getElementById('wordAnalysis');
-  const spWords = spoken.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/);
-  const coWords = correct.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/);
-
-  let analysisHTML = '';
-  coWords.forEach(w => {
-    if(spWords.includes(w)) analysisHTML += `<span class="w-correct">${w} </span>`;
-    else analysisHTML += `<span class="w-missing">${w} </span>`;
-  });
-
-  analysis.innerHTML = `<div style="font-size:11px;font-weight:900;color:var(--brown-light);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Word by word check:</div>${analysisHTML}`;
-  analysis.classList.add('show');
-
-  if(result.pct >= 0.9) {
-    banner.textContent = `✅ Word perfect! ${result.matches}/${result.total} words correct!`;
-    banner.className = 'result-banner res-good';
-    document.getElementById('nextCueBtn').classList.add('show');
-  } else if(result.pct >= 0.6) {
-    banner.textContent = `🟡 Getting there! ${result.matches}/${result.total} words — red words need work`;
-    banner.className = 'result-banner res-bad';
-    document.getElementById('feedbackRow').style.display = 'flex';
-  } else {
-    banner.textContent = `❌ Keep practising! ${result.matches}/${result.total} words correct — you've got this!`;
-    banner.className = 'result-banner res-bad';
-    document.getElementById('feedbackRow').style.display = 'flex';
-  }
-}
-
-function simulateVoiceCheck() {
-  const correct = cuePairs[cueIndex].myLine;
-  const words = correct.split(' ');
-  // Drop 1-2 random words
-  const dropped = Math.floor(Math.random()*2)+1;
-  const spoken = words.filter((_,i) => i % Math.ceil(words.length/dropped) !== 0).join(' ');
-  checkSpokenLine(spoken.length > 5 ? spoken : correct);
+  if(lineShown) return;
+  lineShown = true;
+  const pair = cuePairs[cueIndex];
+  document.getElementById('revealHint').style.display = 'none';
+  document.getElementById('revealTxt').textContent = pair.myLine;
+  document.getElementById('feedbackRow').style.display = 'flex';
+  document.getElementById('nextCueBtn').style.display = 'none';
 }
 
 function nextCue(result) {
-  if(result === 'wrong' && activeProduction) {
-    const idx = (activeProduction.cuePairs || []).findIndex(p=>p.myLine === cuePairs[cueIndex].myLine);
-    if(idx>=0) activeProduction.cuePairs[idx].needsWork = true;
-  }
-  if(result === 'correct') { addXP(10); }
-  autoSave();
+  const prod = activeProduction || productions[0];
+  if(result === 'correct') { addXP(10); if(prod && prod.cuePairs[cueIndex]) prod.cuePairs[cueIndex].needsWork = false; }
+  else if(result === 'wrong') { if(prod && prod.cuePairs[cueIndex]) prod.cuePairs[cueIndex].needsWork = true; }
   cueIndex++;
-  if(cueIndex >= cuePairs.length) {
-    showToast('🎉 Scene complete! Amazing work!');
-    if(activeProduction) activeProduction.progress = Math.min(100, (activeProduction.progress||0)+10);
-    setTimeout(() => navTo('practiceScreen',2), 1200);
-  } else {
-    loadCue();
-  }
+  if(cueIndex >= cuePairs.length) { finishCueCards(); return; }
+  loadCue();
+}
+
+function finishCueCards() {
+  showToast('🎉 Session complete! Great work!');
+  addXP(50);
+  checkBadges();
+  autoSave();
+  setTimeout(() => exitToGameChooser(), 1500);
 }
 
 // ════════════════════════════════════════
 //  GAME CENTER
 // ════════════════════════════════════════
-function buildGameQuestions() {
-  const prod = activeProduction || productions[0];
-  if(prod && prod.cuePairs.length > 0) {
-    return prod.cuePairs.map(pair => {
-      const words = pair.myLine.split(' ').filter(w=>w.length>3);
-      if(words.length === 0) return null;
-      const blankIdx = Math.floor(Math.random()*words.length);
-      const blank = words[blankIdx].replace(/[^a-zA-Z']/g,'');
-      const opts = generateOptions(blank, prod.scriptData);
-      return { line: pair.myLine, blank, blankClean: blank, options: opts };
-    }).filter(Boolean);
-  }
-  // Sample fallback
-  return [
-    {line:"I am that merry wanderer of the night.",blank:"merry",blankClean:"merry",options:["merry","noble","sleepy","dark"]},
-    {line:"Lord, what fools these mortals be!",blank:"fools",blankClean:"fools",options:["fools","knaves","souls","men"]},
-    {line:"The course of true love never did run smooth.",blank:"smooth",blankClean:"smooth",options:["smooth","clear","fast","true"]},
-    {line:"I must go seek some dewdrops here.",blank:"dewdrops",blankClean:"dewdrops",options:["dewdrops","moonbeams","starlight","raindrops"]},
-  ];
+function showGameHome() {
+  const gh = document.getElementById('gameHome');
+  const gc = document.getElementById('gameChooser');
+  if(gh) gh.style.display = 'block';
+  if(gc) gc.style.display = 'none';
 }
 
-function generateOptions(correct, scriptData) {
-  // Get other words from the script as distractors
-  const allWords = scriptData ? scriptData.flatMap(l=>l.text.split(' ').map(w=>w.replace(/[^a-zA-Z']/g,'').toLowerCase())).filter(w=>w.length>3 && w!==correct.toLowerCase()) : ['noble','sleepy','dark','bright'];
-  const distractors = [...new Set(allWords)].sort(()=>Math.random()-0.5).slice(0,3);
-  while(distractors.length < 3) distractors.push(['quickly','gently','softly','boldly'][distractors.length]);
-  const opts = [correct, ...distractors].sort(()=>Math.random()-0.5);
-  return opts;
-}
-
-function startGame(type) {
-  if(type !== 'fillblank') {
-    showToast(`${type==='scramble'?'Word Scramble 🔀':type==='match'?'Memory Match 🧩':'Beat the Clock ⚡'} — coming very soon!`);
+function refreshGameScreen() {
+  // Script picker
+  const picker = document.getElementById('gameScriptPicker');
+  if(!picker) return;
+  if(productions.length === 0) {
+    picker.innerHTML = `<div style="font-size:13px;color:var(--brown-light);">No scripts yet — <button onclick="navTo('scriptScreen',1)" style="background:none;border:none;color:var(--terra);font-weight:900;cursor:pointer;font-family:var(--font);font-size:13px;">upload one first</button></div>`;
     return;
   }
-  gameScore = 0; gameStreak = 0; gameTimerSecs = 60; gameQIndex = 0;
-  gameQuestions = buildGameQuestions();
-  if(gameQuestions.length === 0) { showToast('Need a script loaded to play! 📄'); return; }
+  picker.innerHTML = productions.map((p,i) => 
+    `<button class="tool-btn ${activeProduction===p||(!activeProduction&&i===0)?'active':''}" onclick="setGameScript(${i},this)">${p.name||p.myChar}</button>`
+  ).join(' ');
+  if(!activeProduction && productions.length > 0) activeProduction = productions[0];
+  refreshGameScenePicker();
+  updateDailyChallenge();
+}
+
+function setGameScript(idx, btn) {
+  activeProduction = productions[idx];
+  document.querySelectorAll('#gameScriptPicker .tool-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  refreshGameScenePicker();
+}
+
+function refreshGameScenePicker() {
+  const prod = activeProduction;
+  const area = document.getElementById('gameScenePicker');
+  const pills = document.getElementById('gameScenePills');
+  if(!prod || !prod.scenes || prod.scenes.length <= 1) {
+    if(area) area.style.display = 'none';
+    activeSceneFilter = 'all';
+    return;
+  }
+  if(area) area.style.display = 'block';
+  pills.innerHTML = `<button class="tool-btn active" onclick="setGameScene('all',this)">All Scenes</button>` +
+    prod.scenes.map(s => `<button class="tool-btn" onclick="setGameScene('${s}',this)">${s}</button>`).join('');
+}
+
+function setGameScene(scene, btn) {
+  activeSceneFilter = scene;
+  document.querySelectorAll('#gameScenePills .tool-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+}
+
+function updateDailyChallenge() {
+  const games = ['fillblank','cue','speed','partner'];
+  const today = new Date().getDay();
+  const todayGame = games[today % games.length];
+  const labels = { fillblank:'Fill in the Blank', cue:'Cue Cards', speed:'Speed Drill', partner:'Scene Partner' };
+  const el = document.getElementById('dailyChalDesc');
+  if(el) el.textContent = `Today: ${labels[todayGame]}`;
+}
+
+function startGameById(gameId) {
+  if(productions.length === 0) { showToast('Upload a script first! 📄'); navTo('scriptScreen',1); return; }
+  if(!activeProduction) activeProduction = productions[0];
+  launchGame(gameId);
+}
+
+function launchGame(gameId) {
+  if(!activeProduction || !activeProduction.cuePairs || activeProduction.cuePairs.length === 0) {
+    showToast('No lines to practice! Upload a script first.');
+    return;
+  }
+  if(gameId === 'cue') startCueCards();
+  else if(gameId === 'fillblank') startFillBlank();
+  else if(gameId === 'speed') startSpeedDrill();
+  else if(gameId === 'partner') startScenePartner();
+}
+
+// ════════════════════════════════════════
+//  FILL IN THE BLANK GAME
+// ════════════════════════════════════════
+gameScore=0; gameStreak=0; gameTimerSecs=60; gameTimerInt=null; gameQIndex=0; gameQuestions=[];
+
+function startFillBlank() {
+  const prod = activeProduction;
+  if(!prod || !prod.cuePairs || (prod.cuePairs||[]).length === 0) { showToast('No lines to practice!'); return; }
+  gameScore=0; gameStreak=0; gameQIndex=0;
+  gameTimerSecs = {easy:90,medium:60,hard:30}[document.getElementById('diffSel')?.value||'medium'];
+  gameQuestions = buildGameQuestions(prod);
+  if(gameQuestions.length === 0) { showToast('Lines too short for this game — try longer lines!'); return; }
   goToGameScreen('fillBlankScreen');
   loadGameQ();
   startGameTimer();
 }
 
+function buildGameQuestions(prod) {
+  const pairs = activeSceneFilter==='all' ? prod.cuePairs : (prod.cuePairs||[]).filter(p=>(p.scene||'Scene 1')===activeSceneFilter);
+  const questions = [];
+  pairs.forEach(pair => {
+    const words = pair.myLine.split(/\s+/).filter(w => w.replace(/[^a-zA-Z]/g,'').length > 3);
+    if(words.length < 3) return;
+    const blankWord = words[Math.floor(Math.random()*words.length)];
+    const blankClean = blankWord.replace(/[^a-zA-Z]/g,'').toLowerCase();
+    // Get distractors from other lines
+    const allWords = pairs.map(p=>p.myLine.split(/\s+/)).flat().filter(w=>w.replace(/[^a-zA-Z]/g,'').length>3 && w.replace(/[^a-zA-Z]/g,'').toLowerCase()!==blankClean);
+    const distractors = [...new Set(allWords.map(w=>w.replace(/[^a-zA-Z]/g,'').toLowerCase()))].filter(w=>w!==blankClean).sort(()=>Math.random()-0.5).slice(0,3);
+    const options = [...distractors, blankClean].sort(()=>Math.random()-0.5);
+    questions.push({ line: pair.myLine, blankWord, blankClean, options });
+  });
+  return questions.sort(()=>Math.random()-0.5);
+}
+
 function loadGameQ() {
+  if(gameQuestions.length === 0) return;
   const q = gameQuestions[gameQIndex % gameQuestions.length];
-  const display = q.line.replace(new RegExp('\\b'+q.blankClean+'\\b','i'), `<span class="blank" id="theBlank">_______</span>`);
+  const display = q.line.replace(new RegExp('\\b'+q.blankWord.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b'), `<span class="blank" id="theBlank">_______</span>`);
   document.getElementById('gameLineCard').innerHTML = `
     <div style="font-size:11px;font-weight:900;color:var(--brown-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Fill in the missing word:</div>
-    ${display}
-  `;
-  const pct = (gameQIndex % gameQuestions.length) / gameQuestions.length * 100;
+    <div style="font-size:15px;line-height:1.8;">${display}</div>`;
+  const pct = (gameQIndex%gameQuestions.length)/gameQuestions.length*100;
   document.getElementById('gameProgBar').style.width = pct+'%';
   const opts = document.getElementById('wordOpts');
   opts.innerHTML = '';
@@ -2365,7 +2303,7 @@ function loadGameQ() {
     const btn = document.createElement('button');
     btn.className = 'wopt';
     btn.textContent = opt;
-    btn.onclick = () => checkGameAnswer(opt, q.blankClean, btn, q.options);
+    btn.onclick = () => checkGameAnswer(opt, q.blankClean, btn);
     opts.appendChild(btn);
   });
   document.getElementById('gameBanner').className = 'result-banner';
@@ -2373,130 +2311,318 @@ function loadGameQ() {
   updateGameUI();
 }
 
-function checkGameAnswer(chosen, correct, btn, allOpts) {
+function checkGameAnswer(chosen, correct, btn) {
   document.querySelectorAll('.wopt').forEach(b => b.disabled = true);
   const blank = document.getElementById('theBlank');
   const banner = document.getElementById('gameBanner');
   if(chosen.toLowerCase() === correct.toLowerCase()) {
-    blank.textContent = chosen;
-    blank.classList.add('filled-ok');
-    gameScore += 50 + (gameStreak * 10);
+    if(blank) blank.textContent = chosen;
+    gameScore += 50 + (gameStreak*10);
     gameStreak++;
-    banner.textContent = `✅ Correct! +${50 + ((gameStreak-1)*10)} pts${gameStreak>1?' 🔥 x'+gameStreak+' streak!':''}`;
+    banner.textContent = `✅ Correct! +${50+((gameStreak-1)*10)} pts${gameStreak>1?' 🔥 ×'+gameStreak+' streak!':''}`;
     banner.className = 'result-banner res-good';
-    if(gameStreak > 2) triggerStreak();
     btn.style.cssText = 'background:var(--sage);color:white;border-color:var(--sage);';
-    addXP(20);
-    checkBadges();
+    if(gameStreak > 2) triggerStreak();
+    addXP(20); checkBadges();
   } else {
-    blank.textContent = chosen;
-    blank.classList.add('filled-bad');
+    if(blank) blank.textContent = chosen;
     gameStreak = 0;
-    banner.textContent = `❌ The word was "${correct}" — keep going, you've got this!`;
+    banner.textContent = `❌ The word was "${correct}" — keep going!`;
     banner.className = 'result-banner res-bad';
     btn.style.cssText = 'background:var(--terra);color:white;border-color:var(--terra);';
-    // Show correct answer
-    document.querySelectorAll('.wopt').forEach(b => {
-      if(b.textContent.toLowerCase()===correct.toLowerCase()) b.style.cssText='background:var(--sage);color:white;border-color:var(--sage);';
-    });
+    document.querySelectorAll('.wopt').forEach(b => { if(b.textContent===correct) b.style.cssText='background:var(--sage);color:white;border-color:var(--sage);'; });
   }
   updateGameUI();
   document.getElementById('gameNextBtn').style.display = 'block';
 }
 
-function nextGameQ() {
-  gameQIndex++;
-  loadGameQ();
-}
-
+function nextGameQ() { gameQIndex++; loadGameQ(); }
 function updateGameUI() {
   document.getElementById('gScore').textContent = gameScore;
   document.getElementById('gStreak').textContent = gameStreak;
 }
 
 function setDiff(val) {
-  const times = {easy:90, medium:60, hard:30};
   clearInterval(gameTimerInt);
-  gameTimerSecs = times[val];
+  gameTimerSecs = {easy:90,medium:60,hard:30}[val];
   document.getElementById('gTimer').textContent = gameTimerSecs;
   startGameTimer();
-  showToast(`Difficulty: ${val.charAt(0).toUpperCase()+val.slice(1)} — ${times[val]}s`);
+  showToast(`Difficulty: ${val.charAt(0).toUpperCase()+val.slice(1)}`);
 }
 
 function startGameTimer() {
   clearInterval(gameTimerInt);
-  gameTimerInt = setInterval(()=>{
+  gameTimerInt = setInterval(() => {
     gameTimerSecs--;
     document.getElementById('gTimer').textContent = gameTimerSecs;
     if(gameTimerSecs <= 0) {
       clearInterval(gameTimerInt);
-      showToast(`⏱ Time's up! Final score: ${gameScore} pts 🎉`);
-      setTimeout(()=>navTo('gameScreen',3), 1500);
+      showToast(`⏱ Time's up! Score: ${gameScore} pts 🎉`);
+      addXP(Math.floor(gameScore/10));
+      checkBadges();
+      setTimeout(() => exitToGameChooser(), 2000);
     }
-  },1000);
+  }, 1000);
 }
 
-function switchSrc(type, btn) {
-  document.querySelectorAll('.src-tab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  showToast(type==='mine' ? '📚 Using your scripts' : '📖 Using sample scripts');
-  if(type==='sample') activeProduction = null;
-  else if(productions.length>0) activeProduction = productions[0];
+// ════════════════════════════════════════
+//  SPEED DRILL (rewritten)
+// ════════════════════════════════════════
+let sdPairs=[], sdIndex=0, sdStartTime=0, sdTimerInterval=null, sdWrong=0;
+
+function startSpeedDrill() {
+  const prod = activeProduction || productions[0];
+  if(!prod || !prod.cuePairs || (prod.cuePairs||[]).length === 0) { showToast('No lines!'); return; }
+  sdPairs = activeSceneFilter==='all' ? [...prod.cuePairs] : (prod.cuePairs||[]).filter(p=>(p.scene||'Scene 1')===activeSceneFilter);
+  if(sdPairs.length===0) { showToast('No lines in that section!'); return; }
+  sdIndex=0; sdWrong=0;
+  screenIds.forEach(s => { const el=document.getElementById(s); if(el) el.classList.remove('active'); });
+  document.querySelectorAll('.game-screen,.hf-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('speedDrillScreen').classList.add('active');
+  document.getElementById('sdFinished').style.display = 'none';
+  const bestKey = 'sd-best-'+(prod.myChar||'char');
+  const best = localStorage.getItem(bestKey);
+  document.getElementById('sdBest').textContent = best ? 'Best: '+best+'s for '+sdPairs.length+' lines' : 'Best: not set yet';
+  sdLoadLine();
+  sdStartTime = Date.now();
+  clearInterval(sdTimerInterval);
+  sdTimerInterval = setInterval(() => {
+    document.getElementById('sdTimer').textContent = ((Date.now()-sdStartTime)/1000).toFixed(1)+'s';
+  }, 100);
+  window.scrollTo(0,0);
+}
+
+function stopSpeedDrill() {
+  clearInterval(sdTimerInterval);
+  exitToGameChooser();
+}
+
+function sdLoadLine() {
+  if(sdIndex >= sdPairs.length) { sdFinish(); return; }
+  const pair = sdPairs[sdIndex];
+  document.getElementById('sdProgress').textContent = (sdIndex+1)+' of '+sdPairs.length;
+  document.getElementById('sdSceneTag').textContent = pair.scene||'Scene 1';
+  document.getElementById('sdCueText').textContent = pair.cue;
+  document.getElementById('sdLineText').textContent = pair.myLine;
+}
+
+function sdMark(result) {
+  if(result==='wrong') { sdWrong++; if(sdPairs[sdIndex]) sdPairs[sdIndex].needsWork=true; }
+  else if(sdPairs[sdIndex]) sdPairs[sdIndex].needsWork=false;
+  sdIndex++;
+  sdLoadLine();
+}
+
+function sdFinish() {
+  clearInterval(sdTimerInterval);
+  const total = ((Date.now()-sdStartTime)/1000).toFixed(1);
+  document.getElementById('sdTimer').textContent = total+'s';
+  document.getElementById('sdFinished').style.display = 'block';
+  const correct = sdPairs.length - sdWrong;
+  document.getElementById('sdFinishStats').textContent = correct+'/'+sdPairs.length+' lines · '+total+'s total';
+  const prod = activeProduction||productions[0];
+  if(prod) {
+    const bestKey='sd-best-'+(prod.myChar||'char');
+    const best=parseFloat(localStorage.getItem(bestKey))||9999;
+    if(parseFloat(total)<best) { localStorage.setItem(bestKey,total); showToast('New best! '+total+'s 🏆'); document.getElementById('sdBest').textContent='NEW BEST: '+total+'s!'; }
+  }
+  addXP(correct*10);
+  autoSave();
+}
+
+// ════════════════════════════════════════
+//  SCENE PARTNER (rewritten)
+// ════════════════════════════════════════
+let spPairs=[], spIndex=0, spPaused=false, spMyTurn=false;
+
+function startScenePartner() {
+  const prod = activeProduction || productions[0];
+  if(!prod || !prod.cuePairs || (prod.cuePairs||[]).length===0) { showToast('No lines!'); return; }
+  spPairs = activeSceneFilter==='all' ? [...prod.cuePairs] : (prod.cuePairs||[]).filter(p=>(p.scene||'Scene 1')===activeSceneFilter);
+  spIndex=0; spPaused=false; spMyTurn=false;
+  screenIds.forEach(s => { const el=document.getElementById(s); if(el) el.classList.remove('active'); });
+  document.querySelectorAll('.game-screen,.hf-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('scenePartnerScreen').classList.add('active');
+  document.getElementById('spMyCard').style.display = 'none';
+  document.getElementById('spOtherCard').style.display = 'none';
+  document.getElementById('spMicBtn').style.display = 'none';
+  document.getElementById('spResult').style.display = 'none';
+  document.getElementById('spStartBtn').style.display = 'block';
+  document.getElementById('spStatus').textContent = 'App reads all other characters. You say yours.';
+  document.getElementById('spProgress').textContent = '0 of '+spPairs.length+' lines';
+  window.scrollTo(0,0);
+}
+
+function stopScenePartner() { window.speechSynthesis&&window.speechSynthesis.cancel(); exitToGameChooser(); }
+
+function toggleSPPause() {
+  spPaused = !spPaused;
+  document.getElementById('spPauseBtn').textContent = spPaused ? '▶ Resume' : '⏸ Pause';
+  if(!spPaused && !spMyTurn) spReadOther();
+}
+
+function spStart() { document.getElementById('spStartBtn').style.display='none'; spLoadNext(); }
+
+function spLoadNext() {
+  if(spIndex >= spPairs.length) { spFinish(); return; }
+  const pair = spPairs[spIndex];
+  document.getElementById('spProgress').textContent = (spIndex+1)+' of '+spPairs.length+' lines';
+  document.getElementById('spOtherCard').style.display = 'block';
+  document.getElementById('spMyCard').style.display = 'none';
+  document.getElementById('spMicBtn').style.display = 'none';
+  document.getElementById('spResult').style.display = 'none';
+  document.getElementById('spOtherChar').textContent = 'OTHER CHARACTER';
+  document.getElementById('spOtherText').textContent = pair.cue;
+  document.getElementById('spStatus').textContent = 'Reading their line...';
+  spMyTurn = false;
+  if(!spPaused && window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+    setTimeout(() => {
+      const utt = new SpeechSynthesisUtterance(pair.cue);
+      utt.rate = ttsRate; utt.pitch=0.95; utt.volume=1;
+      const voices = window.speechSynthesis.getVoices();
+      const preferred = voices.find(v=>v.lang.startsWith('en')&&v.localService);
+      if(preferred) utt.voice=preferred;
+      utt.onend = () => { if(!spPaused) spShowMyTurn(); };
+      utt.onerror = () => { if(!spPaused) spShowMyTurn(); };
+      window.speechSynthesis.speak(utt);
+    }, 150);
+  } else { setTimeout(spShowMyTurn, 800); }
+}
+
+function spReadOther() { spLoadNext(); }
+
+function spShowMyTurn() {
+  if(spIndex >= spPairs.length) return;
+  spMyTurn = true;
+  document.getElementById('spMyCard').style.display = 'block';
+  document.getElementById('spMyChar').textContent = '🎭 YOUR LINE';
+  document.getElementById('spMyText').textContent = '(tap mic to speak, or tap Next)';
+  document.getElementById('spMicBtn').style.display = 'block';
+  document.getElementById('spMicBtn').className = 'hf-big-btn idle';
+  document.getElementById('spMicBtn').textContent = '🎙';
+  document.getElementById('spStatus').textContent = 'Your turn!';
+}
+
+function spMicTap() {
+  if(!('SpeechRecognition' in window||'webkitSpeechRecognition' in window)) { showToast('Tap Next to continue'); spNext(); return; }
+  const btn = document.getElementById('spMicBtn');
+  btn.className='hf-big-btn listening'; btn.textContent='🔴';
+  const SR = window.SpeechRecognition||window.webkitSpeechRecognition;
+  const rec = new SR(); rec.lang='en-GB'; rec.continuous=false; rec.interimResults=false;
+  rec.onresult = e => { const spoken=e.results[0][0].transcript; btn.className='hf-big-btn idle'; btn.textContent='🎙'; spCheckLine(spoken); };
+  rec.onerror = () => { btn.className='hf-big-btn idle'; btn.textContent='🎙'; };
+  rec.start(); setTimeout(()=>{ try{rec.stop();}catch(e){} },9000);
+}
+
+function spCheckLine(spoken) {
+  if(!spPairs[spIndex]) { spNext(); return; }
+  const correct = spPairs[spIndex].myLine;
+  const result = compareLines(spoken, correct);
+  const resultEl = document.getElementById('spResult');
+  resultEl.style.display='block';
+  document.getElementById('spMyText').textContent = correct;
+  if(result.pct >= 0.75) {
+    resultEl.className='hf-result good'; resultEl.textContent='✅ '+Math.round(result.pct*100)+'% — nice!';
+    addXP(10); setTimeout(()=>{ spIndex++; spLoadNext(); },1200);
+  } else {
+    resultEl.className='hf-result close'; resultEl.textContent='You said: "'+spoken+'" — tap Next when ready';
+  }
+}
+
+function spNext() { document.getElementById('spMyText').textContent=spPairs[spIndex]?spPairs[spIndex].myLine:''; spIndex++; spLoadNext(); }
+
+function spFinish() {
+  showToast('Scene complete! 🎉'); addXP(50); checkBadges(); autoSave();
+  setTimeout(()=>exitToGameChooser(), 1500);
 }
 
 // ════════════════════════════════════════
 //  STUDY TIMER
 // ════════════════════════════════════════
+let sessionMins = 20;
+
 function openTimer() { document.getElementById('timerModal').classList.add('show'); }
 function closeTimer() {
   document.getElementById('timerModal').classList.remove('show');
   clearInterval(timerInterval);
-  timerRunning = false; timerSecs = 1200; isBreak = false;
-  document.getElementById('timerDisplay').textContent = '20:00';
-  document.getElementById('timerDisplay').style.color = 'var(--terra)';
-  document.getElementById('timerToggleBtn').textContent = '▶ Start';
-  document.getElementById('timerModeLabel').textContent = '20 min focus session';
+  timerRunning=false; isBreak=false;
+  resetTimerDisplay();
 }
 
-function selectBreak(mins) {
-  breakLen = mins;
-  document.getElementById('bo5').classList.toggle('active', mins===5);
-  document.getElementById('bo10').classList.toggle('active', mins===10);
+function resetTimerDisplay() {
+  const mins = sessionMins || 20;
+  timerSecs = mins * 60;
+  const display = `${String(Math.floor(timerSecs/60)).padStart(2,'0')}:${String(timerSecs%60).padStart(2,'0')}`;
+  const el = document.getElementById('timerDisplay');
+  if(el) { el.textContent = display; el.style.color = 'var(--terra)'; }
+  const btn = document.getElementById('timerToggleBtn');
+  if(btn) btn.textContent = '▶ Start';
+  const lbl = document.getElementById('timerModeLabel');
+  if(lbl) lbl.textContent = mins+' min focus session';
 }
+
+function setSessionLength(mins) {
+  sessionMins = mins;
+  clearInterval(timerInterval);
+  timerRunning = false;
+  resetTimerDisplay();
+  showToast('Session: '+mins+' min');
+}
+
+function setBreakLength(mins) {
+  breakLen = mins;
+  showToast('Break: '+mins+' min');
+}
+
+function selectBreak(mins) { setBreakLength(mins); }
 
 function toggleTimer() {
   if(!timerRunning) {
     timerRunning = true;
-    document.getElementById('timerToggleBtn').textContent = '⏸ Pause';
-    timerInterval = setInterval(tickTimer, 1000);
+    const btn = document.getElementById('timerToggleBtn');
+    if(btn) btn.textContent = '⏸ Pause';
+    timerInterval = setInterval(() => {
+      timerSecs--;
+      const display = `${String(Math.floor(timerSecs/60)).padStart(2,'0')}:${String(timerSecs%60).padStart(2,'0')}`;
+      const el = document.getElementById('timerDisplay');
+      if(el) el.textContent = display;
+      if(timerSecs <= 0) {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        if(!isBreak) {
+          isBreak = true;
+          timerSecs = breakLen * 60;
+          showToast('🔔 Break time! Rest for '+breakLen+' min');
+          const lbl = document.getElementById('timerModeLabel');
+          if(lbl) lbl.textContent = breakLen+' min break';
+          const el2 = document.getElementById('timerDisplay');
+          if(el2) el2.style.color = 'var(--sage)';
+        } else {
+          isBreak = false;
+          timerSecs = (sessionMins||20) * 60;
+          showToast('🎯 Break over! Back to work!');
+          resetTimerDisplay();
+        }
+      }
+    }, 1000);
   } else {
     timerRunning = false;
     clearInterval(timerInterval);
-    document.getElementById('timerToggleBtn').textContent = '▶ Resume';
+    const btn = document.getElementById('timerToggleBtn');
+    if(btn) btn.textContent = '▶ Resume';
   }
 }
 
-function tickTimer() {
-  timerSecs--;
-  if(timerSecs < 0) {
-    if(!isBreak) {
-      isBreak = true;
-      timerSecs = breakLen * 60;
-      document.getElementById('timerModeLabel').textContent = `${breakLen} min break 🌿`;
-      document.getElementById('timerDisplay').style.color = 'var(--sage)';
-      showToast('🌿 Break time! Well done — breathe!');
-    } else {
-      isBreak = false;
-      timerSecs = 1200;
-      document.getElementById('timerModeLabel').textContent = '20 min focus session';
-      document.getElementById('timerDisplay').style.color = 'var(--terra)';
-      showToast('⏱ Back to studying — you\'ve got this!');
-    }
-  }
-  const m = Math.floor(timerSecs/60);
-  const s = timerSecs%60;
-  document.getElementById('timerDisplay').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+function resetTimer() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  isBreak = false;
+  resetTimerDisplay();
 }
+
+
+// (timer functions above)
 
 // ════════════════════════════════════════
 //  SETTINGS
@@ -2511,9 +2637,12 @@ function globalFontSize(d) {
 
 function setBreakLen(mins) {
   breakLen = mins;
-  document.getElementById('break5Btn').classList.toggle('active', mins===5);
-  document.getElementById('break10Btn').classList.toggle('active', mins===10);
-  showToast('Break length: ' + mins + ' minutes');
+  // Update UI if elements exist
+  const b5 = document.getElementById('break5Btn');
+  const b10 = document.getElementById('break10Btn');
+  if(b5) b5.classList.toggle('active', mins===5);
+  if(b10) b10.classList.toggle('active', mins===10);
+  showToast('Break: ' + mins + ' min');
 }
 
 // ════════════════════════════════════════
@@ -2583,7 +2712,7 @@ function showProgressDashboard() {
   if(!prod) { showToast('No script loaded yet!'); return; }
   const screen = document.getElementById('progressDashScreen');
   screen.classList.add('active');
-  document.getElementById('dashSubtitle').textContent = prod.myChar + ' — ' + prod.cuePairs.length + ' lines';
+  document.getElementById('dashSubtitle').textContent = prod.myChar + ' — ' + (prod.cuePairs||[]).length + ' lines';
   renderDashboard(prod);
 }
 
@@ -2650,8 +2779,8 @@ let hfPairs = [], hfIndex = 0, hfPaused = false, hfSpeaking = false;
 
 function startHandsFree() {
   const prod = activeProduction || productions[0];
-  if(!prod || prod.cuePairs.length === 0) { showToast('No lines to practise!'); return; }
-  hfPairs = activeSceneFilter === 'all' ? prod.cuePairs : prod.cuePairs.filter(function(p){ return (p.scene||'Scene 1') === activeSceneFilter; });
+  if(!prod || (prod.cuePairs||[]).length === 0) { showToast('No lines to practise!'); return; }
+  hfPairs = activeSceneFilter === 'all' ? prod.cuePairs : (prod.cuePairs||[]).filter(function(p){ return (p.scene||'Scene 1') === activeSceneFilter; });
   hfIndex = 0;
   hfPaused = false;
   document.getElementById('handsFreeScreen').classList.add('active');
@@ -2769,189 +2898,6 @@ function hfFinish() {
   document.getElementById('hfMicBtn').className = 'hf-big-btn idle';
   showToast('Hands-Free session complete!');
   addXP(50);
-}
-
-// ════════════════════════════════════════
-//  SCENE PARTNER
-// ════════════════════════════════════════
-let spPairs = [], spIndex = 0, spPaused = false, spMyTurn = false;
-
-function startScenePartner() {
-  const prod = activeProduction || productions[0];
-  if(!prod || prod.cuePairs.length === 0) { showToast('No lines to practise!'); return; }
-  spPairs = activeSceneFilter === 'all' ? prod.cuePairs : prod.cuePairs.filter(function(p){ return (p.scene||'Scene 1') === activeSceneFilter; });
-  spIndex = 0; spPaused = false; spMyTurn = false;
-  document.getElementById('scenePartnerScreen').classList.add('active');
-  document.getElementById('spMyCard').style.display = 'none';
-  document.getElementById('spOtherCard').style.display = 'none';
-  document.getElementById('spMicBtn').style.display = 'none';
-  document.getElementById('spStartBtn').style.display = 'block';
-  document.getElementById('spResult').style.display = 'none';
-  document.getElementById('spStatus').textContent = 'App will read all other characters\' lines. You speak yours.';
-  document.getElementById('spProgress').textContent = '0 of ' + spPairs.length + ' lines';
-}
-
-function stopScenePartner() {
-  window.speechSynthesis && window.speechSynthesis.cancel();
-  document.getElementById('scenePartnerScreen').classList.remove('active');
-}
-
-function toggleSPPause() {
-  spPaused = !spPaused;
-  document.getElementById('spPauseBtn').textContent = spPaused ? '▶ Resume' : '⏸ Pause';
-  if(!spPaused && !spMyTurn) spReadOther();
-}
-
-function spStart() {
-  document.getElementById('spStartBtn').style.display = 'none';
-  spLoadNext();
-}
-
-function spLoadNext() {
-  if(spIndex >= spPairs.length) { spFinish(); return; }
-  const pair = spPairs[spIndex];
-  document.getElementById('spProgress').textContent = (spIndex+1) + ' of ' + spPairs.length + ' lines';
-
-  // Show cue (other character's line) and read it aloud
-  document.getElementById('spOtherCard').style.display = 'block';
-  document.getElementById('spMyCard').style.display = 'none';
-  document.getElementById('spMicBtn').style.display = 'none';
-  document.getElementById('spResult').style.display = 'none';
-  document.getElementById('spOtherChar').textContent = 'OTHER CHARACTER';
-  document.getElementById('spOtherText').textContent = pair.cue;
-  document.getElementById('spStatus').textContent = 'Reading their line...';
-  spMyTurn = false;
-
-  if(!spPaused && window.speechSynthesis) {
-    window.speechSynthesis.cancel();
-    setTimeout(function() {
-      const utt = new SpeechSynthesisUtterance(pair.cue);
-      utt.rate = 0.88; utt.pitch = 0.95; utt.volume = 1;
-      const voices = window.speechSynthesis.getVoices();
-      const preferred = voices.find(function(v){ return v.lang.startsWith('en') && v.localService; });
-      if(preferred) utt.voice = preferred;
-      utt.onend = function() { if(!spPaused) spShowMyTurn(); };
-      utt.onerror = function() { if(!spPaused) spShowMyTurn(); };
-      window.speechSynthesis.speak(utt);
-    }, 150);
-  } else {
-    setTimeout(spShowMyTurn, 800);
-  }
-}
-
-function spShowMyTurn() {
-  if(spIndex >= spPairs.length) return;
-  const pair = spPairs[spIndex];
-  spMyTurn = true;
-  document.getElementById('spMyCard').style.display = 'block';
-  document.getElementById('spMyChar').textContent = '🎭 YOUR LINE';
-  document.getElementById('spMyText').textContent = '(tap mic to speak, or tap Next)';
-  document.getElementById('spMicBtn').style.display = 'block';
-  document.getElementById('spMicBtn').className = 'hf-big-btn idle';
-  document.getElementById('spMicBtn').textContent = '🎙';
-  document.getElementById('spStatus').textContent = 'Your turn — say your line!';
-}
-
-function spMicTap() {
-  if(!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
-    showToast('Voice not supported — tap Next to continue');
-    return;
-  }
-  const btn = document.getElementById('spMicBtn');
-  btn.className = 'hf-big-btn listening'; btn.textContent = '🔴';
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const rec = new SR();
-  rec.lang = 'en-GB'; rec.continuous = false; rec.interimResults = false;
-  rec.onresult = function(e) {
-    const spoken = e.results[0][0].transcript;
-    btn.className = 'hf-big-btn idle'; btn.textContent = '🎙';
-    spCheckLine(spoken);
-  };
-  rec.onerror = function() { btn.className = 'hf-big-btn idle'; btn.textContent = '🎙'; };
-  rec.start();
-  setTimeout(function(){ try{rec.stop();}catch(e){} }, 9000);
-}
-
-function spCheckLine(spoken) {
-  const correct = spPairs[spIndex].myLine;
-  const result = compareLines(spoken, correct);
-  const resultEl = document.getElementById('spResult');
-  resultEl.style.display = 'block';
-  document.getElementById('spMyText').textContent = correct;
-  if(result.pct >= 0.85) {
-    resultEl.className = 'hf-result good';
-    resultEl.textContent = '✅ ' + Math.round(result.pct*100) + '% — moving on!';
-    addXP(10);
-    setTimeout(function(){ spIndex++; spLoadNext(); }, 1200);
-  } else {
-    resultEl.className = 'hf-result close';
-    resultEl.textContent = 'You said: "' + spoken + '" — tap Next when ready';
-  }
-}
-
-// ════════════════════════════════════════
-//  SPEED DRILL
-// ════════════════════════════════════════
-let sdPairs = [], sdIndex = 0, sdStartTime = 0, sdTimerInterval = null, sdWrong = 0;
-
-function startSpeedDrill() {
-  const prod = activeProduction || productions[0];
-  if(!prod || prod.cuePairs.length === 0) { showToast('No lines to practise!'); return; }
-  sdPairs = activeSceneFilter === 'all' ? prod.cuePairs : prod.cuePairs.filter(function(p){ return (p.scene||'Scene 1') === activeSceneFilter; });
-  sdIndex = 0; sdWrong = 0;
-  document.getElementById('speedDrillScreen').classList.add('active');
-  document.getElementById('sdFinished').style.display = 'none';
-  var bestKey = 'sd-best-' + (prod.myChar || 'char');
-  var best = localStorage.getItem(bestKey);
-  document.getElementById('sdBest').textContent = best ? 'Best: ' + best + 's for ' + sdPairs.length + ' lines' : 'Best time: not set yet';
-  sdLoadLine();
-  sdStartTime = Date.now();
-  clearInterval(sdTimerInterval);
-  sdTimerInterval = setInterval(function() {
-    var elapsed = ((Date.now() - sdStartTime) / 1000).toFixed(1);
-    document.getElementById('sdTimer').textContent = elapsed + 's';
-  }, 100);
-}
-
-function stopSpeedDrill() {
-  clearInterval(sdTimerInterval);
-  document.getElementById('speedDrillScreen').classList.remove('active');
-}
-
-function sdLoadLine() {
-  if(sdIndex >= sdPairs.length) { sdFinish(); return; }
-  const pair = sdPairs[sdIndex];
-  document.getElementById('sdProgress').textContent = (sdIndex+1) + ' of ' + sdPairs.length;
-  document.getElementById('sdSceneTag').textContent = pair.scene || 'Scene 1';
-  document.getElementById('sdCueText').textContent = pair.cue;
-  document.getElementById('sdLineText').textContent = pair.myLine;
-}
-
-function sdMark(result) {
-  if(result === 'wrong') { sdWrong++; if(sdPairs[sdIndex]) sdPairs[sdIndex].needsWork = true; }
-  sdIndex++;
-  sdLoadLine();
-}
-
-function sdFinish() {
-  clearInterval(sdTimerInterval);
-  var total = ((Date.now() - sdStartTime) / 1000).toFixed(1);
-  document.getElementById('sdTimer').textContent = total + 's';
-  document.getElementById('sdFinished').style.display = 'block';
-  var correct = sdPairs.length - sdWrong;
-  document.getElementById('sdFinishStats').textContent = correct + '/' + sdPairs.length + ' lines got · ' + total + 's total';
-  var prod = activeProduction || productions[0];
-  if(prod) {
-    var bestKey = 'sd-best-' + (prod.myChar || 'char');
-    var best = parseFloat(localStorage.getItem(bestKey)) || 9999;
-    if(parseFloat(total) < best) {
-      localStorage.setItem(bestKey, total);
-      showToast('New personal best! ' + total + 's 🏆');
-      document.getElementById('sdBest').textContent = 'NEW BEST: ' + total + 's!';
-    }
-  }
-  addXP(correct * 10);
-  autoSave();
 }
 
 // ════════════════════════════════════════
@@ -3571,7 +3517,7 @@ function editProduction(idx) {
   activeProduction = prod;
   // Load into manual entry
   manualChar = prod.myChar;
-  manualPairs = prod.cuePairs.map(function(p) { return Object.assign({}, p); });
+  manualPairs = (prod.cuePairs||[]).map(function(p) { return Object.assign({}, p); });
   manualScenes = prod.scenes && prod.scenes.length > 0 ? prod.scenes.slice() : ['Scene 1'];
   manualCurrentScene = manualScenes[manualScenes.length - 1];
   manualViewingScene = 'all';
@@ -4133,7 +4079,507 @@ function printChakraProfile() {
 }
 
 // chakra refresh is handled inside navTo directly
--e 
+
+// ════════════════════════════════════════
+//  RECOVERED CORE FUNCTIONS
+// ════════════════════════════════════════
+
+// ════════════════════════════════════════
+//  RAW SCRIPT TEXT (state)
+// ════════════════════════════════════════
+rawScriptText = rawScriptText || '';
+splitterParsed = []; splitterDividers = []; splitterMyChar = '';
+
+// ════════════════════════════════════════
+//  FILE UPLOAD — PDF.js powered
+// ════════════════════════════════════════
+function handleFileUpload(input) {
+  const file = input.files[0];
+  if(!file) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+  showToast(`Loading: ${file.name} 📂`);
+  if(ext === 'pdf') {
+    extractPDFwithPDFjs(file);
+  } else {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      rawScriptText = e.target.result;
+      processScript('file');
+    };
+    reader.readAsText(file);
+  }
+}
+
+async function extractPDFwithPDFjs(file) {
+  showToast('Reading PDF... ⏳');
+  try {
+    if(window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    } else { throw new Error('PDF.js not loaded'); }
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let fullText = '';
+    const totalPages = pdf.numPages;
+    for(let pageNum = 1; pageNum <= totalPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+      const content = await page.getTextContent();
+      const items = content.items;
+      if(items.length === 0) continue;
+      let lastY = null, lineBuffer = '';
+      const pageLines = [];
+      items.forEach(item => {
+        const y = item.transform ? Math.round(item.transform[5]) : 0;
+        const text = item.str;
+        if(lastY !== null && Math.abs(y - lastY) > 3) {
+          if(lineBuffer.trim()) pageLines.push(lineBuffer.trimEnd());
+          lineBuffer = text;
+        } else { lineBuffer += text; }
+        lastY = y;
+      });
+      if(lineBuffer.trim()) pageLines.push(lineBuffer.trimEnd());
+      fullText += pageLines.reverse().join('\n') + '\n';
+    }
+    const cleaned = fullText.trim();
+    if(cleaned.length > 100) {
+      rawScriptText = cleaned;
+      showToast(`PDF loaded — ${totalPages} pages ✅`);
+      processScript('file');
+    } else {
+      showToast('PDF appears image-based — please paste the text instead 📋');
+      document.querySelectorAll('.itab')[1]?.click();
+    }
+  } catch(err) {
+    console.error('PDF.js error:', err);
+    showToast('Could not read PDF — please paste the script text 📋');
+    document.querySelectorAll('.itab')[1]?.click();
+  }
+}
+
+// ════════════════════════════════════════
+//  SCRIPT FONT + DISPLAY CONTROLS
+// ════════════════════════════════════════
+function toggleFont(btn) {
+  const reader = document.getElementById('scriptReader') || document.getElementById('detailScriptReader');
+  if(!reader) return;
+  const isOD = reader.style.fontFamily.includes('OpenDyslexic') || reader.classList.contains('od-font');
+  reader.style.fontFamily = isOD ? "Georgia, serif" : "'OpenDyslexic', serif";
+  if(btn) btn.classList.toggle('active', !isOD);
+  showToast(isOD ? 'Standard font' : 'OpenDyslexic font');
+}
+
+function changeFontSize(delta, btn) {
+  scriptFontSize = Math.max(12, Math.min(26, scriptFontSize + delta));
+  document.documentElement.style.setProperty('--script-fs', scriptFontSize+'px');
+  const reader = document.getElementById('scriptReader') || document.getElementById('detailScriptReader');
+  if(reader) reader.style.fontSize = scriptFontSize+'px';
+  showToast(`Font: ${scriptFontSize}px`);
+}
+
+function toggleMyLinesOnly(btn) {
+  const reader = document.getElementById('scriptReader') || document.getElementById('detailScriptReader');
+  if(!reader) return;
+  const myOnly = btn ? btn.classList.toggle('active') : false;
+  reader.querySelectorAll('.script-block').forEach(el => {
+    const isMine = el.classList.contains('my-line');
+    el.style.display = (myOnly && !isMine) ? 'none' : '';
+  });
+  if(btn) {
+    // Add dropdown for "show all"
+    btn.textContent = myOnly ? '📋 Show All Lines' : 'My Lines Only';
+  }
+}
+
+// ════════════════════════════════════════
+//  VOICE TOGGLE (cue cards)
+// ════════════════════════════════════════
+// voiceActive already declared above
+let voiceRecognizer = null;
+
+function toggleVoice() {
+  if(voiceActive) {
+    voiceActive = false;
+    if(voiceRecognizer) { try{ voiceRecognizer.stop(); }catch(e){} voiceRecognizer = null; }
+    document.getElementById('voiceBtn').textContent = '🎙 Speak Your Line';
+    document.getElementById('voiceBtn').style.background = '';
+    return;
+  }
+  if(!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+    showToast('Voice input not supported in this browser'); return;
+  }
+  voiceActive = true;
+  document.getElementById('voiceBtn').textContent = '🔴 Listening... (tap to stop)';
+  document.getElementById('voiceBtn').style.background = 'var(--terra)';
+  document.getElementById('voiceBtn').style.color = 'white';
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  voiceRecognizer = new SR();
+  voiceRecognizer.lang = 'en-GB';
+  voiceRecognizer.continuous = false;
+  voiceRecognizer.interimResults = false;
+  voiceRecognizer.onresult = function(e) {
+    const spoken = e.results[0][0].transcript;
+    voiceActive = false;
+    document.getElementById('voiceBtn').textContent = '🎙 Speak Your Line';
+    document.getElementById('voiceBtn').style.background = '';
+    document.getElementById('voiceBtn').style.color = '';
+    checkSpokenLine(spoken);
+  };
+  voiceRecognizer.onerror = function() {
+    voiceActive = false;
+    document.getElementById('voiceBtn').textContent = '🎙 Speak Your Line';
+    document.getElementById('voiceBtn').style.background = '';
+  };
+  voiceRecognizer.start();
+  setTimeout(function(){ if(voiceActive) { try{voiceRecognizer.stop();}catch(e){} } }, 10000);
+}
+
+function checkSpokenLine(spoken) {
+  if(cueIndex >= cuePairs.length) return;
+  const correct = cuePairs[cueIndex].myLine;
+  const result = compareLines(spoken, correct);
+  const pct = Math.round(result.pct * 100);
+  const banner = document.getElementById('cueBanner');
+  const analysis = document.getElementById('wordAnalysis');
+  document.getElementById('revealHint').style.display = 'none';
+  document.getElementById('revealTxt').textContent = correct;
+  lineShown = true;
+  if(result.pct >= 0.85) {
+    banner.className = 'result-banner res-good';
+    banner.textContent = `✅ ${pct}% — great!`;
+    addXP(15);
+    setTimeout(() => nextCue('correct'), 1200);
+  } else if(result.pct >= 0.6) {
+    banner.className = 'result-banner res-close';
+    banner.textContent = `~ ${pct}% — close! "${spoken}"`;
+    document.getElementById('feedbackRow').style.display = 'flex';
+    document.getElementById('nextCueBtn').style.display = 'none';
+  } else {
+    banner.className = 'result-banner res-bad';
+    banner.textContent = `You said: "${spoken}"`;
+    document.getElementById('feedbackRow').style.display = 'flex';
+    document.getElementById('nextCueBtn').style.display = 'none';
+  }
+  if(result.wordResults && result.wordResults.length > 0) {
+    analysis.innerHTML = result.wordResults.map(w =>
+      `<span style="background:${w.ok?'var(--sage)':'var(--terra)'};color:white;border-radius:4px;padding:2px 6px;font-size:11px;margin:2px;">${w.word}</span>`
+    ).join(' ');
+  }
+}
+
+// ════════════════════════════════════════
+//  COMPARE LINES
+// ════════════════════════════════════════
+function compareLines(spoken, correct) {
+  const normalize = s => s.toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/).filter(Boolean);
+  const a = normalize(spoken), b = normalize(correct);
+  if(b.length === 0) return { pct: 1, wordResults: [] };
+  let matches = 0;
+  const wordResults = b.map(word => {
+    const ok = a.includes(word);
+    if(ok) matches++;
+    return { word, ok };
+  });
+  return { pct: matches / b.length, wordResults };
+}
+
+// ════════════════════════════════════════
+//  DICT
+// ════════════════════════════════════════
+function closeDict() { document.getElementById('dictPop').classList.remove('show'); }
+function speakDictWord() {
+  const w = document.getElementById('dpWord').textContent;
+  if('speechSynthesis' in window) {
+    const u = new SpeechSynthesisUtterance(w);
+    u.rate = 0.7;
+    speechSynthesis.speak(u);
+  }
+}
+
+// ════════════════════════════════════════
+//  RENDER SCRIPT READER
+// ════════════════════════════════════════
+function renderScriptReader(data, myChar) {
+  const reader = document.getElementById('scriptReader');
+  if(!reader || !data) return;
+  reader.innerHTML = data.map((line, idx) => {
+    const isMine = line.char === myChar || line.mine;
+    return `<div class="script-block ${isMine?'my-line':''}" style="border-left:4px solid ${isMine?'var(--terra)':'var(--sand-dark)'};margin-bottom:8px;padding:8px 12px;border-radius:0 var(--rs) var(--rs) 0;background:${isMine?'rgba(193,97,79,0.08)':'var(--cream)'};">
+      <div style="font-size:10px;font-weight:900;color:${isMine?'var(--terra)':'var(--brown-light)'};text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">${line.char||''}</div>
+      <div style="font-size:var(--script-fs,14px);line-height:1.8;">${line.text}</div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════
+//  CHARACTER SETUP (after upload)
+// ════════════════════════════════════════
+function highlightTypedChar(val) {
+  const name = val.trim().toUpperCase();
+  document.querySelectorAll('.char-pill').forEach(p => {
+    p.classList.toggle('selected', p.dataset.name === name);
+  });
+  document.getElementById('myCharInput').dataset.prodName = name || '';
+}
+
+function confirmCharacter() {
+  const name = (document.getElementById('myCharInput').value || '').trim().toUpperCase();
+  if(!name) { showToast('Please choose or type your character name 🎭'); return; }
+  document.getElementById('charSetup').style.display = 'none';
+  showSceneSplitter(rawScriptText, name);
+}
+
+function showCharacterSetup(chars) {
+  const setup = document.getElementById('charSetup');
+  const pills = document.getElementById('detectedChars');
+  if(!setup || !pills) return;
+  pills.innerHTML = chars.map(c =>
+    `<div class="char-pill" data-name="${c}" onclick="selectChar('${c}')">${c}</div>`
+  ).join('');
+  setup.style.display = 'block';
+  setup.classList.add('show');
+  document.getElementById('readerSection').style.display = 'none';
+  document.getElementById('sceneSplitterSection').style.display = 'none';
+}
+
+function selectChar(name) {
+  document.querySelectorAll('.char-pill').forEach(p => p.classList.remove('selected'));
+  document.querySelector(`.char-pill[data-name="${name}"]`)?.classList.add('selected');
+  document.getElementById('myCharInput').value = name;
+  document.getElementById('myCharInput').dataset.prodName = name;
+}
+
+// ════════════════════════════════════════
+//  PROCESS SCRIPT
+// ════════════════════════════════════════
+function processScript(source) {
+  let text = '';
+  if(source === 'paste') {
+    text = document.getElementById('pasteArea').value.trim();
+    if(!text) { showToast('Please paste your script text first! 📋'); return; }
+  } else {
+    text = rawScriptText;
+  }
+  if(text.length < 20) { showToast('Script seems too short — please try again'); return; }
+  rawScriptText = text;
+  const chars = detectCharacters(text);
+  showCharacterSetup(chars);
+  showToast(`Script loaded! Found ${chars.length} characters 🎭`);
+}
+
+// ════════════════════════════════════════
+//  DETECT CHARACTERS
+// ════════════════════════════════════════
+function detectCharacters(text) {
+  const lines = text.split('\n');
+  const charCounts = {};
+  const SKIP = /^(ACT|SCENE|INT\.|EXT\.|THE END|LIGHTS|BLACKOUT|CURTAIN|END OF|FADE|CUT TO|SHIFT|VOICE OVER|NEVER WRESTLE)/;
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if(!trimmed || trimmed.length < 2 || trimmed.length > 45) return;
+    if(SKIP.test(trimmed)) return;
+    if(/^[A-Z0-9][A-Z0-9\s\.\'\-\&]*$/.test(trimmed) && /[A-Z]/.test(trimmed)) {
+      if(['A','I','HE','SHE','IT','WE','TO','GO','NO','OH','MY','UP','HM','AH'].includes(trimmed)) return;
+      charCounts[trimmed] = (charCounts[trimmed]||0) + 1;
+    }
+    const colonMatch = trimmed.match(/^([A-Z][A-Z0-9\s\.\'\-]{1,28}):\s*(.*)/);
+    if(colonMatch) {
+      const name = colonMatch[1].trim();
+      charCounts[name] = (charCounts[name]||0) + 1;
+    }
+  });
+  const totalMatches = Object.values(charCounts).reduce((a,b)=>a+b,0);
+  const minCount = totalMatches > 50 ? 2 : 1;
+  return Object.entries(charCounts)
+    .filter(([,count]) => count >= minCount)
+    .sort((a,b) => b[1]-a[1])
+    .map(([name]) => name)
+    .slice(0, 20);
+}
+
+// ════════════════════════════════════════
+//  SCENE SPLITTER
+// ════════════════════════════════════════
+function skipSceneSplit() {
+  document.getElementById('sceneSplitterSection').style.display = 'none';
+  buildScriptData(rawScriptText, splitterMyChar || document.getElementById('myCharInput').value.trim().toUpperCase());
+}
+
+function saveSplitScenes() {
+  const dividers = splitterDividers;
+  buildScriptDataWithScenes(splitterParsed, splitterMyChar, dividers);
+}
+
+function showSceneSplitter(text, myChar) {
+  splitterMyChar = myChar;
+  splitterDividers = [];
+  const lines = text.split('\n');
+  splitterParsed = [];
+  let currentChar = null, currentText = [];
+  const SKIP = /^(ACT|SCENE|INT\.|EXT\.|SHIFT|LIGHTS|BLACKOUT|NEVER WRESTLE)/;
+  function flush() {
+    if(currentChar && currentText.length > 0) {
+      const t = currentText.join(' ').replace(/\s+/g,' ').trim();
+      if(t) splitterParsed.push({ char: currentChar, text: t, mine: currentChar === myChar });
+      currentText = [];
+    }
+  }
+  lines.forEach(function(line) {
+    const trimmed = line.trim();
+    if(!trimmed) return;
+    const isChar = /^[A-Z0-9][A-Z0-9\s\.\'\-\&]*$/.test(trimmed) && /[A-Z]/.test(trimmed) && !SKIP.test(trimmed) && trimmed.length >= 2 && trimmed.length <= 45 && !['A','I','HE','SHE','WE','OH','NO','GO','UP','AH'].includes(trimmed);
+    const colonMatch = trimmed.match(/^([A-Z][A-Z0-9\s\.\'\-]{1,28}):\s*(.*)/);
+    if(colonMatch) { flush(); currentChar = colonMatch[1].trim(); if(colonMatch[2]) currentText.push(colonMatch[2]); }
+    else if(isChar) { flush(); currentChar = trimmed; }
+    else if(currentChar && !/^\(.*\)$/.test(trimmed) && !/^\[.*\]$/.test(trimmed)) currentText.push(trimmed);
+  });
+  flush();
+  if(splitterParsed.length === 0) { buildScriptData(text, myChar); return; }
+  document.getElementById('sceneSplitterSection').style.display = 'block';
+  renderSplitterScript();
+}
+
+function renderSplitterScript() {
+  const container = document.getElementById('splitterScript');
+  if(!container) return;
+  container.innerHTML = splitterParsed.map((block, i) => {
+    const divider = splitterDividers.find(d => d.after === i);
+    const isMine = block.mine;
+    return `
+      ${divider ? `<div style="background:var(--sage);color:white;border-radius:var(--rs);padding:8px 14px;margin:8px 0;font-weight:900;font-size:12px;">📍 Scene: ${divider.name} <button onclick="removeDivider(${i})" style="float:right;background:rgba(0,0,0,0.2);border:none;color:white;border-radius:99px;padding:2px 8px;cursor:pointer;font-family:var(--font);">✕</button></div>` : ''}
+      <div onclick="splitterTap(${i})" style="padding:8px 12px;border-left:4px solid ${isMine?'var(--terra)':'var(--sand-dark)'};margin-bottom:4px;background:${isMine?'rgba(193,97,79,0.08)':'white'};border-radius:0 var(--rs) var(--rs) 0;cursor:pointer;">
+        <div style="font-size:10px;font-weight:900;color:${isMine?'var(--terra)':'var(--brown-light)'};text-transform:uppercase;">${block.char}</div>
+        <div style="font-size:13px;line-height:1.6;">${block.text.substring(0,120)}${block.text.length>120?'...':''}</div>
+      </div>`;
+  }).join('');
+}
+
+function splitterTap(idx) {
+  const name = prompt('Name this scene (everything from here onwards):') || ('Scene '+(splitterDividers.length+1));
+  const existing = splitterDividers.findIndex(d => d.after === idx);
+  if(existing !== -1) splitterDividers[existing].name = name;
+  else splitterDividers.push({ after: idx, name });
+  splitterDividers.sort((a,b) => a.after - b.after);
+  renderSplitterScript();
+}
+
+function removeDivider(afterIdx) {
+  splitterDividers = splitterDividers.filter(d => d.after !== afterIdx);
+  renderSplitterScript();
+}
+
+// ════════════════════════════════════════
+//  BUILD SCRIPT DATA
+// ════════════════════════════════════════
+function buildScriptData(text, myChar) {
+  const lines = text.split('\n');
+  const parsed = [];
+  let currentChar = null, currentText = [];
+  const SKIP = /^(ACT|SCENE|INT\.|EXT\.|SHIFT|LIGHTS|BLACKOUT|NEVER WRESTLE)/;
+  function isCharName(trimmed) {
+    if(!trimmed || trimmed.length < 2 || trimmed.length > 45) return false;
+    if(SKIP.test(trimmed)) return false;
+    if(!/^[A-Z0-9][A-Z0-9\s\.\'\-\&]*$/.test(trimmed)) return false;
+    if(!/[A-Z]/.test(trimmed)) return false;
+    if(['A','I','HE','SHE','IT','WE','TO','GO','NO','OH','MY','UP','HM','AH'].includes(trimmed)) return false;
+    return true;
+  }
+  function flush() {
+    if(currentChar && currentText.length > 0) {
+      const lineText = currentText.join(' ').replace(/\s+/g,' ').trim();
+      if(lineText) parsed.push({ char: currentChar, text: lineText, mine: currentChar === myChar });
+      currentText = [];
+    }
+  }
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if(!trimmed) return;
+    const colonMatch = trimmed.match(/^([A-Z][A-Z0-9\s\.\'\-]{1,28}):\s*(.*)/);
+    if(colonMatch) { flush(); currentChar = colonMatch[1].trim(); if(colonMatch[2].trim()) currentText.push(colonMatch[2].trim()); return; }
+    if(isCharName(trimmed)) { flush(); currentChar = trimmed; return; }
+    if(currentChar && !/^\(.*\)$/.test(trimmed) && !/^\[.*\]$/.test(trimmed)) currentText.push(trimmed);
+  });
+  flush();
+  if(parsed.length === 0) { showToast('Could not parse script — try pasting with proper formatting'); return; }
+  const cuePairsArr = [];
+  for(let i=0; i<parsed.length; i++) {
+    if(parsed[i].mine) {
+      const cue = i > 0 ? parsed[i-1].text : 'Start of scene';
+      cuePairsArr.push({ cue, myLine: parsed[i].text, scene: 'Scene 1' });
+    }
+  }
+  const nameEl = document.getElementById('myCharInput');
+  const prod = {
+    name: (nameEl && nameEl.dataset.prodName) || myChar,
+    role: myChar, type: '🎭', scriptData: parsed,
+    cuePairs: cuePairsArr, myChar, id: Date.now()
+  };
+  finishScriptLoad(prod);
+}
+
+function buildScriptDataWithScenes(parsed, myChar, dividers) {
+  // Assign scene names to each block
+  let currentScene = 'Scene 1';
+  const divSorted = [...dividers].sort((a,b) => a.after - b.after);
+  parsed.forEach((block, i) => {
+    const divAfter = divSorted.find(d => d.after < i && (!divSorted[divSorted.indexOf(d)+1] || divSorted[divSorted.indexOf(d)+1].after >= i));
+    if(divAfter) currentScene = divAfter.name;
+    // Apply scenes in order
+    block.scene = 'Scene 1';
+  });
+  // Simpler: assign scenes sequentially
+  let sceneIdx = 0;
+  let sceneName = divSorted.length > 0 ? 'Before Scene 1' : 'Scene 1';
+  parsed.forEach((block, i) => {
+    while(sceneIdx < divSorted.length && divSorted[sceneIdx].after < i) {
+      sceneName = divSorted[sceneIdx].name;
+      sceneIdx++;
+    }
+    block.scene = sceneName;
+  });
+  const sceneNames = [...new Set(parsed.map(b => b.scene))];
+  const cuePairsArr = [];
+  for(let i=0; i<parsed.length; i++) {
+    if(parsed[i].mine) {
+      const cue = i > 0 ? parsed[i-1].text : 'Start of scene';
+      cuePairsArr.push({ cue, myLine: parsed[i].text, scene: parsed[i].scene });
+    }
+  }
+  const nameEl = document.getElementById('myCharInput');
+  const prod = {
+    name: (nameEl && nameEl.dataset.prodName) || myChar,
+    role: myChar, type: '🎭', scriptData: parsed,
+    cuePairs: cuePairsArr, scenes: sceneNames, myChar, id: Date.now()
+  };
+  finishScriptLoad(prod);
+}
+
+function finishScriptLoad(prod) {
+  productions.push(prod);
+  activeProduction = prod;
+  currentScriptIdx = productions.length - 1;
+  autoSave();
+  renderScriptReader(prod.scriptData, prod.myChar);
+  document.getElementById('sceneSplitterSection').style.display = 'none';
+  document.getElementById('charSetup').style.display = 'none';
+  document.getElementById('readerSection').style.display = 'block';
+  refreshHome();
+  renderScriptLibrary();
+  showToast(`✅ Script loaded! ${(prod.cuePairs||[]).length} lines for ${prod.myChar}`);
+}
+
+// Drag & drop on drop zone
+document.addEventListener('DOMContentLoaded', function() {
+  const dropZone = document.getElementById('dropZone');
+  if(dropZone) {
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault(); dropZone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if(file) handleFileUpload({ files: [file] });
+    });
+  }
+});
+
 </script>
 </body>
 </html>
