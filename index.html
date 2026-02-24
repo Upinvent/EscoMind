@@ -720,9 +720,7 @@ body {
         </div>
         <!-- Character assignment bar -->
         <div style="background:var(--sand);border-radius:var(--rs);padding:10px 12px;margin-bottom:8px;" id="charAssignBar">
-          <div style="font-size:11px;font-weight:900;color:var(--brown);margin-bottom:8px;">🎭 Assign lines to characters — tap a line then pick the character:</div>
-          <div id="charAssignPills" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
-          <div style="font-size:10px;color:var(--brown-light);margin-top:6px;">Tap any line in the script below to reassign it, or select multiple by tapping them then tap a character above.</div>
+          <div id="charAssignPills"></div>
         </div>
       </div>
       <div class="script-reader show" id="detailScriptReader"></div>
@@ -1578,19 +1576,28 @@ function renderDetailScript(idx) {
   if(!prod || !prod.scriptData) return;
   const reader = document.getElementById('detailScriptReader');
   const myChar = prod.myChar;
-  // Group consecutive lines by character, keeping original order
-  // Show each line with character name, highlight mine with red border
-  let html = '';
+  let html = '<div style="font-size:11px;color:var(--brown-light);margin-bottom:12px;text-align:center;padding:6px;background:var(--sand);border-radius:var(--rs);">👆 Tap any line to reassign it to the right character</div>';
   prod.scriptData.forEach((line, lineIdx) => {
     const isMine = line.char === myChar || line.mine;
-    const charColors = getCharColor(line.char, prod);
-    html += `<div class="script-block ${isMine?'my-line':''}" 
-      id="sline_${lineIdx}" 
-      onclick="selectLineForReassign(${lineIdx},${idx})"
-      style="border-left:4px solid ${isMine?'var(--terra)':charColors};margin-bottom:8px;padding:8px 12px;border-radius:0 var(--rs) var(--rs) 0;background:${isMine?'rgba(193,97,79,0.08)':'var(--cream)'};cursor:pointer;">
-      <div style="font-size:10px;font-weight:900;color:${isMine?'var(--terra)':charColors};text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">${line.char || 'UNKNOWN'}</div>
-      <div style="font-size:14px;line-height:1.8;">${line.text}</div>
-    </div>`;
+    const isDir = line.isDirection;
+    const charColor = getCharColor(line.char, prod);
+    if(isDir) {
+      html += `<div id="sline_${lineIdx}" onclick="selectLineForReassign(${lineIdx},${idx})"
+        style="border-left:2px dashed var(--sand-dark);margin-bottom:4px;padding:5px 10px;border-radius:0 var(--rs) var(--rs) 0;background:transparent;cursor:pointer;opacity:0.45;">
+        <div style="font-size:9px;font-weight:900;color:var(--brown-light);text-transform:uppercase;letter-spacing:1px;">STAGE DIRECTION</div>
+        <div style="font-size:12px;font-style:italic;color:var(--brown-light);">${line.text}</div>
+      </div>`;
+    } else {
+      html += `<div class="script-block ${isMine?'my-line':''}" id="sline_${lineIdx}"
+        onclick="selectLineForReassign(${lineIdx},${idx})"
+        style="border-left:4px solid ${isMine?'var(--terra)':charColor};margin-bottom:6px;padding:8px 12px;border-radius:0 var(--rs) var(--rs) 0;background:${isMine?'rgba(193,97,79,0.08)':'var(--cream)'};cursor:pointer;transition:transform 0.1s;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+          <div style="font-size:10px;font-weight:900;color:${isMine?'var(--terra)':charColor};text-transform:uppercase;letter-spacing:1px;">${line.char||'UNKNOWN'}${isMine?' 🎭':''}</div>
+          <div style="font-size:10px;color:var(--sand-dark);">tap to reassign</div>
+        </div>
+        <div style="font-size:14px;line-height:1.8;">${escapeHtml(line.text)}</div>
+      </div>`;
+    }
   });
   reader.innerHTML = html;
 }
@@ -1616,27 +1623,109 @@ function renderCharAssignBar(idx) {
   const bar = document.getElementById('charAssignPills');
   if(!bar) return;
   const chars = [...new Set(prod.scriptData.map(l => l.char).filter(Boolean))];
-  bar.innerHTML = chars.map(c => {
-    const isMine = c === prod.myChar;
-    return `<button onclick="assignSelectedLines('${c}',${idx})" 
-      style="background:${isMine?'var(--terra)':'var(--sand)'};color:${isMine?'white':'var(--brown)'};border:2px solid ${isMine?'var(--terra)':'var(--sand-dark)'};border-radius:99px;padding:6px 14px;font-family:var(--font);font-size:11px;font-weight:900;cursor:pointer;">
-      ${isMine?'🎭 ':''}${c}${isMine?' (you)':''}
-    </button>`;
-  }).join('');
+  const counts = {};
+  prod.scriptData.forEach(l => { if(l.char && !l.isDirection) counts[l.char] = (counts[l.char]||0)+1; });
+  const myLines = prod.scriptData.filter(l=>l.mine && !l.isDirection).length;
+  const directions = prod.scriptData.filter(l=>l.isDirection).length;
+  bar.innerHTML = `
+    <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+      ${chars.map(c => {
+        const isMine = c === prod.myChar;
+        return `<div style="background:${isMine?'var(--terra)':'var(--sand)'};color:${isMine?'white':'var(--brown)'};
+          border:2px solid ${isMine?'var(--terra)':'var(--sand-dark)'};
+          border-radius:99px;padding:5px 12px;font-size:11px;font-weight:900;display:inline-flex;align-items:center;gap:5px;">
+          ${isMine?'🎭 ':''}${c} <span style="opacity:0.7;">(${counts[c]||0})</span>
+        </div>`;
+      }).join('')}
+      ${directions>0?`<div style="background:var(--sand);color:var(--brown-light);border:1px dashed var(--sand-dark);border-radius:99px;padding:5px 12px;font-size:11px;font-weight:700;">🚫 ${directions} directions hidden</div>`:''}
+    </div>
+    <div style="font-size:11px;color:var(--brown-light);margin-top:8px;">
+      <strong>${myLines} lines</strong> assigned to you · Tap any line below to reassign it
+    </div>
+  `;
 }
 
 function selectLineForReassign(lineIdx, prodIdx) {
-  const el = document.getElementById('sline_' + lineIdx);
-  if(!el) return;
-  const alreadySelected = (el.style.outline || '').includes('3px');
-  if(alreadySelected) {
-    el.style.outline = '';
-    selectedLines = selectedLines.filter(i => i !== lineIdx);
-  } else {
-    el.style.outline = '3px solid var(--amber)';
-    selectedLines.push(lineIdx);
-  }
-  showToast(selectedLines.length > 0 ? `${selectedLines.length} line(s) selected — tap a character above` : 'Line deselected');
+  const prod = productions[prodIdx];
+  if(!prod) return;
+  const line = prod.scriptData[lineIdx];
+  if(!line) return;
+  const chars = [...new Set(prod.scriptData.map(l=>l.char).filter(Boolean))];
+
+  // Remove any existing popup
+  const old = document.getElementById('reassignPopup');
+  if(old) old.remove();
+
+  // Build popup
+  const popup = document.createElement('div');
+  popup.id = 'reassignPopup';
+  popup.style.cssText = `
+    position:fixed;bottom:0;left:0;right:0;z-index:9999;
+    background:var(--cream);border-radius:20px 20px 0 0;
+    box-shadow:0 -8px 40px rgba(0,0,0,0.22);
+    padding:20px 20px 36px;
+    animation:slideUp 0.22s cubic-bezier(0.34,1.56,0.64,1);
+  `;
+  popup.innerHTML = `
+    <div style="width:40px;height:4px;background:var(--sand-dark);border-radius:99px;margin:0 auto 16px;"></div>
+    <div style="font-size:11px;font-weight:900;color:var(--brown-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Reassign this line:</div>
+    <div style="font-size:14px;font-weight:700;color:var(--brown);margin-bottom:16px;line-height:1.5;background:var(--sand);border-radius:var(--rs);padding:8px 12px;">"${line.text.substring(0,80)}${line.text.length>80?'…':''}"</div>
+    <div style="font-size:11px;font-weight:900;color:var(--brown-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Currently: <span style="color:var(--terra)">${line.char}</span> — who does this belong to?</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
+      ${chars.map(c => {
+        const isMine = c === prod.myChar;
+        const isCurrent = c === line.char;
+        return `<button onclick="quickReassign(${lineIdx},${prodIdx},'${c.replace(/'/g,"\'")}',this.closest('#reassignPopup'))"
+          style="background:${isCurrent?'var(--amber)':isMine?'var(--terra)':'var(--sand)'};
+            color:${isCurrent||isMine?'white':'var(--brown)'};
+            border:2px solid ${isCurrent?'var(--amber)':isMine?'var(--terra)':'var(--sand-dark)'};
+            border-radius:99px;padding:8px 16px;font-family:var(--font);font-size:13px;font-weight:900;cursor:pointer;">
+          ${isCurrent?'✓ ':''}${isMine?'🎭 ':''}${c}
+        </button>`;
+      }).join('')}
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="markAsDirection(${lineIdx},${prodIdx},this.closest('#reassignPopup'))"
+        style="flex:1;background:var(--sand);color:var(--brown-light);border:2px solid var(--sand-dark);border-radius:var(--rs);padding:10px;font-family:var(--font);font-size:12px;font-weight:900;cursor:pointer;">
+        🚫 Stage Direction (hide from practice)
+      </button>
+      <button onclick="this.closest('#reassignPopup').remove()"
+        style="background:none;border:none;font-size:24px;cursor:pointer;padding:0 8px;">✕</button>
+    </div>
+  `;
+  document.body.appendChild(popup);
+
+  // Close on backdrop tap
+  setTimeout(() => {
+    const close = (e) => { if(!popup.contains(e.target)) { popup.remove(); document.removeEventListener('touchstart',close); document.removeEventListener('mousedown',close); }};
+    document.addEventListener('touchstart', close);
+    document.addEventListener('mousedown', close);
+  }, 100);
+}
+
+function quickReassign(lineIdx, prodIdx, newChar, popup) {
+  const prod = productions[prodIdx];
+  if(!prod || !prod.scriptData[lineIdx]) return;
+  prod.scriptData[lineIdx].char = newChar;
+  prod.scriptData[lineIdx].mine = (newChar === prod.myChar);
+  rebuildCuePairs(prod);
+  autoSave();
+  if(popup) popup.remove();
+  renderDetailScript(prodIdx);
+  renderCharAssignBar(prodIdx);
+  showToast(`✅ Assigned to ${newChar}`);
+}
+
+function markAsDirection(lineIdx, prodIdx, popup) {
+  const prod = productions[prodIdx];
+  if(!prod || !prod.scriptData[lineIdx]) return;
+  prod.scriptData[lineIdx].isDirection = true;
+  prod.scriptData[lineIdx].mine = false;
+  rebuildCuePairs(prod);
+  autoSave();
+  if(popup) popup.remove();
+  renderDetailScript(prodIdx);
+  showToast('Marked as stage direction — hidden from practice');
 }
 
 function assignSelectedLines(charName, prodIdx) {
@@ -1662,14 +1751,22 @@ function assignSelectedLines(charName, prodIdx) {
 function rebuildCuePairs(prod) {
   const myChar = prod.myChar;
   const pairs = [];
+  // Update mine flags first, skip directions
+  prod.scriptData.forEach(l => { l.mine = !l.isDirection && (l.char === myChar); });
+  // Build cue pairs: cue = last non-direction line before mine
   for(let i = 0; i < prod.scriptData.length; i++) {
-    if(prod.scriptData[i].mine || prod.scriptData[i].char === myChar) {
-      const cue = i > 0 ? prod.scriptData[i-1].text : 'Start of scene';
-      pairs.push({ cue, myLine: prod.scriptData[i].text, scene: prod.scriptData[i].scene || 'Scene 1' });
+    const line = prod.scriptData[i];
+    if(line.isDirection) continue;
+    if(line.mine) {
+      // Find previous non-direction line
+      let cue = 'Start of scene';
+      for(let j = i-1; j >= 0; j--) {
+        if(!prod.scriptData[j].isDirection) { cue = prod.scriptData[j].text; break; }
+      }
+      pairs.push({ cue, myLine: line.text, scene: line.scene || 'Scene 1' });
     }
   }
   prod.cuePairs = pairs;
-  prod.scriptData.forEach(l => { l.mine = (l.char === myChar); });
 }
 
 function practiceCurrentScript() {
@@ -4350,10 +4447,162 @@ function selectChar(name) {
 // ════════════════════════════════════════
 //  PROCESS SCRIPT
 // ════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
+//  SCRIPT PARSER v2 — line-by-line, handles normal + inverted attribution
+// ════════════════════════════════════════════════════════════
+
+function charNameFromLine(stripped) {
+  // Returns cleaned character name if this looks like a char label, else null
+  if(!stripped || stripped.length < 2 || stripped.length > 55) return null;
+  // Strip parenthetical stage notes: "ELI (on Light)" → "ELI"
+  const base = stripped.replace(/\s*\([^)]*\)\s*/g,'').trim();
+  if(!base || base.length < 2) return null;
+  // Skip known stage direction keywords
+  if(/^(SHIFT|LIGHTS|BLACKOUT|SCENE|ACT|CURTAIN|INTERMISSION|PAUSE|SILENCE|BEAT|FADE|NEVER|THE END|VOICE OVER|OFFSTAGE|OFF STAGE|INT\.|EXT\.)/.test(base)) return null;
+  // Must be ALL-CAPS words only
+  if(!/^[A-Z][A-Z0-9\s\.\'\-\&]*$/.test(base)) return null;
+  // Must have at least 2 consecutive capital letters
+  if(!/[A-Z]{2,}/.test(base)) return null;
+  // Skip common words that aren't names
+  const exact = base.trim();
+  if(['A','I','HE','SHE','IT','WE','TO','GO','NO','OH','MY','UP','HM','AH',
+      'OK','SO','OR','IF','BY','DO','BE','AS','AT','OF','IN','ON','IS','AM',
+      'AN','US','ALL','AND','BUT','FOR','YET','NOR','NOT','TOO','NOW','YES',
+      'THEN','THEM','THEY','THEIR','THERE','HERE','WHEN','WHAT','WHERE','WHY',
+      'HOW','WHO','WELL','JUST','LIKE','YEAH','OKAY','THAT','THIS','WITH',
+      'HAVE','BEEN','WILL','WOULD','COULD','SHOULD','SHALL','MAY','MIGHT',
+      'MUST','DOES','DONE','WERE','SAID','BACK','CAME','COME','WENT','GOING',
+      'STILL','EVEN','ONLY','ALSO','BOTH','EACH','MORE','SOME','HOLD ON',
+      'ALL CAPS'].includes(exact)) return null;
+  // Skip pure numbers or page-number-like strings
+  if(/^\d+$/.test(exact)) return null;
+  // "CHAR1 & CHAR2" — take first character's name
+  if(base.includes(' & ')) return base.split(' & ')[0].trim();
+  return base;
+}
+
+function detectCharacters(text) {
+  // Detect all character names for the setup screen
+  const lines = text.split('\n');
+  const counts = {};
+  for(const line of lines) {
+    const cn = charNameFromLine(line.trim());
+    if(cn) counts[cn] = (counts[cn]||0) + 1;
+  }
+  const total = Object.values(counts).reduce((a,b)=>a+b,0);
+  const min = total > 50 ? 2 : 1;
+  return Object.entries(counts)
+    .filter(([,c])=>c>=min)
+    .sort((a,b)=>b[1]-a[1])
+    .map(([n])=>n)
+    .slice(0,20);
+}
+
+function parseScriptV2(text, myChar) {
+  /**
+   * Smart line-by-line parser.
+   * Handles BOTH standard attribution (CHARNAME → dialogue)
+   * AND inverted attribution (dialogue → CHARNAME) as used in Windfall.
+   * Each physical text line becomes its own scriptData entry.
+   */
+  const rawLines = text.split('\n');
+
+  // Step 1: tokenise
+  const tokens = [];
+  for(const raw of rawLines) {
+    const s = raw.trim();
+    if(!s) { tokens.push({t:'blank'}); continue; }
+    if(/^\d+\s*$/.test(s)) continue;                          // page numbers
+    if(/^\(.*\)$/.test(s) || /^\[.*\]$/.test(s)) continue;   // pure stage directions
+    const cn = charNameFromLine(s);
+    if(cn) tokens.push({t:'char', v:cn});
+    else   tokens.push({t:'text', v:s});
+  }
+
+  // Step 2: collapse consecutive blanks to one
+  const toks = [];
+  for(const tk of tokens) {
+    if(tk.t==='blank' && toks.length && toks[toks.length-1].t==='blank') continue;
+    toks.push(tk);
+  }
+
+  // Step 3: assign lines using lookahead for inverted attribution
+  const result = [];
+  let currentChar = null;
+  let i = 0;
+
+  while(i < toks.length) {
+    const tk = toks[i];
+
+    if(tk.t === 'char') {
+      currentChar = tk.v;
+      i++;
+      if(i < toks.length && toks[i].t==='blank') i++; // skip blank after char name
+      continue;
+    }
+
+    if(tk.t === 'blank') { i++; continue; }
+
+    if(tk.t === 'text') {
+      // Collect a run of consecutive text lines
+      let j = i;
+      const textRun = [];
+      while(j < toks.length && toks[j].t==='text') { textRun.push(toks[j].v); j++; }
+
+      // Skip blank after text run
+      let k = j;
+      if(k < toks.length && toks[k].t==='blank') k++;
+
+      // Is there a char name next?
+      const nextCharIdx = (k < toks.length && toks[k].t==='char') ? k : -1;
+
+      if(nextCharIdx !== -1) {
+        // Look past that char name (skip its blank)
+        let m = nextCharIdx + 1;
+        if(m < toks.length && toks[m].t==='blank') m++;
+        // If after the char name comes ANOTHER char or end-of-tokens → inverted attribution
+        const afterIsChar = m < toks.length && toks[m].t==='char';
+        const afterIsEnd  = m >= toks.length;
+        const afterIsBlankThenChar = m < toks.length && toks[m].t==='blank'
+                                  && m+1 < toks.length && toks[m+1].t==='char';
+
+        if(afterIsChar || afterIsEnd || afterIsBlankThenChar) {
+          // Inverted: these lines belong to the upcoming char name
+          const nextChar = toks[nextCharIdx].v;
+          for(const line of textRun) {
+            result.push({char: nextChar, text: line, mine: nextChar===myChar});
+          }
+          i = j; // advance past text run; char token processed next iteration
+          continue;
+        }
+      }
+
+      // Normal: belongs to currentChar
+      if(currentChar) {
+        for(const line of textRun) {
+          result.push({char: currentChar, text: line, mine: currentChar===myChar});
+        }
+      }
+      i = j;
+      continue;
+    }
+
+    i++;
+  }
+
+  return result;
+}
+
+function parseRawScript(text) {
+  // Compatibility wrapper — used by editor page upload
+  return parseScriptV2(text, '__NONE__');
+}
+
+// ─── processScript ───────────────────────────────────────────────────────────
 function processScript(source) {
   let text = '';
   if(source === 'paste') {
-    text = document.getElementById('pasteArea').value.trim();
+    text = (document.getElementById('pasteArea').value||'').trim();
     if(!text) { showToast('Please paste your script text first! 📋'); return; }
   } else {
     text = rawScriptText;
@@ -4361,78 +4610,32 @@ function processScript(source) {
   if(text.length < 20) { showToast('Script seems too short — please try again'); return; }
   rawScriptText = text;
   const chars = detectCharacters(text);
+  if(chars.length === 0) {
+    showToast('No character names found. Make sure names are in ALL CAPS on their own line.');
+    showCharacterSetup([]);
+    return;
+  }
   showCharacterSetup(chars);
-  showToast(`Script loaded! Found ${chars.length} characters 🎭`);
+  showToast(`Found ${chars.length} characters — who are you? 🎭`);
 }
 
-// ════════════════════════════════════════
-//  DETECT CHARACTERS
-// ════════════════════════════════════════
-function detectCharacters(text) {
-  const lines = text.split('\n');
-  const charCounts = {};
-  const SKIP = /^(ACT|SCENE|INT\.|EXT\.|THE END|LIGHTS|BLACKOUT|CURTAIN|END OF|FADE|CUT TO|SHIFT|VOICE OVER|NEVER WRESTLE)/;
-  lines.forEach(line => {
-    const trimmed = line.trim();
-    if(!trimmed || trimmed.length < 2 || trimmed.length > 45) return;
-    if(SKIP.test(trimmed)) return;
-    if(/^[A-Z0-9][A-Z0-9\s\.\'\-\&]*$/.test(trimmed) && /[A-Z]/.test(trimmed)) {
-      if(['A','I','HE','SHE','IT','WE','TO','GO','NO','OH','MY','UP','HM','AH'].includes(trimmed)) return;
-      charCounts[trimmed] = (charCounts[trimmed]||0) + 1;
-    }
-    const colonMatch = trimmed.match(/^([A-Z][A-Z0-9\s\.\'\-]{1,28}):\s*(.*)/);
-    if(colonMatch) {
-      const name = colonMatch[1].trim();
-      charCounts[name] = (charCounts[name]||0) + 1;
-    }
-  });
-  const totalMatches = Object.values(charCounts).reduce((a,b)=>a+b,0);
-  const minCount = totalMatches > 50 ? 2 : 1;
-  return Object.entries(charCounts)
-    .filter(([,count]) => count >= minCount)
-    .sort((a,b) => b[1]-a[1])
-    .map(([name]) => name)
-    .slice(0, 20);
-}
-
-// ════════════════════════════════════════
-//  SCENE SPLITTER
-// ════════════════════════════════════════
+// ─── Scene splitter ───────────────────────────────────────────────────────────
 function skipSceneSplit() {
   document.getElementById('sceneSplitterSection').style.display = 'none';
-  buildScriptData(rawScriptText, splitterMyChar || document.getElementById('myCharInput').value.trim().toUpperCase());
+  const myChar = splitterMyChar || (document.getElementById('myCharInput').value||'').trim().toUpperCase();
+  buildAndFinish(rawScriptText, myChar, []);
 }
 
 function saveSplitScenes() {
-  const dividers = splitterDividers;
-  buildScriptDataWithScenes(splitterParsed, splitterMyChar, dividers);
+  buildAndFinish(rawScriptText, splitterMyChar, splitterDividers);
 }
 
 function showSceneSplitter(text, myChar) {
   splitterMyChar = myChar;
   splitterDividers = [];
-  const lines = text.split('\n');
-  splitterParsed = [];
-  let currentChar = null, currentText = [];
-  const SKIP = /^(ACT|SCENE|INT\.|EXT\.|SHIFT|LIGHTS|BLACKOUT|NEVER WRESTLE)/;
-  function flush() {
-    if(currentChar && currentText.length > 0) {
-      const t = currentText.join(' ').replace(/\s+/g,' ').trim();
-      if(t) splitterParsed.push({ char: currentChar, text: t, mine: currentChar === myChar });
-      currentText = [];
-    }
-  }
-  lines.forEach(function(line) {
-    const trimmed = line.trim();
-    if(!trimmed) return;
-    const isChar = /^[A-Z0-9][A-Z0-9\s\.\'\-\&]*$/.test(trimmed) && /[A-Z]/.test(trimmed) && !SKIP.test(trimmed) && trimmed.length >= 2 && trimmed.length <= 45 && !['A','I','HE','SHE','WE','OH','NO','GO','UP','AH'].includes(trimmed);
-    const colonMatch = trimmed.match(/^([A-Z][A-Z0-9\s\.\'\-]{1,28}):\s*(.*)/);
-    if(colonMatch) { flush(); currentChar = colonMatch[1].trim(); if(colonMatch[2]) currentText.push(colonMatch[2]); }
-    else if(isChar) { flush(); currentChar = trimmed; }
-    else if(currentChar && !/^\(.*\)$/.test(trimmed) && !/^\[.*\]$/.test(trimmed)) currentText.push(trimmed);
-  });
-  flush();
-  if(splitterParsed.length === 0) { buildScriptData(text, myChar); return; }
+  // Quick parse to see if there's anything to show
+  splitterParsed = parseScriptV2(text, myChar);
+  if(splitterParsed.length === 0) { buildAndFinish(text, myChar, []); return; }
   document.getElementById('sceneSplitterSection').style.display = 'block';
   renderSplitterScript();
 }
@@ -4440,116 +4643,95 @@ function showSceneSplitter(text, myChar) {
 function renderSplitterScript() {
   const container = document.getElementById('splitterScript');
   if(!container) return;
-  container.innerHTML = splitterParsed.map((block, i) => {
-    const divider = splitterDividers.find(d => d.after === i);
-    const isMine = block.mine;
+  // Show unique chars as colour-coded blocks, grouped (not every line)
+  // Group consecutive same-char lines into blocks for readability
+  const groups = [];
+  let last = null;
+  for(const line of splitterParsed) {
+    if(last && last.char === line.char) { last.lines.push(line.text); }
+    else { last = {char:line.char, mine:line.mine, lines:[line.text], idx:groups.length}; groups.push(last); }
+  }
+  container.innerHTML = groups.map((g,gi) => {
+    const div = splitterDividers.find(d=>d.after===gi);
+    const isMine = g.mine;
     return `
-      ${divider ? `<div style="background:var(--sage);color:white;border-radius:var(--rs);padding:8px 14px;margin:8px 0;font-weight:900;font-size:12px;">📍 Scene: ${divider.name} <button onclick="removeDivider(${i})" style="float:right;background:rgba(0,0,0,0.2);border:none;color:white;border-radius:99px;padding:2px 8px;cursor:pointer;font-family:var(--font);">✕</button></div>` : ''}
-      <div onclick="splitterTap(${i})" style="padding:8px 12px;border-left:4px solid ${isMine?'var(--terra)':'var(--sand-dark)'};margin-bottom:4px;background:${isMine?'rgba(193,97,79,0.08)':'white'};border-radius:0 var(--rs) var(--rs) 0;cursor:pointer;">
-        <div style="font-size:10px;font-weight:900;color:${isMine?'var(--terra)':'var(--brown-light)'};text-transform:uppercase;">${block.char}</div>
-        <div style="font-size:13px;line-height:1.6;">${block.text.substring(0,120)}${block.text.length>120?'...':''}</div>
+      ${div ? `<div style="background:var(--sage);color:white;border-radius:var(--rs);padding:8px 14px;margin:8px 0;font-weight:900;font-size:12px;display:flex;justify-content:space-between;align-items:center;">📍 Scene: ${div.name} <button onclick="removeDivider(${gi})" style="background:rgba(0,0,0,0.2);border:none;color:white;border-radius:99px;padding:2px 8px;cursor:pointer;font-family:var(--font);">✕</button></div>` : ''}
+      <div onclick="splitterTap(${gi})" style="padding:8px 12px;border-left:4px solid ${isMine?'var(--terra)':'var(--sand-dark)'};margin-bottom:4px;background:${isMine?'rgba(193,97,79,0.08)':'white'};border-radius:0 var(--rs) var(--rs) 0;cursor:pointer;">
+        <div style="font-size:10px;font-weight:900;color:${isMine?'var(--terra)':'var(--brown-light)'};text-transform:uppercase;">${g.char}</div>
+        <div style="font-size:13px;line-height:1.6;color:var(--brown);">${g.lines[0].substring(0,100)}${g.lines.length>1?' (+'+( g.lines.length-1)+' more)':''}</div>
       </div>`;
   }).join('');
 }
 
 function splitterTap(idx) {
   const name = prompt('Name this scene (everything from here onwards):') || ('Scene '+(splitterDividers.length+1));
-  const existing = splitterDividers.findIndex(d => d.after === idx);
+  const existing = splitterDividers.findIndex(d=>d.after===idx);
   if(existing !== -1) splitterDividers[existing].name = name;
-  else splitterDividers.push({ after: idx, name });
-  splitterDividers.sort((a,b) => a.after - b.after);
+  else splitterDividers.push({after:idx, name});
+  splitterDividers.sort((a,b)=>a.after-b.after);
   renderSplitterScript();
 }
 
 function removeDivider(afterIdx) {
-  splitterDividers = splitterDividers.filter(d => d.after !== afterIdx);
+  splitterDividers = splitterDividers.filter(d=>d.after!==afterIdx);
   renderSplitterScript();
 }
 
-// ════════════════════════════════════════
-//  BUILD SCRIPT DATA
-// ════════════════════════════════════════
-function buildScriptData(text, myChar) {
-  const lines = text.split('\n');
-  const parsed = [];
-  let currentChar = null, currentText = [];
-  const SKIP = /^(ACT|SCENE|INT\.|EXT\.|SHIFT|LIGHTS|BLACKOUT|NEVER WRESTLE)/;
-  function isCharName(trimmed) {
-    if(!trimmed || trimmed.length < 2 || trimmed.length > 45) return false;
-    if(SKIP.test(trimmed)) return false;
-    if(!/^[A-Z0-9][A-Z0-9\s\.\'\-\&]*$/.test(trimmed)) return false;
-    if(!/[A-Z]/.test(trimmed)) return false;
-    if(['A','I','HE','SHE','IT','WE','TO','GO','NO','OH','MY','UP','HM','AH'].includes(trimmed)) return false;
-    return true;
+// ─── Build & finish ────────────────────────────────────────────────────────────
+function buildAndFinish(text, myChar, dividers) {
+  const allLines = parseScriptV2(text, myChar);
+  if(allLines.length === 0) { showToast('Could not parse script — check formatting'); return; }
+
+  // Assign scenes based on dividers (applied to display-groups, not raw lines)
+  if(dividers && dividers.length > 0) {
+    // Build same groups as splitter
+    const groups = [];
+    let last = null;
+    for(const line of allLines) {
+      if(last && last.char === line.char) { last.lines.push(line); }
+      else { last = {char:line.char, lines:[line], idx:groups.length}; groups.push(last); }
+    }
+    // Assign scene names to groups
+    let sceneIdx = 0;
+    let sceneName = 'Scene 1';
+    const sortedDiv = [...dividers].sort((a,b)=>a.after-b.after);
+    groups.forEach((g,gi) => {
+      while(sceneIdx < sortedDiv.length && sortedDiv[sceneIdx].after <= gi) {
+        sceneName = sortedDiv[sceneIdx].name;
+        sceneIdx++;
+      }
+      g.lines.forEach(l => l.scene = sceneName);
+    });
+  } else {
+    allLines.forEach(l => l.scene = 'Scene 1');
   }
-  function flush() {
-    if(currentChar && currentText.length > 0) {
-      const lineText = currentText.join(' ').replace(/\s+/g,' ').trim();
-      if(lineText) parsed.push({ char: currentChar, text: lineText, mine: currentChar === myChar });
-      currentText = [];
+
+  const sceneNames = [...new Set(allLines.map(l=>l.scene||'Scene 1'))];
+
+  // Build cue pairs: for each of MY lines, cue = preceding line (any char)
+  const cuePairs = [];
+  for(let i=0; i<allLines.length; i++) {
+    if(allLines[i].mine) {
+      const cue = i > 0 ? allLines[i-1].text : 'Start of scene';
+      cuePairs.push({cue, myLine:allLines[i].text, scene:allLines[i].scene||'Scene 1'});
     }
   }
-  lines.forEach(line => {
-    const trimmed = line.trim();
-    if(!trimmed) return;
-    const colonMatch = trimmed.match(/^([A-Z][A-Z0-9\s\.\'\-]{1,28}):\s*(.*)/);
-    if(colonMatch) { flush(); currentChar = colonMatch[1].trim(); if(colonMatch[2].trim()) currentText.push(colonMatch[2].trim()); return; }
-    if(isCharName(trimmed)) { flush(); currentChar = trimmed; return; }
-    if(currentChar && !/^\(.*\)$/.test(trimmed) && !/^\[.*\]$/.test(trimmed)) currentText.push(trimmed);
-  });
-  flush();
-  if(parsed.length === 0) { showToast('Could not parse script — try pasting with proper formatting'); return; }
-  const cuePairsArr = [];
-  for(let i=0; i<parsed.length; i++) {
-    if(parsed[i].mine) {
-      const cue = i > 0 ? parsed[i-1].text : 'Start of scene';
-      cuePairsArr.push({ cue, myLine: parsed[i].text, scene: 'Scene 1' });
-    }
-  }
+
   const nameEl = document.getElementById('myCharInput');
   const prod = {
     name: (nameEl && nameEl.dataset.prodName) || myChar,
-    role: myChar, type: '🎭', scriptData: parsed,
-    cuePairs: cuePairsArr, myChar, id: Date.now()
+    role: myChar, type: '🎭',
+    scriptData: allLines,
+    cuePairs, scenes: sceneNames, myChar, id: Date.now()
   };
   finishScriptLoad(prod);
 }
 
+// Backwards-compat wrappers
+function buildScriptData(text, myChar) { buildAndFinish(text, myChar, []); }
 function buildScriptDataWithScenes(parsed, myChar, dividers) {
-  // Assign scene names to each block
-  let currentScene = 'Scene 1';
-  const divSorted = [...dividers].sort((a,b) => a.after - b.after);
-  parsed.forEach((block, i) => {
-    const divAfter = divSorted.find(d => d.after < i && (!divSorted[divSorted.indexOf(d)+1] || divSorted[divSorted.indexOf(d)+1].after >= i));
-    if(divAfter) currentScene = divAfter.name;
-    // Apply scenes in order
-    block.scene = 'Scene 1';
-  });
-  // Simpler: assign scenes sequentially
-  let sceneIdx = 0;
-  let sceneName = divSorted.length > 0 ? 'Before Scene 1' : 'Scene 1';
-  parsed.forEach((block, i) => {
-    while(sceneIdx < divSorted.length && divSorted[sceneIdx].after < i) {
-      sceneName = divSorted[sceneIdx].name;
-      sceneIdx++;
-    }
-    block.scene = sceneName;
-  });
-  const sceneNames = [...new Set(parsed.map(b => b.scene))];
-  const cuePairsArr = [];
-  for(let i=0; i<parsed.length; i++) {
-    if(parsed[i].mine) {
-      const cue = i > 0 ? parsed[i-1].text : 'Start of scene';
-      cuePairsArr.push({ cue, myLine: parsed[i].text, scene: parsed[i].scene });
-    }
-  }
-  const nameEl = document.getElementById('myCharInput');
-  const prod = {
-    name: (nameEl && nameEl.dataset.prodName) || myChar,
-    role: myChar, type: '🎭', scriptData: parsed,
-    cuePairs: cuePairsArr, scenes: sceneNames, myChar, id: Date.now()
-  };
-  finishScriptLoad(prod);
+  // parsed may already have scene assignments from splitter — use them
+  buildAndFinish(rawScriptText, myChar, dividers);
 }
 
 function finishScriptLoad(prod) {
