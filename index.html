@@ -494,6 +494,7 @@ body {
   .toast{max-width:440px;}
 }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
 
@@ -1405,23 +1406,9 @@ function handleFileUpload(input) {
   const file = input.files[0];
   if(!file) return;
   const ext = file.name.split('.').pop().toLowerCase();
+  showToast(`Loading: ${file.name} 📂`);
   if(ext === 'pdf') {
-    showToast('PDF detected — extracting text... 📄');
-    // For PDF: read as text (works for text-layer PDFs)
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      // Try to extract readable text from PDF binary
-      const binary = e.target.result;
-      const text = extractTextFromPDF(binary, file.name);
-      if(text.trim().length > 50) {
-        rawScriptText = text;
-        processScript('file');
-      } else {
-        showToast('PDF is image-based — please copy & paste the text instead 📋');
-        document.querySelectorAll('.itab')[1].click();
-      }
-    };
-    reader.readAsBinaryString(file);
+    extractPDFwithPDFjs(file);
   } else {
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -1430,25 +1417,98 @@ function handleFileUpload(input) {
     };
     reader.readAsText(file);
   }
-  showToast(`Loading: ${file.name} 📂`);
 }
 
-function extractTextFromPDF(binary, filename) {
-  // Simple text extraction from PDF text layer
+async function extractPDFwithPDFjs(file) {
+  showToast('Reading PDF... this takes a moment ⏳');
+  try {
+    // Configure PDF.js worker
+    if(window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    } else {
+      throw new Error('PDF.js not loaded');
+    }
+
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let fullText = '';
+    const totalPages = pdf.numPages;
+
+    for(let pageNum = 1; pageNum <= totalPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+      const content = await page.getTextContent();
+      // Reconstruct lines from text items, preserving vertical position groupings
+      const items = content.items;
+      if(items.length === 0) continue;
+
+      // Group by Y position (same line = within 3pt of each other)
+      let lastY = null;
+      let lineBuffer = '';
+      const pageLines = [];
+
+      items.forEach(item => {
+        const y = item.transform ? Math.round(item.transform[5]) : 0;
+        const text = item.str;
+        if(lastY !== null && Math.abs(y - lastY) > 3) {
+          // New line
+          if(lineBuffer.trim()) pageLines.push(lineBuffer.trimEnd());
+          lineBuffer = text;
+        } else {
+          lineBuffer += text;
+        }
+        lastY = y;
+      });
+      if(lineBuffer.trim()) pageLines.push(lineBuffer.trimEnd());
+
+      // Reverse lines (PDFs render bottom-up)
+      fullText += pageLines.reverse().join('\n') + '\n';
+    }
+
+    const cleaned = fullText.trim();
+    if(cleaned.length > 100) {
+      rawScriptText = cleaned;
+      showToast(`PDF loaded — ${totalPages} pages extracted ✅`);
+      processScript('file');
+    } else {
+      showToast('PDF appears image-based — please paste the text instead 📋');
+      document.querySelectorAll('.itab')[1]?.click();
+    }
+  } catch(err) {
+    console.error('PDF.js error:', err);
+    // Fallback: try raw binary extraction
+    showToast('Trying backup PDF reader... 🔄');
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const text = extractTextFromPDFFallback(e.target.result);
+      if(text.length > 100) {
+        rawScriptText = text;
+        processScript('file');
+      } else {
+        showToast('Could not read this PDF — please paste the script text 📋');
+        document.querySelectorAll('.itab')[1]?.click();
+      }
+    };
+    reader.readAsBinaryString(file);
+  }
+}
+
+function extractTextFromPDFFallback(binary) {
+  // Backup: extract readable strings from PDF binary stream
   try {
     let text = '';
-    const matches = binary.match(/BT[\s\S]*?ET/g) || [];
-    matches.forEach(block => {
-      const strings = block.match(/\(([^)]+)\)/g) || [];
+    // Look for text between parentheses in BT/ET blocks
+    const btBlocks = binary.match(/BT[\s\S]*?ET/g) || [];
+    btBlocks.forEach(block => {
+      const strings = block.match(/\(([^)\\]|\\.)*\)/g) || [];
       strings.forEach(s => {
-        text += s.slice(1,-1).replace(/\\n/g,'\n').replace(/\\/g,'') + ' ';
+        const clean = s.slice(1,-1)
+          .replace(/\\n/g,'\n').replace(/\\r/g,'')
+          .replace(/\\t/g,' ').replace(/\\\(/g,'(').replace(/\\\)/g,')')
+          .replace(/\\\\/g,'\\');
+        text += clean + ' ';
       });
+      text += '\n';
     });
-    if(text.trim().length < 30) {
-      // Try another method - look for readable text
-      const readable = binary.match(/[A-Z][A-Z\s]{2,}\n[\s\S]{10,200}(?=\n[A-Z])/g) || [];
-      text = readable.join('\n\n');
-    }
     return text.trim();
   } catch(e) { return ''; }
 }
@@ -1492,27 +1552,50 @@ function processScript(source) {
 function detectCharacters(text) {
   const lines = text.split('\n');
   const charCounts = {};
-  // Patterns: ALL CAPS lines, or "CharName:" pattern
-  lines.forEach(line => {
+
+  // Patterns for play script character names:
+  // 1. ALL CAPS line on its own (standard US play format)
+  // 2. ALL CAPS with numbers like "BROTHER 1", "1st LADY", "2nd WIFE"
+  // 3. Names with apostrophes or hyphens: "MR. MANO", "MRS. 2ND"
+  const SKIP = /^(ACT|SCENE|INT\.|EXT\.|THE END|LIGHTS|BLACKOUT|CURTAIN|END OF|FADE|CUT TO|SHIFT|VOICE OVER|STAGE DIRECTION|NEVER WRESTLE)/;
+  
+  lines.forEach((line, i) => {
     const trimmed = line.trim();
-    // ALL CAPS word(s) on their own line (2-30 chars)
-    if(/^[A-Z][A-Z\s\.]{1,28}$/.test(trimmed) && trimmed.length >= 2 && !trimmed.includes('ACT') && !trimmed.includes('SCENE') && !trimmed.includes('INT.') && !trimmed.includes('EXT.')) {
-      const name = trimmed.trim();
+    if(!trimmed || trimmed.length < 2 || trimmed.length > 40) return;
+    if(SKIP.test(trimmed)) return;
+    
+    // Pattern 1: Pure ALL CAPS line (standard character cue)
+    // Allows: letters, spaces, numbers, apostrophes, periods, hyphens
+    if(/^[A-Z0-9][A-Z0-9\s\.\'\-]*$/.test(trimmed)) {
+      // Must have at least one letter
+      if(!/[A-Z]/.test(trimmed)) return;
+      // Must not be a single common word that's likely a direction
+      if(['A','I','HE','SHE','IT','WE','TO','GO','NO','OH','MY','UP'].includes(trimmed)) return;
+      const name = trimmed;
       charCounts[name] = (charCounts[name]||0) + 1;
     }
-    // "NAME:" pattern
-    const colonMatch = trimmed.match(/^([A-Z][A-Z\s]{1,20}):/);
+    
+    // Pattern 2: "NAME:" format
+    const colonMatch = trimmed.match(/^([A-Z][A-Z0-9\s\.\'\-]{1,28}):/);
     if(colonMatch) {
       const name = colonMatch[1].trim();
       charCounts[name] = (charCounts[name]||0) + 1;
     }
+
+    // Pattern 3: Mixed case with parenthetical — "Mr. Mano" style in stage directions
+    // Already covered by ALL CAPS — skip
   });
-  // Return chars that appear at least once, sorted by frequency
+
+  // Filter: must appear at least 2 times (once = likely a direction or word)
+  // For short scripts (readings), lower threshold to 1
+  const totalMatches = Object.values(charCounts).reduce((a,b)=>a+b, 0);
+  const minCount = totalMatches > 50 ? 2 : 1;
+
   return Object.entries(charCounts)
-    .filter(([,count]) => count >= 1)
+    .filter(([,count]) => count >= minCount)
     .sort((a,b) => b[1]-a[1])
     .map(([name]) => name)
-    .slice(0,12);
+    .slice(0, 20); // Allow up to 20 characters
 }
 
 function showCharacterSetup(chars) {
@@ -1576,8 +1659,8 @@ function showSceneSplitter(text, myChar) {
   lines.forEach(function(line) {
     const trimmed = line.trim();
     if(!trimmed) return;
-    const isChar = /^[A-Z][A-Z\s\.]{1,28}$/.test(trimmed) && !trimmed.match(/^(ACT|SCENE|INT\.|EXT\.)/) && trimmed.length >= 2;
-    const colonMatch = trimmed.match(/^([A-Z][A-Z\s]{1,20}):\s*(.*)/);
+    const isChar = /^[A-Z0-9][A-Z0-9\s\.\'\-\&]*$/.test(trimmed) && /[A-Z]/.test(trimmed) && !trimmed.match(/^(ACT|SCENE|INT\.|EXT\.|SHIFT|LIGHTS|BLACKOUT|NEVER WRESTLE)/) && trimmed.length >= 2 && trimmed.length <= 45 && !['A','I','HE','SHE','WE','OH','NO','GO','UP','AH'].includes(trimmed);
+    const colonMatch = trimmed.match(/^([A-Z][A-Z0-9\s\.\'\-]{1,28}):\s*(.*)/);
     if(colonMatch) { flush(); currentChar = colonMatch[1].trim(); if(colonMatch[2]) currentText.push(colonMatch[2]); }
     else if(isChar) { flush(); currentChar = trimmed; }
     else if(currentChar && !/^\(.*\)$/.test(trimmed) && !/^\[.*\]$/.test(trimmed)) currentText.push(trimmed);
@@ -1718,6 +1801,20 @@ function buildScriptData(text, myChar) {
   let currentChar = null;
   let currentText = [];
 
+  const SKIP_LINES = /^(ACT|SCENE|INT\.|EXT\.|THE END|LIGHTS|BLACKOUT|CURTAIN|END OF|FADE|CUT TO|SHIFT|VOICE OVER|NEVER WRESTLE)/;
+
+  function isCharacterName(trimmed) {
+    if(!trimmed || trimmed.length < 2 || trimmed.length > 45) return false;
+    if(SKIP_LINES.test(trimmed)) return false;
+    // Must be ALL CAPS (letters, numbers, spaces, periods, apostrophes, hyphens)
+    if(!/^[A-Z0-9][A-Z0-9\s\.\'\-\&]*$/.test(trimmed)) return false;
+    // Must contain at least one letter
+    if(!/[A-Z]/.test(trimmed)) return false;
+    // Skip single common words
+    if(['A','I','HE','SHE','IT','WE','TO','GO','NO','OH','MY','UP','HM','AH'].includes(trimmed)) return false;
+    return true;
+  }
+
   function flush() {
     if(currentChar && currentText.length > 0) {
       const lineText = currentText.join(' ').replace(/\s+/g,' ').trim();
@@ -1730,22 +1827,30 @@ function buildScriptData(text, myChar) {
     const trimmed = line.trim();
     if(!trimmed) return;
 
-    // Check if it's a character name
-    const isCharName = /^[A-Z][A-Z\s\.]{1,28}$/.test(trimmed) && !trimmed.includes('ACT') && !trimmed.includes('SCENE') && !trimmed.includes('INT.') && !trimmed.includes('EXT.') && trimmed.length >= 2;
-    const colonMatch = trimmed.match(/^([A-Z][A-Z\s]{1,20}):\s*(.*)/);
-
+    // Colon format: "NAME: dialogue"
+    const colonMatch = trimmed.match(/^([A-Z][A-Z0-9\s\.\'\-]{1,28}):\s*(.*)/);
     if(colonMatch) {
       flush();
       currentChar = colonMatch[1].trim();
-      if(colonMatch[2]) currentText.push(colonMatch[2]);
-    } else if(isCharName) {
+      if(colonMatch[2].trim()) currentText.push(colonMatch[2].trim());
+      return;
+    }
+
+    // Check if this line is a character name
+    if(isCharacterName(trimmed)) {
+      // Only treat as char name if it matches one we detected (or is clearly a name)
       flush();
       currentChar = trimmed;
-    } else if(currentChar) {
-      // Skip stage directions (lines in parentheses or starting with [ )
-      if(!/^\(.*\)$/.test(trimmed) && !/^\[.*\]$/.test(trimmed)) {
-        currentText.push(trimmed);
-      }
+      return;
+    }
+
+    if(currentChar) {
+      // Skip pure stage directions in parens or brackets
+      if(/^\(.*\)$/.test(trimmed) || /^\[.*\]$/.test(trimmed)) return;
+      // Skip lines that are clearly stage directions (start with * or italic markers)
+      if(/^\*.*\*$/.test(trimmed)) return;
+      // Include everything else as dialogue (inline stage directions are part of the line)
+      currentText.push(trimmed);
     }
   });
   flush();
