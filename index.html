@@ -495,6 +495,7 @@ body {
 }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 </head>
 <body>
 
@@ -636,6 +637,91 @@ body {
             <div id="manualLinesListInner"></div>
           </div>
         </div>
+      </div>
+
+      <!-- PDF PAGE TOOLS -->
+      <div id="pdfToolsSection" style="display:none;">
+        <div class="card" style="margin-bottom:14px;background:linear-gradient(135deg,#1a1a2e,#16213e);color:white;">
+          <div style="font-size:15px;font-weight:900;margin-bottom:4px;">📄 PDF Page Tools</div>
+          <div style="font-size:12px;opacity:0.85;line-height:1.5;">Fix scanned or photographed scripts before importing — rotate sideways pages, crop borders, tint for easier reading, or reorder pages.</div>
+        </div>
+
+        <!-- Page thumbnails grid -->
+        <div style="font-size:12px;font-weight:900;color:var(--brown);margin-bottom:8px;">Pages — tap to select, then apply a tool:</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;" id="pdfPageGrid"></div>
+
+        <!-- Selection controls -->
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-sm" onclick="pdfSelectAll()" style="flex:1;min-width:80px;">Select All</button>
+          <button class="btn btn-ghost btn-sm" onclick="pdfSelectNone()" style="flex:1;min-width:80px;">Deselect All</button>
+          <span id="pdfSelCount" style="font-size:12px;font-weight:900;color:var(--brown-light);align-self:center;min-width:80px;text-align:center;">0 selected</span>
+        </div>
+
+        <!-- Tool buttons -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+          <!-- ROTATE -->
+          <div class="card" style="padding:12px;">
+            <div style="font-size:13px;font-weight:900;margin-bottom:8px;">↩ Rotating Pages</div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-sage btn-sm" style="flex:1;" onclick="pdfRotate(-90)">↺ 90° L</button>
+              <button class="btn btn-sage btn-sm" style="flex:1;" onclick="pdfRotate(90)">↻ 90° R</button>
+              <button class="btn btn-sage btn-sm" style="flex:1;" onclick="pdfRotate(180)">↕ 180°</button>
+            </div>
+          </div>
+
+          <!-- CROP -->
+          <div class="card" style="padding:12px;">
+            <div style="font-size:13px;font-weight:900;margin-bottom:8px;">✂ Cropping Pages</div>
+            <div style="font-size:11px;color:var(--brown-light);margin-bottom:6px;">Remove border (% each side):</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+              <input type="number" id="cropTop" placeholder="Top %" min="0" max="40" value="5" style="padding:4px 6px;border:1px solid var(--sand-dark);border-radius:var(--rs);font-family:var(--font);font-size:11px;width:100%;">
+              <input type="number" id="cropBottom" placeholder="Bottom %" min="0" max="40" value="5" style="padding:4px 6px;border:1px solid var(--sand-dark);border-radius:var(--rs);font-family:var(--font);font-size:11px;width:100%;">
+              <input type="number" id="cropLeft" placeholder="Left %" min="0" max="40" value="5" style="padding:4px 6px;border:1px solid var(--sand-dark);border-radius:var(--rs);font-family:var(--font);font-size:11px;width:100%;">
+              <input type="number" id="cropRight" placeholder="Right %" min="0" max="40" value="5" style="padding:4px 6px;border:1px solid var(--sand-dark);border-radius:var(--rs);font-family:var(--font);font-size:11px;width:100%;">
+            </div>
+            <button class="btn btn-terra btn-sm" style="width:100%;margin-top:6px;" onclick="pdfCrop()">✂ Apply Crop</button>
+          </div>
+
+          <!-- TINT -->
+          <div class="card" style="padding:12px;">
+            <div style="font-size:13px;font-weight:900;margin-bottom:8px;">🎨 Tinting Pages</div>
+            <div style="font-size:11px;color:var(--brown-light);margin-bottom:6px;">Overlay colour for easier reading:</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+              <button onclick="pdfTint('#FFF9C4',0.25,this)" style="background:#FFF9C4;border:2px solid #ccc;border-radius:99px;padding:4px 12px;font-size:11px;font-weight:900;cursor:pointer;color:#333;">Yellow</button>
+              <button onclick="pdfTint('#E8F5E9',0.25,this)" style="background:#E8F5E9;border:2px solid #ccc;border-radius:99px;padding:4px 12px;font-size:11px;font-weight:900;cursor:pointer;color:#333;">Green</button>
+              <button onclick="pdfTint('#E3F2FD',0.25,this)" style="background:#E3F2FD;border:2px solid #ccc;border-radius:99px;padding:4px 12px;font-size:11px;font-weight:900;cursor:pointer;color:#333;">Blue</button>
+              <button onclick="pdfTint('#FCE4EC',0.25,this)" style="background:#FCE4EC;border:2px solid #ccc;border-radius:99px;padding:4px 12px;font-size:11px;font-weight:900;cursor:pointer;color:#333;">Pink</button>
+              <button onclick="pdfTint(null,0,this)" style="background:white;border:2px solid #ccc;border-radius:99px;padding:4px 12px;font-size:11px;font-weight:900;cursor:pointer;color:#333;">None</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:10px;color:var(--brown-light);">Strength:</span>
+              <input type="range" id="tintStrength" min="0.05" max="0.5" step="0.05" value="0.25" style="flex:1;" oninput="document.getElementById('tintStrengthVal').textContent=Math.round(this.value*100)+'%'">
+              <span id="tintStrengthVal" style="font-size:10px;font-weight:900;min-width:30px;">25%</span>
+            </div>
+          </div>
+
+          <!-- COLLATE / REORDER -->
+          <div class="card" style="padding:12px;">
+            <div style="font-size:13px;font-weight:900;margin-bottom:8px;">📋 Collating Pages</div>
+            <div style="font-size:11px;color:var(--brown-light);margin-bottom:6px;">Drag thumbnails above to reorder, or:</div>
+            <button class="btn btn-ghost btn-sm" style="width:100%;margin-bottom:6px;" onclick="pdfMoveUp()">↑ Move selected up</button>
+            <button class="btn btn-ghost btn-sm" style="width:100%;margin-bottom:6px;" onclick="pdfMoveDown()">↓ Move selected down</button>
+            <button class="btn btn-terra btn-sm" style="width:100%;" onclick="pdfDeletePages()">🗑 Delete selected</button>
+          </div>
+        </div>
+
+        <!-- Preview selected page -->
+        <div id="pdfPreviewArea" style="display:none;margin-bottom:14px;">
+          <div style="font-size:12px;font-weight:900;color:var(--brown);margin-bottom:8px;">Preview:</div>
+          <canvas id="pdfPreviewCanvas" style="width:100%;border-radius:var(--rs);box-shadow:var(--shadow);max-height:400px;object-fit:contain;"></canvas>
+        </div>
+
+        <!-- Action buttons -->
+        <div style="display:flex;gap:10px;margin-bottom:8px;">
+          <button class="btn btn-ghost" style="flex:1;" onclick="pdfPreviewSelected()">👁 Preview</button>
+          <button class="btn btn-terra" style="flex:2;" onclick="pdfDoneEditing()">✅ Done — Import Script</button>
+        </div>
+        <button onclick="hidePdfTools()" style="background:none;border:2px solid var(--sand-dark);border-radius:99px;padding:8px;font-family:var(--font);font-size:12px;font-weight:900;cursor:pointer;color:var(--brown-light);width:100%;">✕ Cancel</button>
       </div>
 
       <!-- CHARACTER SETUP -->
@@ -846,6 +932,7 @@ body {
 
       <!-- Game grid -->
       <div class="section-title">Games</div>
+      <div class="section-title" style="margin-top:0;">Core Games</div>
       <div class="gc-grid">
         <div class="gc-card gc-1" onclick="startGameById('cue')">
           <div class="gc-best" id="gcBest-cue">Best: --</div>
@@ -870,6 +957,27 @@ body {
           <div class="gc-icon">🎭</div>
           <div class="gc-name">Scene Partner</div>
           <div class="gc-desc">App reads others, you speak yours</div>
+        </div>
+      </div>
+      <div class="section-title">New — Rehearsal Pro + Line Learner Methods ✨</div>
+      <div class="gc-grid">
+        <div class="gc-card gc-5" onclick="startGameById('blackout')">
+          <div class="gc-best" id="gcBest-blackout">Best: --</div>
+          <div class="gc-icon">⬛</div>
+          <div class="gc-name">Blackout</div>
+          <div class="gc-desc">Lines hidden — tap to peek</div>
+        </div>
+        <div class="gc-card gc-1" onclick="startGameById('audiogap')">
+          <div class="gc-best" id="gcBest-audiogap">Best: --</div>
+          <div class="gc-icon">🎧</div>
+          <div class="gc-name">Audio Run-Through</div>
+          <div class="gc-desc">Scene plays — gap left for you</div>
+        </div>
+        <div class="gc-card gc-2" onclick="startGameById('teleprompter')">
+          <div class="gc-best" id="gcBest-teleprompter">Best: --</div>
+          <div class="gc-icon">📜</div>
+          <div class="gc-name">Teleprompter</div>
+          <div class="gc-desc">Auto-scroll full script</div>
         </div>
       </div>
 
@@ -898,6 +1006,9 @@ body {
         <div class="gc-card gc-2" onclick="launchGame('fillblank')"><div class="gc-icon">📝</div><div class="gc-name">Fill in the Blank</div></div>
         <div class="gc-card gc-3" onclick="launchGame('speed')"><div class="gc-icon">⚡</div><div class="gc-name">Speed Drill</div></div>
         <div class="gc-card gc-4" onclick="launchGame('partner')"><div class="gc-icon">🎭</div><div class="gc-name">Scene Partner</div></div>
+        <div class="gc-card gc-5" onclick="launchGame('blackout')"><div class="gc-icon">⬛</div><div class="gc-name">Blackout</div><div class="gc-desc" style="font-size:9px;color:rgba(255,255,255,0.7);">Rehearsal Pro style</div></div>
+        <div class="gc-card gc-1" onclick="launchGame('teleprompter')"><div class="gc-icon">📜</div><div class="gc-name">Teleprompter</div><div class="gc-desc" style="font-size:9px;color:rgba(255,255,255,0.7);">Auto-scroll script</div></div>
+        <div class="gc-card gc-2" onclick="launchGame('audiogap')"><div class="gc-icon">🎧</div><div class="gc-name">Audio Run-Through</div><div class="gc-desc" style="font-size:9px;color:rgba(255,255,255,0.7);">Line Learner style</div></div>
       </div>
     </div>
   </div>
@@ -1142,6 +1253,269 @@ body {
       <div style="display:flex;gap:10px;justify-content:center;">
         <button class="btn btn-terra" style="flex:1;" onclick="startSpeedDrill()">Run Again ⚡</button>
         <button class="btn btn-ghost" style="flex:1;" onclick="exitToGameChooser()">Done ✓</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════ BLACKOUT MODE ════════════════ -->
+<!-- From Rehearsal Pro: your lines are hidden, tap to peek -->
+<div class="hf-screen" id="blackoutScreen">
+  <div class="hf-header">
+    <button class="back-btn" onclick="stopBlackout()">‹</button>
+    <div>
+      <div style="font-size:17px;font-weight:900;">⬛ Blackout Mode</div>
+      <div style="font-size:11px;color:var(--brown-light);" id="boProgress">Line 1 of 0</div>
+    </div>
+    <button onclick="toggleBoLoop()" id="boLoopBtn" style="margin-left:auto;background:var(--sand);border:2px solid var(--sand-dark);border-radius:99px;padding:6px 14px;font-family:var(--font);font-weight:900;font-size:11px;cursor:pointer;">🔁 Loop: Off</button>
+  </div>
+  <div class="hf-body" style="gap:12px;">
+    <!-- Progress bar -->
+    <div class="prog-wrap" style="width:100%;max-width:500px;"><div class="prog-fill" id="boProgBar" style="width:0%"></div></div>
+
+    <!-- Other character's line (always visible) -->
+    <div id="boOtherCard" class="sp-other-line" style="width:100%;max-width:500px;">
+      <div class="sp-char-name" id="boOtherChar">OTHER CHARACTER</div>
+      <div id="boOtherText" style="font-size:15px;line-height:1.7;">...</div>
+      <button onclick="speakBoOther()" style="margin-top:6px;background:rgba(255,255,255,0.25);border:none;color:white;border-radius:99px;padding:4px 12px;font-size:11px;font-weight:900;cursor:pointer;font-family:var(--font);">🔊 Hear cue</button>
+    </div>
+
+    <!-- MY LINE — blacked out until tapped -->
+    <div id="boMyCard" onclick="boReveal()" style="width:100%;max-width:500px;background:var(--terra);border-radius:var(--r);padding:16px;cursor:pointer;min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all 0.3s;">
+      <div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.7);margin-bottom:6px;" id="boMyChar">YOUR LINE 🎭</div>
+      <div id="boBlackBar" style="width:90%;height:36px;background:rgba(0,0,0,0.4);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+        <span style="color:rgba(255,255,255,0.5);font-size:13px;font-weight:900;">👆 Tap to peek</span>
+      </div>
+      <div id="boMyText" style="display:none;font-size:15px;font-weight:700;color:white;line-height:1.7;width:100%;text-align:left;"></div>
+    </div>
+
+    <div style="font-size:12px;color:var(--brown-light);text-align:center;" id="boHint">Tap the red card to reveal your line</div>
+
+    <!-- Beat marks area -->
+    <div id="boBeatMarks" style="width:100%;max-width:500px;min-height:32px;"></div>
+
+    <!-- Action buttons -->
+    <div style="display:flex;gap:10px;width:100%;max-width:500px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="boMark('wrong')">✗ Missed</button>
+      <button class="btn btn-sage" style="flex:1;" onclick="boMark('close')">~ Nearly</button>
+      <button class="btn btn-terra" style="flex:2;" onclick="boMark('correct')">✓ Nailed it!</button>
+    </div>
+    <button onclick="stopBlackout()" style="background:none;border:2px solid var(--sand-dark);border-radius:99px;padding:8px 20px;font-family:var(--font);font-size:12px;font-weight:900;cursor:pointer;color:var(--brown-light);margin-top:4px;width:100%;max-width:500px;">✕ Quit</button>
+
+    <!-- Finish panel -->
+    <div id="boFinished" style="display:none;width:100%;max-width:500px;text-align:center;margin-top:8px;">
+      <div style="font-size:22px;font-weight:900;margin-bottom:8px;">Scene done! 🎉</div>
+      <div style="font-size:14px;color:var(--brown-light);margin-bottom:16px;" id="boFinishStats"></div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-terra" style="flex:1;" onclick="startBlackout()">Again ⬛</button>
+        <button class="btn btn-ghost" style="flex:1;" onclick="stopBlackout()">Done ✓</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ TELEPROMPTER MODE ════════════════ -->
+<!-- From Rehearsal Pro: auto-scrolling script, your lines highlighted -->
+<div class="hf-screen" id="teleprompterScreen">
+  <div class="hf-header">
+    <button class="back-btn" onclick="stopTeleprompter()">‹</button>
+    <div>
+      <div style="font-size:17px;font-weight:900;">📜 Teleprompter</div>
+      <div style="font-size:11px;color:var(--brown-light);" id="tpStatus">Auto-scrolling...</div>
+    </div>
+    <button onclick="toggleTpPause()" id="tpPauseBtn" style="margin-left:auto;background:var(--sand);border:2px solid var(--sand-dark);border-radius:99px;padding:6px 14px;font-family:var(--font);font-weight:900;font-size:12px;cursor:pointer;">⏸ Pause</button>
+  </div>
+  <!-- Speed controls -->
+  <div style="display:flex;align-items:center;gap:10px;background:var(--sand);padding:8px 16px;border-bottom:1px solid var(--sand-dark);">
+    <span style="font-size:11px;font-weight:900;color:var(--brown-light);">Speed:</span>
+    <button onclick="tpSlower()" style="background:var(--sand-dark);border:none;border-radius:50%;width:28px;height:28px;font-size:16px;cursor:pointer;font-family:var(--font);">−</button>
+    <span id="tpSpeedLabel" style="font-size:12px;font-weight:900;min-width:30px;text-align:center;">2</span>
+    <button onclick="tpFaster()" style="background:var(--sand-dark);border:none;border-radius:50%;width:28px;height:28px;font-size:16px;cursor:pointer;font-family:var(--font);">+</button>
+    <div style="flex:1;"></div>
+    <label style="font-size:11px;font-weight:900;color:var(--brown-light);display:flex;align-items:center;gap:6px;">
+      <input type="checkbox" id="tpHideMyLines" onchange="tpToggleHide(this.checked)" style="width:16px;height:16px;">
+      Hide my lines
+    </label>
+    <button onclick="tpLoop()" id="tpLoopBtn" style="background:var(--sand);border:2px solid var(--sand-dark);border-radius:99px;padding:4px 12px;font-size:11px;font-weight:900;cursor:pointer;font-family:var(--font);">🔁 Off</button>
+  </div>
+  <!-- Script content -->
+  <div id="tpScroll" style="overflow-y:auto;flex:1;padding:20px 16px;font-size:var(--tp-fs,17px);line-height:2.2;" onclick="toggleTpPause()">
+    <div id="tpContent"></div>
+    <div style="height:60vh;"></div><!-- bottom padding so last line can scroll to top -->
+  </div>
+</div>
+
+<!-- ════════════════ AUDIO GAP PRACTICE ════════════════ -->
+<!-- From Line Learner: TTS plays scene with silence gap for your lines -->
+<!-- ════════════════ AUDIO RUN-THROUGH (Line Learner full feature set) ════════════════ -->
+<div class="hf-screen" id="audioGapScreen">
+  <div class="hf-header">
+    <button class="back-btn" onclick="stopAudioGap()">‹</button>
+    <div>
+      <div style="font-size:17px;font-weight:900;">🎧 Audio Run-Through</div>
+      <div style="font-size:11px;color:var(--brown-light);" id="agProgress">Ready</div>
+    </div>
+    <button onclick="agOpenSettings()" style="margin-left:auto;background:var(--sand);border:2px solid var(--sand-dark);border-radius:99px;padding:6px 14px;font-family:var(--font);font-weight:900;font-size:12px;cursor:pointer;">⚙ Options</button>
+  </div>
+
+  <!-- ── SETTINGS PANEL (collapsed by default) ── -->
+  <div id="agSettingsPanel" style="display:none;background:var(--cream);border-bottom:2px solid var(--sand-dark);padding:14px 16px;">
+    <div style="font-size:13px;font-weight:900;color:var(--brown);margin-bottom:12px;">⚙ Run-Through Options</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+
+      <!-- Play mode -->
+      <div style="background:var(--sand);border-radius:var(--rs);padding:10px;">
+        <div style="font-size:11px;font-weight:900;color:var(--brown);margin-bottom:6px;">Play mode:</div>
+        <select id="agPlayMode" style="width:100%;padding:5px;border:1px solid var(--sand-dark);border-radius:var(--rs);font-family:var(--font);font-size:11px;background:white;">
+          <option value="gap-line">Gap → then hear line</option>
+          <option value="line-gap" selected>Hear line → then gap</option>
+          <option value="gap-only">Gap only (silent recall)</option>
+        </select>
+        <div style="font-size:9px;color:var(--brown-light);margin-top:4px;">Gap-line: try first, then check. Line-gap: hear it, repeat it.</div>
+      </div>
+
+      <!-- Gap size -->
+      <div style="background:var(--sand);border-radius:var(--rs);padding:10px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-size:11px;font-weight:900;color:var(--brown);">Gap size:</span>
+          <span id="agGapLabel" style="font-size:12px;font-weight:900;color:var(--terra);">8s</span>
+        </div>
+        <input type="range" id="agGapSlider" min="3" max="30" step="1" value="8" style="width:100%;" oninput="agUpdateGap(this.value)">
+        <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--brown-light);"><span>3s tight</span><span>30s easy</span></div>
+      </div>
+
+      <!-- Pitch shift per character -->
+      <div style="background:var(--sand);border-radius:var(--rs);padding:10px;">
+        <div style="font-size:11px;font-weight:900;color:var(--brown);margin-bottom:6px;">🎵 Other chars pitch:</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button onclick="agChangePitch(-0.1)" style="background:var(--sand-dark);border:none;border-radius:50%;width:26px;height:26px;font-size:14px;cursor:pointer;font-family:var(--font);">−</button>
+          <span id="agPitchLabel" style="font-size:12px;font-weight:900;min-width:40px;text-align:center;">1.0×</span>
+          <button onclick="agChangePitch(0.1)" style="background:var(--sand-dark);border:none;border-radius:50%;width:26px;height:26px;font-size:14px;cursor:pointer;font-family:var(--font);">+</button>
+        </div>
+        <div style="font-size:9px;color:var(--brown-light);margin-top:4px;">Shift cue voices so yours stands out</div>
+      </div>
+
+      <!-- Speed for other lines -->
+      <div style="background:var(--sand);border-radius:var(--rs);padding:10px;">
+        <div style="font-size:11px;font-weight:900;color:var(--brown);margin-bottom:6px;">⚡ Cue line speed:</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button onclick="agChangeSpeed(-0.1)" style="background:var(--sand-dark);border:none;border-radius:50%;width:26px;height:26px;font-size:14px;cursor:pointer;font-family:var(--font);">−</button>
+          <span id="agSpeedLabel" style="font-size:12px;font-weight:900;min-width:40px;text-align:center;">1.0×</span>
+          <button onclick="agChangeSpeed(0.1)" style="background:var(--sand-dark);border:none;border-radius:50%;width:26px;height:26px;font-size:14px;cursor:pointer;font-family:var(--font);">+</button>
+        </div>
+        <div style="font-size:9px;color:var(--brown-light);margin-top:4px;">Speed up cue lines; gap stays normal</div>
+      </div>
+    </div>
+
+    <!-- Options row -->
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+      <label style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:900;color:var(--brown);background:var(--sand);padding:6px 10px;border-radius:99px;">
+        <input type="checkbox" id="agPauseAfterGap" style="width:14px;height:14px;">
+        Pause after each gap
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:900;color:var(--brown);background:var(--sand);padding:6px 10px;border-radius:99px;">
+        <input type="checkbox" id="agVoiceAdvance" style="width:14px;height:14px;">
+        🎙 Voice auto-advance
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:900;color:var(--brown);background:var(--sand);padding:6px 10px;border-radius:99px;">
+        <input type="checkbox" id="agLoopCheck" style="width:14px;height:14px;">
+        🔁 Loop scene
+      </label>
+    </div>
+
+    <!-- Sleep timer -->
+    <div style="display:flex;align-items:center;gap:10px;background:var(--sand);border-radius:var(--rs);padding:8px 12px;">
+      <span style="font-size:11px;font-weight:900;color:var(--brown);">😴 Sleep timer:</span>
+      <select id="agSleepTimer" style="padding:4px 8px;border:1px solid var(--sand-dark);border-radius:var(--rs);font-family:var(--font);font-size:11px;background:white;">
+        <option value="0">Off</option>
+        <option value="15">15 min</option>
+        <option value="30">30 min</option>
+        <option value="45">45 min</option>
+        <option value="60">60 min</option>
+      </select>
+      <span id="agSleepCountdown" style="font-size:11px;color:var(--brown-light);margin-left:auto;"></span>
+    </div>
+
+    <button onclick="agCloseSettings()" class="btn btn-terra btn-sm" style="width:100%;margin-top:10px;">Done ✓</button>
+  </div>
+
+  <!-- ── FLAGGED LINES STRIP (A-B loop + marked lines) ── -->
+  <div id="agABStrip" style="display:none;background:linear-gradient(135deg,#1a1a2e,#16213e);color:white;padding:8px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <span style="font-size:11px;font-weight:900;">🔂 A-B Loop:</span>
+    <button onclick="agSetAB('A')" id="agABtn" style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);border-radius:99px;padding:4px 12px;font-size:11px;font-weight:900;cursor:pointer;font-family:var(--font);">Set A</button>
+    <button onclick="agSetAB('B')" id="agBBtn" style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);border-radius:99px;padding:4px 12px;font-size:11px;font-weight:900;cursor:pointer;font-family:var(--font);">Set B</button>
+    <span id="agABStatus" style="font-size:10px;color:rgba(255,255,255,0.7);">Tap A then B to loop a section</span>
+    <button onclick="agClearAB()" style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);border:none;border-radius:99px;padding:4px 10px;font-size:10px;font-weight:900;cursor:pointer;font-family:var(--font);margin-left:auto;">✕ Clear</button>
+  </div>
+
+  <div class="hf-body" style="gap:12px;padding-top:12px;">
+
+    <!-- Progress bar -->
+    <div class="prog-wrap" style="width:100%;max-width:500px;"><div class="prog-fill" id="agProgBar" style="width:0%"></div></div>
+
+    <!-- Currently playing card -->
+    <div id="agNowPlaying" style="width:100%;max-width:500px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <div style="font-size:12px;font-weight:900;color:var(--brown-light);text-transform:uppercase;letter-spacing:1px;" id="agCurrentChar">—</div>
+        <button onclick="agFlagLine()" id="agFlagBtn" style="background:none;border:none;font-size:18px;cursor:pointer;padding:0 4px;" title="Flag this line for review">🚩</button>
+      </div>
+      <div style="background:var(--cream);border-radius:var(--r);padding:16px;font-size:16px;line-height:1.8;min-height:80px;display:flex;align-items:center;justify-content:center;position:relative;" id="agCurrentText">
+        Press Start to begin
+      </div>
+    </div>
+
+    <!-- YOUR TURN gap card -->
+    <div id="agMyTurn" style="display:none;width:100%;max-width:500px;">
+      <div style="background:rgba(193,97,79,0.08);border:3px solid var(--terra);border-radius:var(--r);padding:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="font-size:13px;font-weight:900;color:var(--terra);">🎭 YOUR LINE</span>
+          <!-- Voice recognition indicator -->
+          <div id="agVoiceIndicator" style="display:none;background:var(--terra);border-radius:99px;padding:3px 10px;font-size:10px;font-weight:900;color:white;animation:pulse 1s infinite;">🎙 Listening...</div>
+        </div>
+        <div id="agMyLineText" style="font-size:15px;font-weight:700;color:var(--brown);line-height:1.7;margin-bottom:12px;display:none;"></div>
+        <div id="agCountdown" style="font-size:48px;font-weight:900;color:var(--terra);margin-bottom:12px;text-align:center;">8</div>
+        <!-- A-B mark during gap -->
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+          <button onclick="agPrompt()" style="background:var(--amber);color:var(--brown);border:none;border-radius:99px;padding:10px 20px;font-family:var(--font);font-size:13px;font-weight:900;cursor:pointer;">💡 Prompt</button>
+          <button onclick="agGotIt()" style="background:var(--sage);color:white;border:none;border-radius:99px;padding:10px 20px;font-family:var(--font);font-size:13px;font-weight:900;cursor:pointer;">✓ Got it</button>
+          <button onclick="agFlagLine()" style="background:none;border:2px solid var(--sand-dark);border-radius:99px;padding:10px 14px;font-family:var(--font);font-size:13px;cursor:pointer;" title="Flag for A-B loop">🚩</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flagged lines summary -->
+    <div id="agFlaggedStrip" style="display:none;width:100%;max-width:500px;background:rgba(193,97,79,0.08);border:1px solid var(--terra);border-radius:var(--rs);padding:8px 12px;">
+      <div style="font-size:11px;font-weight:900;color:var(--terra);margin-bottom:4px;">🚩 Flagged for review:</div>
+      <div id="agFlaggedList" style="font-size:11px;color:var(--brown);line-height:1.8;"></div>
+    </div>
+
+    <!-- Controls -->
+    <div style="width:100%;max-width:500px;">
+      <button id="agStartBtn" onclick="agStart()" class="btn btn-terra" style="width:100%;font-size:16px;padding:16px;">▶ Start Run-Through</button>
+    </div>
+    <div id="agRunning" style="display:none;width:100%;max-width:500px;flex-direction:column;gap:8px;">
+      <div style="display:flex;gap:8px;">
+        <button onclick="agPause()" id="agPauseBtn" class="btn btn-ghost" style="flex:1;">⏸ Pause</button>
+        <button onclick="agSkip()" class="btn btn-sage" style="flex:1;">Skip ⏭</button>
+        <button onclick="agToggleABStrip()" style="background:var(--sand);border:2px solid var(--sand-dark);border-radius:99px;padding:8px 12px;font-family:var(--font);font-size:11px;font-weight:900;cursor:pointer;">🔂 A-B</button>
+      </div>
+    </div>
+
+    <button onclick="stopAudioGap()" style="background:none;border:2px solid var(--sand-dark);border-radius:99px;padding:8px 20px;font-family:var(--font);font-size:12px;font-weight:900;cursor:pointer;color:var(--brown-light);width:100%;max-width:500px;">✕ Quit</button>
+
+    <!-- Finish panel -->
+    <div id="agFinished" style="display:none;width:100%;max-width:500px;text-align:center;">
+      <div style="font-size:22px;font-weight:900;margin-bottom:8px;">Run complete! 🎧</div>
+      <div style="font-size:14px;color:var(--brown-light);margin-bottom:4px;" id="agFinishStats"></div>
+      <div id="agFlaggedFinish" style="display:none;background:rgba(193,97,79,0.08);border-radius:var(--rs);padding:12px;margin:10px 0;text-align:left;">
+        <div style="font-size:12px;font-weight:900;color:var(--terra);margin-bottom:6px;">🚩 Lines to revisit:</div>
+        <div id="agFlaggedFinishList" style="font-size:12px;color:var(--brown);line-height:1.9;"></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:12px;">
+        <button class="btn btn-terra" style="flex:1;" onclick="agRestart()">Again 🔁</button>
+        <button class="btn btn-ghost" style="flex:1;" onclick="agRunFlaggedOnly()" id="agRunFlaggedBtn" style="display:none;">Run Flagged 🚩</button>
+        <button class="btn btn-ghost" style="flex:1;" onclick="stopAudioGap()">Done ✓</button>
       </div>
     </div>
   </div>
@@ -2147,6 +2521,22 @@ function refreshPracticeScreen() {
       <div class="pm-info"><div class="pm-name">Speed Drill</div><div class="pm-desc">Race through all your lines. Beat your best time!</div></div>
       <div class="pm-arrow">›</div>
     </div>
+    <div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:var(--brown-light);padding:8px 4px 4px;">✨ New methods</div>
+    <div class="pm-card" onclick="startBlackout()" style="border-left:3px solid var(--terra);">
+      <div class="pm-icon">⬛</div>
+      <div class="pm-info"><div class="pm-name">Blackout Mode</div><div class="pm-desc">Lines hidden — tap to peek. Rehearsal Pro method.</div></div>
+      <div class="pm-arrow">›</div>
+    </div>
+    <div class="pm-card" onclick="startAudioGap()" style="border-left:3px solid var(--sage);">
+      <div class="pm-icon">🎧</div>
+      <div class="pm-info"><div class="pm-name">Audio Run-Through</div><div class="pm-desc">Scene plays aloud — gap left for your line. Line Learner method.</div></div>
+      <div class="pm-arrow">›</div>
+    </div>
+    <div class="pm-card" onclick="startTeleprompter()" style="border-left:3px solid var(--amber);">
+      <div class="pm-icon">📜</div>
+      <div class="pm-info"><div class="pm-name">Teleprompter</div><div class="pm-desc">Full script auto-scrolls. Your lines highlighted or hidden.</div></div>
+      <div class="pm-arrow">›</div>
+    </div>
     <div class="pm-card" onclick="showProgressDashboard()">
       <div class="pm-icon">📊</div>
       <div class="pm-info"><div class="pm-name">Progress Dashboard</div><div class="pm-desc">See which scenes you've mastered</div></div>
@@ -2341,7 +2731,8 @@ function startGameById(gameId) {
 }
 
 function launchGame(gameId) {
-  if(!activeProduction || !activeProduction.cuePairs || activeProduction.cuePairs.length === 0) {
+  if(!activeProduction) { showToast('No script loaded!'); return; }
+  if(gameId !== 'teleprompter' && (!activeProduction.cuePairs || activeProduction.cuePairs.length === 0)) {
     showToast('No lines to practice! Upload a script first.');
     return;
   }
@@ -2349,6 +2740,9 @@ function launchGame(gameId) {
   else if(gameId === 'fillblank') startFillBlank();
   else if(gameId === 'speed') startSpeedDrill();
   else if(gameId === 'partner') startScenePartner();
+  else if(gameId === 'blackout') startBlackout();
+  else if(gameId === 'teleprompter') startTeleprompter();
+  else if(gameId === 'audiogap') startAudioGap();
 }
 
 // ════════════════════════════════════════
@@ -4196,7 +4590,8 @@ function handleFileUpload(input) {
   const ext = file.name.split('.').pop().toLowerCase();
   showToast(`Loading: ${file.name} 📂`);
   if(ext === 'pdf') {
-    extractPDFwithPDFjs(file);
+    // For PDFs, offer page tools first, then extract text
+    showPdfTools(file);
   } else {
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -4204,6 +4599,368 @@ function handleFileUpload(input) {
       processScript('file');
     };
     reader.readAsText(file);
+  }
+}
+
+async 
+// ════════════════════════════════════════════════════════════════════════
+//  PDF PAGE TOOLS — Rotate, Crop, Tint, Collate
+//  Mirrors Rehearsal Pro's physical script management tools
+// ════════════════════════════════════════════════════════════════════════
+
+let pdfToolsFile = null;          // Original File object
+let pdfToolsArrayBuffer = null;   // Raw bytes
+let pdfToolsPageCount = 0;
+let pdfPageOrder = [];            // Indices of pages in current order
+let pdfPageRotations = {};        // pageIdx → rotation delta (0/90/180/270)
+let pdfPageCrops = {};            // pageIdx → {top,bottom,left,right} in %
+let pdfPageTints = {};            // pageIdx → {color, opacity} or null
+let pdfSelectedPages = new Set();
+let pdfActiveTintColor = null;
+let pdfActiveTintOpacity = 0.25;
+let pdfPdfjsDoc = null;           // PDF.js document for thumbnail rendering
+
+async function showPdfTools(file) {
+  pdfToolsFile = file;
+  pdfPageRotations = {};
+  pdfPageCrops = {};
+  pdfPageTints = {};
+  pdfSelectedPages = new Set();
+  pdfActiveTintColor = null;
+
+  // Show loading
+  showToast('Loading PDF pages... ⏳');
+
+  try {
+    pdfToolsArrayBuffer = await file.arrayBuffer();
+
+    // Load via PDF.js for rendering thumbnails
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    pdfPdfjsDoc = await pdfjsLib.getDocument({ data: pdfToolsArrayBuffer.slice(0) }).promise;
+    pdfToolsPageCount = pdfPdfjsDoc.numPages;
+    pdfPageOrder = Array.from({length: pdfToolsPageCount}, (_, i) => i); // 0-indexed
+
+    // Show the section
+    document.getElementById('pdfToolsSection').style.display = 'block';
+    document.getElementById('charSetup').style.display = 'none';
+
+    // Render thumbnails
+    await pdfRenderThumbnails();
+    showToast(`${pdfToolsPageCount} pages loaded — apply tools then import ✅`);
+  } catch(err) {
+    console.error('PDF tools error:', err);
+    showToast('Could not load PDF pages — importing directly 📋');
+    extractPDFwithPDFjs(file);
+  }
+}
+
+function hidePdfTools() {
+  document.getElementById('pdfToolsSection').style.display = 'none';
+  pdfToolsFile = null;
+  pdfPdfjsDoc = null;
+}
+
+async function pdfRenderThumbnails() {
+  const grid = document.getElementById('pdfPageGrid');
+  if(!grid) return;
+  grid.innerHTML = '<div style="font-size:12px;color:var(--brown-light);">Rendering pages...</div>';
+  const items = [];
+  for(let idx = 0; idx < pdfPageOrder.length; idx++) {
+    const origIdx = pdfPageOrder[idx];
+    const thumb = await pdfRenderThumb(origIdx, idx);
+    items.push(thumb);
+  }
+  grid.innerHTML = '';
+  items.forEach(el => grid.appendChild(el));
+  pdfUpdateSelCount();
+}
+
+async function pdfRenderThumb(origPageIdx, displayPos) {
+  const wrapper = document.createElement('div');
+  wrapper.style.cssText = `position:relative;cursor:pointer;border-radius:var(--rs);overflow:hidden;border:3px solid transparent;transition:border-color 0.15s;background:var(--sand);`;
+  wrapper.dataset.origIdx = origPageIdx;
+  wrapper.dataset.displayPos = displayPos;
+  wrapper.onclick = () => pdfTogglePage(origPageIdx, wrapper);
+
+  // Page number badge
+  const badge = document.createElement('div');
+  badge.style.cssText = `position:absolute;top:4px;left:4px;background:rgba(0,0,0,0.6);color:white;font-size:10px;font-weight:900;padding:2px 6px;border-radius:99px;z-index:2;font-family:var(--font);`;
+  badge.textContent = `p.${displayPos + 1}`;
+  wrapper.appendChild(badge);
+
+  // Rotation indicator
+  const rot = pdfPageRotations[origPageIdx] || 0;
+  if(rot) {
+    const rotBadge = document.createElement('div');
+    rotBadge.style.cssText = `position:absolute;top:4px;right:4px;background:var(--sage);color:white;font-size:9px;font-weight:900;padding:2px 5px;border-radius:99px;z-index:2;font-family:var(--font);`;
+    rotBadge.textContent = `${rot}°`;
+    wrapper.appendChild(rotBadge);
+  }
+
+  // Tint indicator
+  const tint = pdfPageTints[origPageIdx];
+  if(tint) {
+    const tintBadge = document.createElement('div');
+    tintBadge.style.cssText = `position:absolute;bottom:4px;left:4px;background:${tint.color};border:1px solid rgba(0,0,0,0.2);width:14px;height:14px;border-radius:50%;z-index:2;`;
+    wrapper.appendChild(tintBadge);
+  }
+
+  // Canvas for page preview
+  const canvas = document.createElement('canvas');
+  try {
+    const page = await pdfPdfjsDoc.getPage(origPageIdx + 1);
+    const viewport = page.getViewport({ scale: 0.25, rotation: pdfPageRotations[origPageIdx] || 0 });
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    canvas.style.cssText = `display:block;width:${Math.min(viewport.width, 90)}px;height:auto;`;
+    await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+
+    // Apply tint overlay on canvas
+    if(tint) {
+      const ctx = canvas.getContext('2d');
+      ctx.globalAlpha = tint.opacity;
+      ctx.fillStyle = tint.color;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.globalAlpha = 1;
+    }
+  } catch(e) {
+    canvas.width = 70; canvas.height = 100;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#f5f5f5';
+    ctx.fillRect(0,0,70,100);
+    ctx.fillStyle = '#999';
+    ctx.font = '10px sans-serif';
+    ctx.fillText('p.'+(displayPos+1), 20, 55);
+  }
+  wrapper.appendChild(canvas);
+
+  // Check if selected
+  if(pdfSelectedPages.has(origPageIdx)) {
+    wrapper.style.borderColor = 'var(--terra)';
+    badge.style.background = 'var(--terra)';
+  }
+  return wrapper;
+}
+
+function pdfTogglePage(origIdx, el) {
+  if(pdfSelectedPages.has(origIdx)) {
+    pdfSelectedPages.delete(origIdx);
+    if(el) { el.style.borderColor = 'transparent'; }
+  } else {
+    pdfSelectedPages.add(origIdx);
+    if(el) { el.style.borderColor = 'var(--terra)'; }
+  }
+  pdfUpdateSelCount();
+}
+
+function pdfSelectAll() {
+  pdfPageOrder.forEach(idx => pdfSelectedPages.add(idx));
+  pdfRenderThumbnails();
+}
+
+function pdfSelectNone() {
+  pdfSelectedPages.clear();
+  pdfRenderThumbnails();
+}
+
+function pdfUpdateSelCount() {
+  const el = document.getElementById('pdfSelCount');
+  if(el) el.textContent = `${pdfSelectedPages.size} selected`;
+}
+
+function pdfGetSelected() {
+  const sel = [...pdfSelectedPages];
+  if(sel.length === 0) { showToast('Select at least one page first 👆'); return null; }
+  return sel;
+}
+
+// ─── ROTATE ──────────────────────────────────────────────────────────────────
+function pdfRotate(degrees) {
+  const sel = pdfGetSelected();
+  if(!sel) return;
+  sel.forEach(idx => {
+    const current = pdfPageRotations[idx] || 0;
+    pdfPageRotations[idx] = (current + degrees + 360) % 360;
+  });
+  pdfRenderThumbnails();
+  showToast(`Rotated ${sel.length} page(s) by ${degrees > 0 ? '+' : ''}${degrees}°`);
+}
+
+// ─── CROP ────────────────────────────────────────────────────────────────────
+function pdfCrop() {
+  const sel = pdfGetSelected();
+  if(!sel) return;
+  const top    = parseFloat(document.getElementById('cropTop').value)    || 0;
+  const bottom = parseFloat(document.getElementById('cropBottom').value) || 0;
+  const left   = parseFloat(document.getElementById('cropLeft').value)   || 0;
+  const right  = parseFloat(document.getElementById('cropRight').value)  || 0;
+  sel.forEach(idx => { pdfPageCrops[idx] = {top, bottom, left, right}; });
+  pdfRenderThumbnails();
+  showToast(`Crop set on ${sel.length} page(s) — will apply on import`);
+}
+
+// ─── TINT ────────────────────────────────────────────────────────────────────
+function pdfTint(color, opacity, btn) {
+  pdfActiveTintColor = color;
+  pdfActiveTintOpacity = parseFloat(document.getElementById('tintStrength').value) || opacity;
+  const sel = pdfGetSelected();
+  if(!sel) return;
+  sel.forEach(idx => {
+    if(!color) delete pdfPageTints[idx];
+    else pdfPageTints[idx] = { color, opacity: pdfActiveTintOpacity };
+  });
+  pdfRenderThumbnails();
+  showToast(color ? `Tint applied to ${sel.length} page(s)` : `Tint removed from ${sel.length} page(s)`);
+}
+
+// ─── COLLATE / REORDER ───────────────────────────────────────────────────────
+function pdfMoveUp() {
+  const sel = pdfGetSelected();
+  if(!sel) return;
+  // Move each selected page up by 1 in pdfPageOrder
+  const selSet = new Set(sel);
+  for(let i = 1; i < pdfPageOrder.length; i++) {
+    if(selSet.has(pdfPageOrder[i]) && !selSet.has(pdfPageOrder[i-1])) {
+      [pdfPageOrder[i-1], pdfPageOrder[i]] = [pdfPageOrder[i], pdfPageOrder[i-1]];
+    }
+  }
+  pdfRenderThumbnails();
+  showToast(`Moved ${sel.length} page(s) up`);
+}
+
+function pdfMoveDown() {
+  const sel = pdfGetSelected();
+  if(!sel) return;
+  const selSet = new Set(sel);
+  for(let i = pdfPageOrder.length - 2; i >= 0; i--) {
+    if(selSet.has(pdfPageOrder[i]) && !selSet.has(pdfPageOrder[i+1])) {
+      [pdfPageOrder[i+1], pdfPageOrder[i]] = [pdfPageOrder[i], pdfPageOrder[i+1]];
+    }
+  }
+  pdfRenderThumbnails();
+  showToast(`Moved ${sel.length} page(s) down`);
+}
+
+function pdfDeletePages() {
+  const sel = pdfGetSelected();
+  if(!sel) return;
+  if(!confirm(`Delete ${sel.length} page(s)? This cannot be undone.`)) return;
+  const selSet = new Set(sel);
+  pdfPageOrder = pdfPageOrder.filter(idx => !selSet.has(idx));
+  pdfSelectedPages.clear();
+  pdfRenderThumbnails();
+  showToast(`Deleted ${sel.length} page(s)`);
+}
+
+// ─── PREVIEW ─────────────────────────────────────────────────────────────────
+async function pdfPreviewSelected() {
+  const sel = pdfGetSelected();
+  if(!sel) return;
+  const origIdx = sel[0];
+  try {
+    const previewArea = document.getElementById('pdfPreviewArea');
+    const canvas = document.getElementById('pdfPreviewCanvas');
+    previewArea.style.display = 'block';
+    const page = await pdfPdfjsDoc.getPage(origIdx + 1);
+    const rot = pdfPageRotations[origIdx] || 0;
+    const viewport = page.getViewport({ scale: 1.5, rotation: rot });
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    const ctx = canvas.getContext('2d');
+    await page.render({ canvasContext: ctx, viewport }).promise;
+    // Apply tint
+    const tint = pdfPageTints[origIdx];
+    if(tint) {
+      ctx.globalAlpha = tint.opacity;
+      ctx.fillStyle = tint.color;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.globalAlpha = 1;
+    }
+    canvas.scrollIntoView({ behavior: 'smooth' });
+  } catch(e) {
+    showToast('Preview failed — continuing anyway');
+  }
+}
+
+// ─── APPLY & IMPORT ──────────────────────────────────────────────────────────
+async function pdfDoneEditing() {
+  if(!pdfToolsArrayBuffer) { extractPDFwithPDFjs(pdfToolsFile); return; }
+  const hasChanges = Object.keys(pdfPageRotations).length > 0 ||
+                     Object.keys(pdfPageCrops).length > 0 ||
+                     Object.keys(pdfPageTints).length > 0 ||
+                     pdfPageOrder.some((v,i) => v !== i) ||
+                     pdfPageOrder.length !== pdfToolsPageCount;
+
+  if(!hasChanges) {
+    // No changes, just extract text directly
+    showToast('No changes — importing script... ⏳');
+    document.getElementById('pdfToolsSection').style.display = 'none';
+    extractPDFwithPDFjs(pdfToolsFile);
+    return;
+  }
+
+  showToast('Applying edits... ⏳');
+  try {
+    // Use PDFLib to apply all transformations
+    const { PDFDocument, degrees, rgb } = PDFLib;
+    const srcDoc = await PDFDocument.load(pdfToolsArrayBuffer);
+    const newDoc = await PDFDocument.create();
+
+    for(let displayPos = 0; displayPos < pdfPageOrder.length; displayPos++) {
+      const origIdx = pdfPageOrder[displayPos];
+      const [copiedPage] = await newDoc.copyPages(srcDoc, [origIdx]);
+
+      // Apply rotation
+      const rotDelta = pdfPageRotations[origIdx] || 0;
+      if(rotDelta) {
+        const existingRot = copiedPage.getRotation().angle;
+        copiedPage.setRotation(degrees((existingRot + rotDelta) % 360));
+      }
+
+      // Apply crop box
+      const crop = pdfPageCrops[origIdx];
+      if(crop) {
+        const { width, height } = copiedPage.getSize();
+        copiedPage.setCropBox(
+          width  * (crop.left   / 100),
+          height * (crop.bottom / 100),
+          width  * (1 - (crop.left + crop.right)   / 100),
+          height * (1 - (crop.top  + crop.bottom)  / 100)
+        );
+      }
+
+      newDoc.addPage(copiedPage);
+
+      // Apply tint: draw a semi-transparent rectangle on top
+      const tint = pdfPageTints[origIdx];
+      if(tint) {
+        // Parse hex color to RGB
+        const hex = tint.color.replace('#','');
+        const r = parseInt(hex.substring(0,2),16)/255;
+        const g = parseInt(hex.substring(2,4),16)/255;
+        const b = parseInt(hex.substring(4,6),16)/255;
+        const page = newDoc.getPages()[newDoc.getPageCount()-1];
+        const { width, height } = page.getSize();
+        page.drawRectangle({
+          x: 0, y: 0, width, height,
+          color: rgb(r, g, b),
+          opacity: tint.opacity,
+        });
+      }
+    }
+
+    const modifiedBytes = await newDoc.save();
+    const modifiedBlob = new Blob([modifiedBytes], { type: 'application/pdf' });
+    const modifiedFile = new File([modifiedBlob], pdfToolsFile.name, { type: 'application/pdf' });
+
+    document.getElementById('pdfToolsSection').style.display = 'none';
+    showToast('Edits applied — extracting text... ⏳');
+    extractPDFwithPDFjs(modifiedFile);
+  } catch(err) {
+    console.error('PDFLib error:', err);
+    showToast('Could not apply edits — importing original PDF 📋');
+    document.getElementById('pdfToolsSection').style.display = 'none';
+    extractPDFwithPDFjs(pdfToolsFile);
   }
 }
 
@@ -4733,6 +5490,684 @@ function buildScriptDataWithScenes(parsed, myChar, dividers) {
   // parsed may already have scene assignments from splitter — use them
   buildAndFinish(rawScriptText, myChar, dividers);
 }
+
+
+// ════════════════════════════════════════════════════════════════════════
+//  BLACKOUT MODE — Rehearsal Pro style
+//  Your lines are hidden behind a black bar; tap to peek; mark right/wrong
+// ════════════════════════════════════════════════════════════════════════
+
+let boPairs = [], boIndex = 0, boLoop = false, boRevealed = false;
+let boCorrect = 0, boWrong = 0, boPrompts = 0;
+
+function startBlackout() {
+  const prod = activeProduction;
+  if(!prod || !prod.cuePairs || prod.cuePairs.length === 0) {
+    showToast('No lines to practice — upload a script first!'); return;
+  }
+  boPairs = [...prod.cuePairs];
+  boIndex = 0; boCorrect = 0; boWrong = 0; boPrompts = 0; boLoop = false;
+  document.getElementById('boLoopBtn').textContent = '🔁 Loop: Off';
+  document.getElementById('boFinished').style.display = 'none';
+  document.getElementById('boProgress').textContent = '';
+  document.querySelectorAll('#blackoutScreen .btn').forEach(b=>{b.style.display='';});
+  document.getElementById('blackoutScreen').classList.add('active');
+  boLoad();
+}
+
+function boLoad() {
+  if(!boPairs[boIndex]) { boFinish(); return; }
+  const pair = boPairs[boIndex];
+  boRevealed = false;
+  const pct = Math.round((boIndex/boPairs.length)*100);
+  (document.getElementById('boProgBar')||{}).style = `width:${pct}%`;
+  (document.getElementById('boProgress')||{}).textContent = `Line ${boIndex+1} of ${boPairs.length}`;
+
+  // Other character (cue)
+  const otherEl = document.getElementById('boOtherText');
+  const otherCharEl = document.getElementById('boOtherChar');
+  if(otherEl) otherEl.textContent = pair.cue || 'Start of scene';
+  if(otherCharEl) otherCharEl.textContent = boIndex===0 ? 'SCENE START' : 'OTHER CHARACTER';
+
+  // My line — hidden
+  const myCard = document.getElementById('boMyCard');
+  const blackBar = document.getElementById('boBlackBar');
+  const myText = document.getElementById('boMyText');
+  const myChar = document.getElementById('boMyChar');
+  if(myCard) { myCard.style.opacity = '1'; myCard.onclick = boReveal; }
+  if(blackBar) blackBar.style.display = 'flex';
+  if(myText) { myText.style.display = 'none'; myText.textContent = pair.myLine || ''; }
+  if(myChar) myChar.textContent = (activeProduction?.myChar || 'YOU') + ' 🎭';
+  (document.getElementById('boHint')||{}).textContent = 'Tap the red card to reveal your line';
+
+  // Auto-speak cue
+  if(pair.cue && pair.cue !== 'Start of scene') {
+    const u = new SpeechSynthesisUtterance(pair.cue);
+    u.rate = ttsRate || 0.9;
+    window.speechSynthesis.cancel();
+    setTimeout(() => window.speechSynthesis.speak(u), 300);
+  }
+}
+
+function boReveal() {
+  if(boRevealed) return;
+  boRevealed = true;
+  const blackBar = document.getElementById('boBlackBar');
+  const myText = document.getElementById('boMyText');
+  if(blackBar) blackBar.style.display = 'none';
+  if(myText) myText.style.display = 'block';
+  (document.getElementById('boHint')||{}).textContent = 'Read your line, then mark how you did ↓';
+  boPrompts++;
+}
+
+function speakBoOther() {
+  const pair = boPairs[boIndex];
+  if(!pair) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(pair.cue);
+  u.rate = ttsRate || 0.9;
+  window.speechSynthesis.speak(u);
+}
+
+function boMark(result) {
+  window.speechSynthesis.cancel();
+  if(result === 'correct') { boCorrect++; addXP(10); }
+  else if(result === 'close') { boCorrect++; addXP(5); }
+  else boWrong++;
+  boIndex++;
+  if(boIndex >= boPairs.length) {
+    if(boLoop) { boIndex = 0; boLoad(); } else boFinish();
+  } else { boLoad(); }
+}
+
+function boFinish() {
+  const total = boCorrect + boWrong;
+  const pct = total > 0 ? Math.round((boCorrect/total)*100) : 0;
+  (document.getElementById('boFinishStats')||{}).textContent =
+    `${boCorrect}/${total} lines · ${pct}% · ${boPrompts} peeks`;
+  (document.getElementById('boFinished')||{}).style.display = 'block';
+  document.querySelectorAll('#blackoutScreen .btn:not(#boFinished .btn)').forEach(b=>{b.style.display='none';});
+  addXP(boCorrect * 5);
+  autoSave();
+}
+
+function stopBlackout() {
+  window.speechSynthesis.cancel();
+  document.getElementById('blackoutScreen').classList.remove('active');
+}
+
+function toggleBoLoop() {
+  boLoop = !boLoop;
+  (document.getElementById('boLoopBtn')||{}).textContent = boLoop ? '🔁 Loop: On' : '🔁 Loop: Off';
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  TELEPROMPTER MODE — Rehearsal Pro style
+//  Auto-scrolling script with your lines highlighted; tap to pause/resume
+// ════════════════════════════════════════════════════════════════════════
+
+let tpScrollInterval = null, tpSpeed = 2, tpPaused = false, tpHideLines = false, tpLoopOn = false;
+
+function startTeleprompter() {
+  const prod = activeProduction;
+  if(!prod || !prod.scriptData || prod.scriptData.length === 0) {
+    showToast('No script loaded!'); return;
+  }
+  tpSpeed = 2; tpPaused = false; tpHideLines = false; tpLoopOn = false;
+  (document.getElementById('tpSpeedLabel')||{}).textContent = tpSpeed;
+  (document.getElementById('tpHideMyLines')||{}).checked = false;
+  (document.getElementById('tpLoopBtn')||{}).textContent = '🔁 Off';
+  (document.getElementById('tpStatus')||{}).textContent = 'Tap script to pause/resume';
+  (document.getElementById('tpPauseBtn')||{}).textContent = '⏸ Pause';
+  tpRender();
+  const scroller = document.getElementById('tpScroll');
+  if(scroller) scroller.scrollTop = 0;
+  document.getElementById('teleprompterScreen').classList.add('active');
+  tpStartScroll();
+}
+
+function tpRender() {
+  const prod = activeProduction;
+  if(!prod) return;
+  const myChar = prod.myChar;
+  const content = document.getElementById('tpContent');
+  if(!content) return;
+  content.innerHTML = prod.scriptData
+    .filter(l => !l.isDirection)
+    .map((line, i) => {
+      const isMine = line.char === myChar || line.mine;
+      if(isMine && tpHideLines) {
+        return `<div style="margin-bottom:10px;padding:6px 14px;border-left:4px solid var(--terra);background:rgba(193,97,79,0.08);">
+          <div style="font-size:10px;font-weight:900;color:var(--terra);text-transform:uppercase;">${line.char} 🎭</div>
+          <div style="background:var(--terra);color:var(--terra);border-radius:6px;padding:4px 8px;user-select:none;">████████████████</div>
+        </div>`;
+      }
+      return `<div style="margin-bottom:10px;padding:6px 14px;border-left:4px solid ${isMine?'var(--terra)':'var(--sand-dark)'};background:${isMine?'rgba(193,97,79,0.08)':'transparent'};">
+        <div style="font-size:10px;font-weight:900;color:${isMine?'var(--terra)':'var(--brown-light)'};text-transform:uppercase;">${line.char}${isMine?' 🎭':''}</div>
+        <div style="color:var(--brown);">${escapeHtml(line.text)}</div>
+      </div>`;
+    }).join('');
+}
+
+function tpStartScroll() {
+  if(tpScrollInterval) clearInterval(tpScrollInterval);
+  tpScrollInterval = setInterval(() => {
+    if(tpPaused) return;
+    const el = document.getElementById('tpScroll');
+    if(!el) return;
+    el.scrollTop += tpSpeed;
+    // Loop: if scrolled to near bottom, restart
+    if(tpLoopOn && el.scrollTop + el.clientHeight >= el.scrollHeight - 100) {
+      el.scrollTop = 0;
+    }
+  }, 50);
+}
+
+function toggleTpPause() {
+  tpPaused = !tpPaused;
+  const btn = document.getElementById('tpPauseBtn');
+  if(btn) btn.textContent = tpPaused ? '▶ Resume' : '⏸ Pause';
+  (document.getElementById('tpStatus')||{}).textContent = tpPaused ? 'Paused — tap to resume' : 'Tap script to pause/resume';
+}
+
+function tpFaster() { tpSpeed = Math.min(10, tpSpeed+1); (document.getElementById('tpSpeedLabel')||{}).textContent = tpSpeed; }
+function tpSlower() { tpSpeed = Math.max(1, tpSpeed-1); (document.getElementById('tpSpeedLabel')||{}).textContent = tpSpeed; }
+
+function tpToggleHide(val) {
+  tpHideLines = val;
+  tpRender();
+}
+
+function tpLoop() {
+  tpLoopOn = !tpLoopOn;
+  (document.getElementById('tpLoopBtn')||{}).textContent = tpLoopOn ? '🔁 On' : '🔁 Off';
+}
+
+function stopTeleprompter() {
+  if(tpScrollInterval) clearInterval(tpScrollInterval);
+  tpScrollInterval = null;
+  window.speechSynthesis.cancel();
+  document.getElementById('teleprompterScreen').classList.remove('active');
+}
+
+
+// ════════════════════════════════════════════════════════════════════════
+//  AUDIO RUN-THROUGH — Full Line Learner feature set
+//  • Play modes: gap→line, line→gap, gap-only
+//  • Pitch shift on cue voices (Web Speech pitchRate)
+//  • Speed control on cue voices (separate from gap speed)
+//  • Voice recognition auto-advance
+//  • A-B loop: mark two points, loop that section
+//  • Flag lines during playback → run flagged-only at end
+//  • Pause after gap option
+//  • Sleep timer
+//  • Loop whole scene
+// ════════════════════════════════════════════════════════════════════════
+
+let agPairs = [], agIndex = 0, agGapSeconds = 8, agLoopOn = false;
+let agCountdownInterval = null, agCountdownVal = 0;
+let agRunning = false, agIsPaused = false;
+let agCorrect = 0, agPrompted = 0;
+let agPitchRate = 1.0, agCueSpeed = 1.0;
+let agPlayMode = 'line-gap';  // 'line-gap' | 'gap-line' | 'gap-only'
+let agPauseAfterGap = false, agVoiceAdvance = false;
+let agFlaggedLines = new Set();  // indices of flagged lines
+let agFlaggedOnly = false;       // running flagged-only pass
+let agAStart = -1, agAEnd = -1;  // A-B loop start/end indices
+let agSleepTimerInterval = null, agSleepMinutes = 0;
+let agVoiceRecognition = null;
+let agSettingsOpen = false;
+let agABStripOpen = false;
+
+// ── Settings panel ────────────────────────────────────────────────────
+function agOpenSettings() {
+  agSettingsOpen = !agSettingsOpen;
+  const panel = document.getElementById('agSettingsPanel');
+  if(panel) panel.style.display = agSettingsOpen ? 'block' : 'none';
+}
+function agCloseSettings() {
+  agSettingsOpen = false;
+  const panel = document.getElementById('agSettingsPanel');
+  if(panel) panel.style.display = 'none';
+  // Read all settings
+  agPlayMode = (document.getElementById('agPlayMode')||{value:'line-gap'}).value;
+  agPauseAfterGap = !!(document.getElementById('agPauseAfterGap')||{}).checked;
+  agVoiceAdvance  = !!(document.getElementById('agVoiceAdvance')||{}).checked;
+  agLoopOn        = !!(document.getElementById('agLoopCheck')||{}).checked;
+  agSleepMinutes  = parseInt((document.getElementById('agSleepTimer')||{value:'0'}).value)||0;
+  if(agSleepMinutes > 0 && agRunning) agStartSleepTimer();
+}
+
+// ── Pitch & speed controls ────────────────────────────────────────────
+function agChangePitch(delta) {
+  agPitchRate = Math.round(Math.max(0.3, Math.min(2.0, agPitchRate + delta)) * 10) / 10;
+  const el = document.getElementById('agPitchLabel');
+  if(el) el.textContent = agPitchRate.toFixed(1) + '×';
+}
+function agChangeSpeed(delta) {
+  agCueSpeed = Math.round(Math.max(0.5, Math.min(2.0, agCueSpeed + delta)) * 10) / 10;
+  const el = document.getElementById('agSpeedLabel');
+  if(el) el.textContent = agCueSpeed.toFixed(1) + '×';
+}
+
+// ── Gap size ─────────────────────────────────────────────────────────
+function agUpdateGap(val) {
+  agGapSeconds = parseInt(val);
+  const el = document.getElementById('agGapLabel');
+  if(el) el.textContent = val + 's';
+  agCountdownVal = agGapSeconds;
+}
+
+// ── Sleep timer ───────────────────────────────────────────────────────
+function agStartSleepTimer() {
+  if(agSleepTimerInterval) clearInterval(agSleepTimerInterval);
+  let remaining = agSleepMinutes * 60;
+  agSleepTimerInterval = setInterval(() => {
+    remaining--;
+    const el = document.getElementById('agSleepCountdown');
+    const mins = Math.floor(remaining/60), secs = remaining%60;
+    if(el) el.textContent = `Sleep in ${mins}:${secs.toString().padStart(2,'0')}`;
+    if(remaining <= 0) {
+      clearInterval(agSleepTimerInterval);
+      agPause();
+      showToast('😴 Sleep timer — run-through paused');
+    }
+  }, 1000);
+}
+
+// ── A-B Loop ─────────────────────────────────────────────────────────
+function agToggleABStrip() {
+  agABStripOpen = !agABStripOpen;
+  const strip = document.getElementById('agABStrip');
+  if(strip) strip.style.display = agABStripOpen ? 'flex' : 'none';
+}
+function agSetAB(point) {
+  if(point === 'A') {
+    agAStart = agIndex;
+    const btn = document.getElementById('agABtn');
+    if(btn) { btn.style.background = 'var(--terra)'; btn.textContent = `A: line ${agIndex+1}`; }
+  } else {
+    agAEnd = agIndex;
+    const btn = document.getElementById('agBBtn');
+    if(btn) { btn.style.background = 'var(--sage)'; btn.textContent = `B: line ${agIndex+1}`; }
+  }
+  const st = document.getElementById('agABStatus');
+  if(agAStart >= 0 && agAEnd > agAStart) {
+    if(st) st.textContent = `🔂 Looping lines ${agAStart+1}–${agAEnd+1}`;
+    showToast(`A-B loop set: lines ${agAStart+1}–${agAEnd+1}`);
+  } else if(st) {
+    st.textContent = agAStart >= 0 ? 'A set — now set B' : 'Tap A then B to loop a section';
+  }
+}
+function agClearAB() {
+  agAStart = -1; agAEnd = -1;
+  const aBtn = document.getElementById('agABtn');
+  const bBtn = document.getElementById('agBBtn');
+  const st   = document.getElementById('agABStatus');
+  if(aBtn) { aBtn.style.background = 'rgba(255,255,255,0.15)'; aBtn.textContent = 'Set A'; }
+  if(bBtn) { bBtn.style.background = 'rgba(255,255,255,0.15)'; bBtn.textContent = 'Set B'; }
+  if(st)   st.textContent = 'Tap A then B to loop a section';
+}
+
+// ── Flag a line ───────────────────────────────────────────────────────
+function agFlagLine() {
+  if(agPairs[agIndex]) {
+    if(agFlaggedLines.has(agIndex)) {
+      agFlaggedLines.delete(agIndex);
+      showToast('Flag removed');
+    } else {
+      agFlaggedLines.add(agIndex);
+      showToast(`🚩 Line ${agIndex+1} flagged for review`);
+    }
+    agRefreshFlaggedStrip();
+  }
+}
+function agRefreshFlaggedStrip() {
+  const strip = document.getElementById('agFlaggedStrip');
+  const list  = document.getElementById('agFlaggedList');
+  if(!strip || !list) return;
+  if(agFlaggedLines.size === 0) { strip.style.display = 'none'; return; }
+  strip.style.display = 'block';
+  list.innerHTML = [...agFlaggedLines].sort((a,b)=>a-b)
+    .map(i => `<div>Line ${i+1}: <em>${(agPairs[i]?.myLine||'').substring(0,60)}${(agPairs[i]?.myLine||'').length>60?'…':''}</em></div>`)
+    .join('');
+}
+
+// ── Voice recognition auto-advance ───────────────────────────────────
+function agStartVoiceRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) { showToast('Voice recognition not supported in this browser'); return; }
+  agVoiceRecognition = new SR();
+  agVoiceRecognition.continuous = false;
+  agVoiceRecognition.interimResults = false;
+  agVoiceRecognition.onresult = (e) => {
+    if(e.results.length > 0) {
+      // Any speech detected = user has spoken their line → auto advance
+      agGotIt();
+    }
+  };
+  agVoiceRecognition.onerror = () => {};
+  agVoiceRecognition.onend   = () => {};
+  const ind = document.getElementById('agVoiceIndicator');
+  if(ind) ind.style.display = 'block';
+  try { agVoiceRecognition.start(); } catch(e) {}
+}
+function agStopVoiceRecognition() {
+  if(agVoiceRecognition) { try { agVoiceRecognition.stop(); } catch(e){} agVoiceRecognition = null; }
+  const ind = document.getElementById('agVoiceIndicator');
+  if(ind) ind.style.display = 'none';
+}
+
+// ── Main entry ────────────────────────────────────────────────────────
+function startAudioGap() {
+  const prod = activeProduction;
+  if(!prod || !prod.cuePairs || prod.cuePairs.length === 0) {
+    showToast('No lines found — upload a script first!'); return;
+  }
+  agPairs = [...prod.cuePairs];
+  agIndex = 0; agCorrect = 0; agPrompted = 0;
+  agRunning = false; agIsPaused = false; agFlaggedOnly = false;
+  agFlaggedLines = new Set(); agAStart = -1; agAEnd = -1;
+  agLoopOn = false; agSleepMinutes = 0;
+  agSettingsOpen = false; agABStripOpen = false;
+
+  // Reset UI
+  const ids = ['agSettingsPanel','agABStrip','agFlaggedStrip','agFinished'];
+  ids.forEach(id => { const el = document.getElementById(id); if(el) el.style.display = 'none'; });
+  const runDiv = document.getElementById('agRunning');
+  if(runDiv) runDiv.style.display = 'none';
+  const startBtn = document.getElementById('agStartBtn');
+  if(startBtn) startBtn.style.display = '';
+
+  // Reset pitch/speed labels
+  agPitchRate = 1.0; agCueSpeed = 1.0;
+  const pl = document.getElementById('agPitchLabel'); if(pl) pl.textContent = '1.0×';
+  const sl = document.getElementById('agSpeedLabel'); if(sl) sl.textContent = '1.0×';
+  const gl = document.getElementById('agGapLabel');   if(gl) gl.textContent = '8s';
+  agGapSeconds = 8;
+
+  document.getElementById('agProgress').textContent = `${agPairs.length} lines`;
+  document.getElementById('agCurrentChar').textContent = '—';
+  document.getElementById('agCurrentText').textContent = 'Press Start to begin';
+  const myTurn = document.getElementById('agMyTurn'); if(myTurn) myTurn.style.display = 'none';
+  document.getElementById('audioGapScreen').classList.add('active');
+}
+
+function agStart() {
+  // Read settings one last time
+  agPlayMode     = (document.getElementById('agPlayMode')||{value:'line-gap'}).value;
+  agPauseAfterGap= !!(document.getElementById('agPauseAfterGap')||{}).checked;
+  agVoiceAdvance = !!(document.getElementById('agVoiceAdvance')||{}).checked;
+  agLoopOn       = !!(document.getElementById('agLoopCheck')||{}).checked;
+  agSleepMinutes = parseInt((document.getElementById('agSleepTimer')||{value:'0'}).value)||0;
+  agGapSeconds   = parseInt((document.getElementById('agGapSlider')||{value:'8'}).value)||8;
+
+  agRunning = true; agIsPaused = false; agIndex = 0;
+  const startBtn = document.getElementById('agStartBtn');
+  if(startBtn) startBtn.style.display = 'none';
+  const runDiv = document.getElementById('agRunning');
+  if(runDiv) { runDiv.style.display = 'flex'; runDiv.style.flexDirection = 'column'; }
+
+  if(agSleepMinutes > 0) agStartSleepTimer();
+  agPlayNext();
+}
+
+function agPlayNext() {
+  if(!agRunning || agIsPaused) return;
+
+  // A-B loop check — if we hit B, jump back to A
+  if(agAStart >= 0 && agAEnd > agAStart && agIndex > agAEnd) {
+    agIndex = agAStart;
+  }
+
+  // Flagged-only pass: skip non-flagged lines
+  if(agFlaggedOnly && agFlaggedLines.size > 0) {
+    while(agIndex < agPairs.length && !agFlaggedLines.has(agIndex)) agIndex++;
+  }
+
+  if(agIndex >= agPairs.length) { agFinish(); return; }
+
+  const pair = agPairs[agIndex];
+  const pct  = Math.round((agIndex / agPairs.length) * 100);
+  const progBar = document.getElementById('agProgBar');
+  if(progBar) progBar.style.width = pct + '%';
+  document.getElementById('agProgress').textContent = `Line ${agIndex+1} of ${agPairs.length}${agFlaggedLines.size?' · 🚩'+agFlaggedLines.size:''}`;
+
+  // Hide "your turn" card
+  const myTurnEl = document.getElementById('agMyTurn');
+  if(myTurnEl) myTurnEl.style.display = 'none';
+  agStopVoiceRecognition();
+
+  // Show cue line
+  document.getElementById('agCurrentChar').textContent = 'OTHER CHARACTER';
+  document.getElementById('agCurrentText').textContent = pair.cue === 'Start of scene' ? '▶ Scene begins...' : (pair.cue || '—');
+
+  // mode: 'line-gap' = speak cue → gap   |   'gap-line' = gap → speak cue   |  'gap-only' = just gap
+  if(agPlayMode === 'gap-line') {
+    // User tries first, THEN hears the cue (like a quiz)
+    agShowMyTurn(() => {
+      if(!agRunning || agIsPaused) return;
+      agSpeak(pair.cue, () => {
+        agIndex++;
+        setTimeout(() => agPlayNext(), 600);
+      }, true); // true = is cue voice
+    });
+  } else if(agPlayMode === 'gap-only') {
+    // No cue playback at all — pure silent recall
+    agShowMyTurn(() => {
+      agIndex++;
+      setTimeout(() => agPlayNext(), 400);
+    });
+  } else {
+    // 'line-gap' = default: speak cue → gap
+    agSpeak(pair.cue === 'Start of scene' ? 'Scene begins.' : (pair.cue||''), () => {
+      if(!agRunning || agIsPaused) return;
+      agShowMyTurn(() => {
+        agIndex++;
+        setTimeout(() => agPlayNext(), agPauseAfterGap ? 200 : 400);
+      });
+    }, true); // true = cue voice (apply pitch shift + speed)
+  }
+}
+
+// Speak text using TTS with optional pitch/speed modification for cue voices
+function agSpeak(text, onEnd, isCue) {
+  if(!text || !agRunning) { if(onEnd) onEnd(); return; }
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate  = isCue ? agCueSpeed  : (ttsRate || 0.9);
+  u.pitch = isCue ? agPitchRate : 1.0;
+  u.onend = () => { if(agRunning && !agIsPaused && onEnd) onEnd(); };
+  u.onerror = () => { if(agRunning && !agIsPaused && onEnd) onEnd(); };
+  window.speechSynthesis.speak(u);
+}
+
+// Show the "your turn" gap card with countdown
+function agShowMyTurn(onExpire) {
+  const pair   = agPairs[agIndex];
+  const myTurn = document.getElementById('agMyTurn');
+  const myLineEl = document.getElementById('agMyLineText');
+  if(!myTurn) { if(onExpire) onExpire(); return; }
+
+  // Set up the card
+  if(myLineEl) { myLineEl.style.display = 'none'; myLineEl.textContent = pair?.myLine || ''; }
+  myTurn.style.display = 'block';
+  document.getElementById('agCurrentChar').textContent = (activeProduction?.myChar||'YOU') + ' 🎭';
+  document.getElementById('agCurrentText').textContent = '— your turn —';
+
+  agCountdownVal = agGapSeconds;
+  const cdEl = document.getElementById('agCountdown');
+  if(cdEl) cdEl.textContent = agCountdownVal;
+
+  if(agCountdownInterval) clearInterval(agCountdownInterval);
+
+  // Start voice recognition if enabled
+  if(agVoiceAdvance) agStartVoiceRecognition();
+
+  agCountdownInterval = setInterval(() => {
+    if(!agRunning || agIsPaused) return;
+    agCountdownVal--;
+    if(cdEl) cdEl.textContent = agCountdownVal;
+    if(agCountdownVal <= 0) {
+      clearInterval(agCountdownInterval);
+      agStopVoiceRecognition();
+      // Auto-prompt when time's up
+      agPrompt();
+      if(agPauseAfterGap) {
+        // Pause here and wait for user to tap resume
+        agIsPaused = true;
+        const pauseBtn = document.getElementById('agPauseBtn');
+        if(pauseBtn) pauseBtn.textContent = '▶ Resume';
+        // store callback so resume can trigger it
+        agPauseCallback = onExpire;
+      } else {
+        setTimeout(() => { if(agRunning && !agIsPaused && onExpire) onExpire(); }, 1500);
+      }
+    }
+  }, 1000);
+
+  // Store for Got It
+  agCurrentGapCallback = onExpire;
+}
+let agCurrentGapCallback = null;
+let agPauseCallback = null;
+
+function agPrompt() {
+  clearInterval(agCountdownInterval);
+  agStopVoiceRecognition();
+  agPrompted++;
+  const myLineEl = document.getElementById('agMyLineText');
+  const cdEl     = document.getElementById('agCountdown');
+  if(myLineEl) {
+    myLineEl.style.display = 'block';
+    agSpeak(myLineEl.textContent, null, false); // speak at normal rate/pitch
+  }
+  if(cdEl) cdEl.textContent = '💡';
+}
+
+function agGotIt() {
+  clearInterval(agCountdownInterval);
+  window.speechSynthesis.cancel();
+  agStopVoiceRecognition();
+  agCorrect++;
+  addXP(8);
+  const myTurn = document.getElementById('agMyTurn');
+  if(myTurn) myTurn.style.display = 'none';
+  agIndex++;
+  const cb = agCurrentGapCallback;
+  agCurrentGapCallback = null;
+  // In line-gap mode the callback handles moving on, in gap-line and gap-only we just play next
+  if(cb && agPlayMode !== 'gap-line') {
+    // skip the natural expiry callback
+  }
+  setTimeout(() => agPlayNext(), 300);
+}
+
+function agSkip() {
+  clearInterval(agCountdownInterval);
+  window.speechSynthesis.cancel();
+  agStopVoiceRecognition();
+  agIndex++;
+  const myTurn = document.getElementById('agMyTurn');
+  if(myTurn) myTurn.style.display = 'none';
+  agCurrentGapCallback = null;
+  agPlayNext();
+}
+
+function agPause() {
+  agIsPaused = !agIsPaused;
+  const btn = document.getElementById('agPauseBtn');
+  if(btn) btn.textContent = agIsPaused ? '▶ Resume' : '⏸ Pause';
+  if(agIsPaused) {
+    window.speechSynthesis.cancel();
+    clearInterval(agCountdownInterval);
+    agStopVoiceRecognition();
+  } else {
+    // If we were paused mid-gap, just restart from current index
+    const pauseCb = agPauseCallback;
+    agPauseCallback = null;
+    if(pauseCb) pauseCb();
+    else agPlayNext();
+  }
+}
+
+function toggleAgLoop() {
+  agLoopOn = !agLoopOn;
+  const btn = document.getElementById('agLoopBtn');
+  if(btn) btn.textContent = agLoopOn ? '🔁 On' : '🔁 Off';
+  const chk = document.getElementById('agLoopCheck');
+  if(chk) chk.checked = agLoopOn;
+}
+
+function agRunFlaggedOnly() {
+  if(agFlaggedLines.size === 0) { showToast('No flagged lines!'); return; }
+  agFlaggedOnly = true;
+  agIndex = 0; agCorrect = 0; agPrompted = 0; agRunning = true; agIsPaused = false;
+  const fin = document.getElementById('agFinished');
+  if(fin) fin.style.display = 'none';
+  const runDiv = document.getElementById('agRunning');
+  if(runDiv) { runDiv.style.display = 'flex'; runDiv.style.flexDirection = 'column'; }
+  showToast(`Running ${agFlaggedLines.size} flagged line(s) 🚩`);
+  agPlayNext();
+}
+
+function agFinish() {
+  agRunning = false;
+  window.speechSynthesis.cancel();
+  clearInterval(agCountdownInterval);
+  if(agSleepTimerInterval) clearInterval(agSleepTimerInterval);
+  agStopVoiceRecognition();
+
+  const total = agPairs.length;
+  const pct   = total > 0 ? Math.round((agCorrect/total)*100) : 0;
+  const statsEl = document.getElementById('agFinishStats');
+  if(statsEl) statsEl.textContent = `${agCorrect}/${total} without prompting · ${agPrompted} prompts · ${pct}%`;
+
+  // Flagged lines summary
+  const flagFin  = document.getElementById('agFlaggedFinish');
+  const flagList = document.getElementById('agFlaggedFinishList');
+  const flagBtn  = document.getElementById('agRunFlaggedBtn');
+  if(agFlaggedLines.size > 0 && flagFin && flagList) {
+    flagFin.style.display  = 'block';
+    if(flagBtn) flagBtn.style.display = '';
+    flagList.innerHTML = [...agFlaggedLines].sort((a,b)=>a-b)
+      .map(i => `<div>Line ${i+1}: <em>${(agPairs[i]?.myLine||'').substring(0,70)}…</em></div>`)
+      .join('');
+  } else if(flagFin) { flagFin.style.display = 'none'; }
+
+  const fin = document.getElementById('agFinished');
+  if(fin) fin.style.display = 'block';
+  const runDiv = document.getElementById('agRunning');
+  if(runDiv) runDiv.style.display = 'none';
+
+  addXP(agCorrect * 8);
+  autoSave();
+
+  if(agLoopOn && !agFlaggedOnly) {
+    agIndex = 0; agRunning = true;
+    setTimeout(() => agPlayNext(), 1500);
+  }
+}
+
+function agRestart() {
+  agIndex = 0; agCorrect = 0; agPrompted = 0;
+  agRunning = true; agIsPaused = false; agFlaggedOnly = false;
+  const fin = document.getElementById('agFinished');
+  if(fin) fin.style.display = 'none';
+  const runDiv = document.getElementById('agRunning');
+  if(runDiv) { runDiv.style.display = 'flex'; runDiv.style.flexDirection = 'column'; }
+  agPlayNext();
+}
+
+function stopAudioGap() {
+  agRunning = false;
+  window.speechSynthesis.cancel();
+  clearInterval(agCountdownInterval);
+  if(agSleepTimerInterval) clearInterval(agSleepTimerInterval);
+  agStopVoiceRecognition();
+  document.getElementById('audioGapScreen').classList.remove('active');
+}
+
 
 function finishScriptLoad(prod) {
   productions.push(prod);
