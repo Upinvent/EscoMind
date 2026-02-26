@@ -4602,7 +4602,6 @@ function handleFileUpload(input) {
   }
 }
 
-async 
 // ════════════════════════════════════════════════════════════════════════
 //  PDF PAGE TOOLS — Rotate, Crop, Tint, Collate
 //  Mirrors Rehearsal Pro's physical script management tools
@@ -5350,10 +5349,6 @@ function parseScriptV2(text, myChar) {
   return result;
 }
 
-function parseRawScript(text) {
-  // Compatibility wrapper — used by editor page upload
-  return parseScriptV2(text, '__NONE__');
-}
 
 // ─── processScript ───────────────────────────────────────────────────────────
 function processScript(source) {
