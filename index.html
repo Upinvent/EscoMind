@@ -3847,7 +3847,7 @@ async function saveToCloud() {
       showSyncStatus('Sync error — saved locally', 'var(--amber)');
     }
   } catch(e) {
-    showSyncStatus('Offline — saved locally', 'var(--amber)');
+    showSyncStatus('Data saved locally ✓', 'var(--brown-light)');
   }
   isSyncing = false;
 }
@@ -3856,7 +3856,7 @@ async function loadFromCloud() {
   // Always load local first so app works instantly
   loadLocal();
   if(!syncBinId || !syncApiKey) {
-    showSyncStatus('No sync set up', 'var(--brown-light)');
+    showSyncStatus('Data saved locally ✓', 'var(--sage)');
     return;
   }
   showSyncStatus('Loading from cloud...', 'var(--brown-light)');
@@ -3884,10 +3884,15 @@ async function loadFromCloud() {
         showSyncStatus('Up to date', 'var(--sage)');
       }
     } else {
-      showSyncStatus('Cloud unavailable', 'var(--amber)');
+      showSyncStatus('Sync unavailable — data saved locally ✓', 'var(--brown-light)');
     }
   } catch(e) {
-    showSyncStatus('Offline — using local data', 'var(--amber)');
+    // Network error — data is still safe locally, don't alarm the user
+    const isOffline = !navigator.onLine;
+    showSyncStatus(
+      isOffline ? 'No internet — data saved locally ✓' : 'Data saved locally ✓',
+      'var(--brown-light)'
+    );
   }
 }
 
