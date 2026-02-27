@@ -493,6 +493,12 @@ body {
   .dict-pop{left:calc(50% - 224px);right:auto;width:448px;}
   .toast{max-width:440px;}
 }
+
+/* ── Line Assignment Editor ── */
+.lae-line { transition: background 0.12s; user-select: none; -webkit-tap-highlight-color: transparent; }
+.lae-line:active { filter: brightness(0.93); }
+.lae-line:last-child { border-bottom: none !important; }
+.lae-dir { opacity: 0.55; font-style: italic; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
@@ -724,6 +730,29 @@ body {
         <button onclick="hidePdfTools()" style="background:none;border:2px solid var(--sand-dark);border-radius:99px;padding:8px;font-family:var(--font);font-size:12px;font-weight:900;cursor:pointer;color:var(--brown-light);width:100%;">✕ Cancel</button>
       </div>
 
+      <!-- LINE ASSIGNMENT EDITOR -->
+      <div id="lineAssignEditor" style="display:none;">
+        <div class="card" style="margin-bottom:14px;background:linear-gradient(135deg,#2d1b2e,#1a0f1e);color:white;">
+          <div style="font-size:15px;font-weight:900;margin-bottom:6px;">🩷 Tap your lines</div>
+          <div style="font-size:12px;opacity:0.85;line-height:1.6;">Tap any line to mark it as <strong style="color:#ff99bb;">YOURS</strong> (pink). Tap again to unmark. Everything else is treated as another character's line.</div>
+        </div>
+
+        <!-- Stats bar -->
+        <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap;">
+          <div style="background:rgba(255,100,150,0.15);border:2px solid #ff99bb;border-radius:99px;padding:5px 14px;font-size:12px;font-weight:900;color:#cc3366;" id="laeMyCount">0 mine</div>
+          <div style="background:var(--sand);border:2px solid var(--sand-dark);border-radius:99px;padding:5px 14px;font-size:12px;font-weight:900;color:var(--brown-light);" id="laeOtherCount">0 other</div>
+          <button onclick="laeSelectAll()" style="margin-left:auto;background:none;border:2px solid #ff99bb;color:#cc3366;border-radius:99px;padding:5px 12px;font-size:11px;font-weight:900;cursor:pointer;font-family:var(--font);">All mine</button>
+          <button onclick="laeSelectNone()" style="background:none;border:2px solid var(--sand-dark);color:var(--brown-light);border-radius:99px;padding:5px 12px;font-size:11px;font-weight:900;cursor:pointer;font-family:var(--font);">Clear</button>
+        </div>
+
+        <!-- The lines list -->
+        <div id="laeLines" style="border:2px solid var(--sand-dark);border-radius:var(--r);overflow:hidden;margin-bottom:14px;max-height:60vh;overflow-y:auto;"></div>
+
+        <!-- Actions -->
+        <button onclick="laeConfirm()" class="btn btn-terra" style="width:100%;font-size:15px;padding:14px;margin-bottom:8px;">✅ These are my lines — continue</button>
+        <button onclick="laeBack()" style="background:none;border:2px solid var(--sand-dark);border-radius:99px;padding:8px;font-family:var(--font);font-size:12px;font-weight:900;cursor:pointer;color:var(--brown-light);width:100%;">‹ Back</button>
+      </div>
+
       <!-- CHARACTER SETUP -->
       <div class="char-setup" id="charSetup">
         <h3>🎭 Who are you playing?</h3>
@@ -754,6 +783,7 @@ body {
           <button class="tool-btn" onclick="changeFontSize(-1,this)">A−</button>
           <button class="tool-btn" id="ttsToggle" onclick="readAloud()">🔊 Read</button>
           <button class="tool-btn" id="myLinesOnly" onclick="toggleMyLinesOnly(this)">My Lines Only</button>
+          <button class="tool-btn" onclick="reopenLAE()" style="border-color:#ff99bb;color:#cc3366;">🩷 Edit lines</button>
         </div>
         <!-- TTS speed control -->
         <div style="display:flex;align-items:center;gap:10px;background:var(--sand);border-radius:var(--rs);padding:10px 14px;margin-bottom:10px;">
@@ -4968,6 +4998,219 @@ async function pdfDoneEditing() {
   }
 }
 
+
+
+// Re-open the line assignment editor for an existing production (edit mode)
+function reopenLAE() {
+  const prod = activeProduction;
+  if(!prod || !prod.scriptData) { showToast('No script loaded'); return; }
+
+  // Re-populate laeParsed from current prod scriptData (with existing mine assignments)
+  laeParsed = prod.scriptData.map(l => ({...l}));
+  laeMineSet = new Set(laeParsed.map((l,i) => l.mine ? i : -1).filter(i => i >= 0));
+
+  // Show the editor inside the upload view
+  navTo('scriptScreen', 1);
+  document.getElementById('scriptHome').style.display = 'none';
+  document.getElementById('scriptUploadView').style.display = 'block';
+  document.getElementById('lineAssignEditor').style.display = 'block';
+  document.getElementById('charSetup').style.display = 'none';
+  document.getElementById('sceneSplitterSection').style.display = 'none';
+  document.getElementById('readerSection').style.display = 'none';
+  document.getElementById('pdfToolsSection').style.display = 'none';
+
+  renderLAE();
+  showToast('Tap lines to change which are yours 🩷');
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  LINE ASSIGNMENT EDITOR (LAE)
+//  After any script loads: show all lines, user taps to mark MINE (pink)
+//  Works regardless of PDF annotation format — always visual, always editable
+// ════════════════════════════════════════════════════════════════════════
+
+let laeParsed = [];       // array of {char, text, scene, mine(bool)}
+let laeMineSet = new Set(); // indices of lines marked as mine
+
+function showLineAssignEditor(parsedLines) {
+  // parsedLines = output of parseScriptV2 (without character filter — all chars)
+  laeParsed = parsedLines;
+  laeMineSet = new Set();
+
+  // Pre-select lines that the parser guessed were mine (if charSetup was already done)
+  parsedLines.forEach((l, i) => { if(l.mine) laeMineSet.add(i); });
+
+  renderLAE();
+
+  // Show this panel, hide others
+  document.getElementById('lineAssignEditor').style.display = 'block';
+  document.getElementById('charSetup').style.display = 'none';
+  document.getElementById('sceneSplitterSection').style.display = 'none';
+}
+
+function renderLAE() {
+  const container = document.getElementById('laeLines');
+  if(!container) return;
+
+  // Group consecutive lines by character for readability
+  let html = '';
+  laeParsed.forEach((line, i) => {
+    const isMine = laeMineSet.has(i);
+    const isDir  = line.isDirection;
+    html += `
+      <div class="lae-line${isMine ? ' lae-mine' : ''}${isDir ? ' lae-dir' : ''}"
+           onclick="laeToggle(${i})" 
+           id="laeLine${i}"
+           style="padding:10px 14px;border-bottom:1px solid var(--sand-dark);cursor:pointer;
+                  transition:background 0.15s;
+                  background:${isMine ? 'rgba(255,100,150,0.12)' : isDir ? 'rgba(0,0,0,0.03)' : 'white'};
+                  display:flex;align-items:flex-start;gap:10px;">
+        <div style="flex:0 0 auto;width:18px;height:18px;border-radius:50%;border:2px solid ${isMine ? '#ff99bb' : '#ccc'};
+                    background:${isMine ? '#ff99bb' : 'transparent'};margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:10px;line-height:1;">
+          ${isMine ? '♥' : ''}
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:10px;font-weight:900;letter-spacing:0.5px;text-transform:uppercase;
+                      color:${isMine ? '#cc3366' : isDir ? 'var(--brown-light)' : 'var(--brown-light)'};
+                      margin-bottom:2px;">${isDir ? 'STAGE DIR.' : (line.char || '—')}</div>
+          <div style="font-size:14px;line-height:1.6;color:${isMine ? '#220011' : 'var(--brown)'};
+                      font-weight:${isMine ? '700' : '400'};">${(line.text||'').replace(/</g,'&lt;')}</div>
+        </div>
+      </div>`;
+  });
+  container.innerHTML = html || '<div style="padding:20px;text-align:center;color:var(--brown-light);">No lines found</div>';
+  laeUpdateCounts();
+}
+
+function laeToggle(i) {
+  if(laeMineSet.has(i)) {
+    laeMineSet.delete(i);
+  } else {
+    laeMineSet.add(i);
+  }
+  // Update just this element without full re-render (fast)
+  const line = laeParsed[i];
+  const isMine = laeMineSet.has(i);
+  const el = document.getElementById('laeLine'+i);
+  if(el) {
+    el.style.background = isMine ? 'rgba(255,100,150,0.12)' : (line.isDirection ? 'rgba(0,0,0,0.03)' : 'white');
+    const dot = el.querySelector('div');
+    if(dot) {
+      dot.style.borderColor = isMine ? '#ff99bb' : '#ccc';
+      dot.style.background  = isMine ? '#ff99bb' : 'transparent';
+      dot.innerHTML = isMine ? '♥' : '';
+    }
+    const charLabel = el.querySelectorAll('div')[2];
+    if(charLabel) charLabel.style.color = isMine ? '#cc3366' : 'var(--brown-light)';
+    const textDiv = el.querySelectorAll('div')[3];
+    if(textDiv) {
+      textDiv.style.color = isMine ? '#220011' : 'var(--brown)';
+      textDiv.style.fontWeight = isMine ? '700' : '400';
+    }
+  }
+  laeUpdateCounts();
+}
+
+function laeUpdateCounts() {
+  const myEl = document.getElementById('laeMyCount');
+  const otherEl = document.getElementById('laeOtherCount');
+  const nonDir = laeParsed.filter(l=>!l.isDirection);
+  const mineCount = [...laeMineSet].filter(i => !laeParsed[i]?.isDirection).length;
+  if(myEl) myEl.textContent = `${mineCount} mine`;
+  if(otherEl) otherEl.textContent = `${nonDir.length - mineCount} other`;
+}
+
+function laeSelectAll() {
+  laeParsed.forEach((l,i) => { if(!l.isDirection) laeMineSet.add(i); });
+  renderLAE();
+}
+
+function laeSelectNone() {
+  laeMineSet.clear();
+  renderLAE();
+}
+
+function laeBack() {
+  document.getElementById('lineAssignEditor').style.display = 'none';
+  document.getElementById('charSetup').style.display = 'block';
+}
+
+function laeConfirm() {
+  if(laeMineSet.size === 0) {
+    showToast('Tap at least one line to mark as yours 🩷');
+    return;
+  }
+
+  // Apply the mine assignments back to the parsed lines
+  const assignedLines = laeParsed.map((l, i) => ({
+    ...l,
+    mine: laeMineSet.has(i)
+  }));
+
+  // Find a character name for the "mine" lines (use the most common char among mine lines)
+  const charCounts = {};
+  [...laeMineSet].forEach(i => {
+    const ch = laeParsed[i]?.char;
+    if(ch && ch !== 'STAGE DIR.') charCounts[ch] = (charCounts[ch]||0) + 1;
+  });
+  const myChar = Object.entries(charCounts).sort((a,b)=>b[1]-a[1])[0]?.[0] || 'MY CHARACTER';
+
+  // Build cue pairs directly from assigned lines (skip scene splitter - use single scene)
+  const cuePairs = [];
+  for(let i = 0; i < assignedLines.length; i++) {
+    if(assignedLines[i].mine) {
+      const cue = i > 0 ? assignedLines[i-1].text : 'Start of scene';
+      cuePairs.push({
+        cue,
+        myLine: assignedLines[i].text,
+        scene: assignedLines[i].scene || 'Scene 1'
+      });
+    }
+  }
+
+  // Assign scenes if none set
+  assignedLines.forEach(l => { if(!l.scene) l.scene = 'Scene 1'; });
+  const sceneNames = [...new Set(assignedLines.map(l=>l.scene))];
+
+  const nameEl = document.getElementById('myCharInput');
+  const prod = {
+    name: (nameEl && nameEl.dataset.prodName) || myChar,
+    role: myChar, type: '🎭',
+    scriptData: assignedLines,
+    cuePairs, scenes: sceneNames,
+    myChar, id: Date.now()
+  };
+
+  document.getElementById('lineAssignEditor').style.display = 'none';
+  finishScriptLoad(prod);
+}
+
+// ── Hook into processScript to show LAE FIRST ──────────────────────────────
+// Override processScript to go through LAE before charSetup
+function processScriptWithLAE(source) {
+  let text = '';
+  if(source === 'paste') {
+    text = (document.getElementById('pasteArea')?.value||'').trim();
+    if(!text) { showToast('Please paste your script text first! 📋'); return; }
+  } else {
+    text = rawScriptText;
+  }
+  if(text.length < 20) { showToast('Script seems too short — please try again'); return; }
+  rawScriptText = text;
+
+  // Parse ALL lines without a character filter (mine=false for all initially)
+  const allLines = parseScriptV2(text, '__NONE__');
+
+  if(allLines.length === 0) {
+    showToast('No lines found. Check script formatting.');
+    return;
+  }
+
+  // Show the line assignment editor
+  showLineAssignEditor(allLines);
+  showToast(`${allLines.length} lines found — tap yours to mark them pink 🩷`);
+}
+
 async function extractPDFwithPDFjs(file) {
   showToast('Reading PDF... ⏳');
   try {
@@ -5357,23 +5600,8 @@ function parseScriptV2(text, myChar) {
 
 // ─── processScript ───────────────────────────────────────────────────────────
 function processScript(source) {
-  let text = '';
-  if(source === 'paste') {
-    text = (document.getElementById('pasteArea').value||'').trim();
-    if(!text) { showToast('Please paste your script text first! 📋'); return; }
-  } else {
-    text = rawScriptText;
-  }
-  if(text.length < 20) { showToast('Script seems too short — please try again'); return; }
-  rawScriptText = text;
-  const chars = detectCharacters(text);
-  if(chars.length === 0) {
-    showToast('No character names found. Make sure names are in ALL CAPS on their own line.');
-    showCharacterSetup([]);
-    return;
-  }
-  showCharacterSetup(chars);
-  showToast(`Found ${chars.length} characters — who are you? 🎭`);
+  // Route through the Line Assignment Editor so user can tap their pink lines
+  processScriptWithLAE(source);
 }
 
 // ─── Scene splitter ───────────────────────────────────────────────────────────
